@@ -309,10 +309,12 @@ exports.insertRun = async (docSaved, req, res, next) => {
     const projectName = req.params.projectName ? req.params.projectName : '';
     const run_id = doc._id;
     const server_id = doc.server_id;
+
     const info = {};
     info.dmetaServer = process.env.BASE_URL;
     info.project = projectName;
     console.log('doc', doc);
+    console.log('server_id', server_id);
     console.log('populated_doc_reads', doc.in.reads);
     // send run information to selected server
     if (server_id) {

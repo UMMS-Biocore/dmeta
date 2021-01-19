@@ -169,7 +169,7 @@ const signToken = id => {
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
-  res.cookie('jwt', token, {
+  res.cookie('jwt-dmeta', token, {
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
@@ -188,7 +188,7 @@ const createSendToken = (user, statusCode, req, res) => {
 };
 
 const sendTokenCookie = (token, req, res) => {
-  res.cookie('jwt', token, {
+  res.cookie('jwt-dmeta', token, {
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
@@ -310,7 +310,7 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.logout = async (req, res) => {
-  res.cookie('jwt', 'loggedout', {
+  res.cookie('jwt-dmeta', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true
   });
@@ -332,8 +332,8 @@ exports.isLoggedIn = async (req, res, next) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
+  } else if (req.cookies['jwt-dmeta']) {
+    token = req.cookies['jwt-dmeta'];
   }
   if (!token) return next();
   let currentUser;
@@ -374,15 +374,18 @@ exports.isLoggedIn = async (req, res, next) => {
 // Only for rendered pages, no errors!
 exports.isLoggedInView = async (req, res, next) => {
   console.log('** isLoggedInView');
-  if (req.cookies.jwt && req.cookies.jwt != 'loggedout') {
+  if (req.cookies['jwt-dmeta'] && req.cookies['jwt-dmeta'] != 'loggedout') {
     try {
       let currentUser;
       if (process.env.SSO_LOGIN === 'true') {
-        const token = await accessTokens.find(req.cookies.jwt);
+        const token = await accessTokens.find(req.cookies['jwt-dmeta']);
         if (token.userId) currentUser = await User.findOne({ sso_id: token.userId });
         res.locals.token = token;
       } else {
-        const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+        const decoded = await promisify(jwt.verify)(
+          req.cookies['jwt-dmeta'],
+          process.env.JWT_SECRET
+        );
         currentUser = await User.findById(decoded.id);
       }
       if (!currentUser) return next();
@@ -394,7 +397,7 @@ exports.isLoggedInView = async (req, res, next) => {
     }
   } else if (process.env.SSO_LOGIN === 'true' && !req.session.loginCheck) {
     // check only if user is not logged in!
-    // when user sign out, req.cookies.jwt will be deleted
+    // when user sign out, req.cookies['jwt-dmeta'] will be deleted
     // check if user authenticated on SSO server
     req.session.loginCheck = true;
     req.session.redirectURL = '/';
