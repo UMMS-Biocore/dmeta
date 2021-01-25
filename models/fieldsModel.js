@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const Collection = require('../models/collectionsModel');
 
+//*********************************************************************************
+// ** NOTE: While updating schema, update fieldsOfFieldsModel in admin-dashboard.js
+//*********************************************************************************
+
 const fieldsSchema = new mongoose.Schema(
   {
     name: {
@@ -50,6 +54,7 @@ const fieldsSchema = new mongoose.Schema(
     },
     description: { type: 'String' },
     unique: { type: 'boolean' },
+    hidden: { type: 'boolean' },
     required: { type: 'Mixed', default: false },
     checkvalid: { type: 'Mixed' },
     active: { type: 'boolean', default: true },

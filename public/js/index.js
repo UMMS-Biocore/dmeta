@@ -5,6 +5,8 @@ import { login, logout } from './login';
 import { getProjectNavbar } from './dashboard.js';
 import { getAdminProjectNavbar } from './admin-dashboard.js';
 import { getImportPageNavBar } from './importpage.js';
+import { globalEventBinders } from './jsfuncs.js';
+
 import 'jquery';
 import '@coreui/coreui';
 
@@ -13,6 +15,8 @@ require('datatables.net-bs4/js/dataTables.bootstrap4.js'); // Datatables Bootstr
 require('datatables.net-bs4/css/dataTables.bootstrap4.css'); // Datatables Bootstrap 4
 require('datatables.net-colreorder');
 require('datatables.net-colreorder-bs4');
+require('jquery-datatables-checkboxes');
+
 // require('datatables.net-buttons');
 // require('datatables.net-buttons-bs4');
 // require('bootstrap-select');
@@ -24,6 +28,7 @@ import './../vendors/@coreui/icons/css/flag.min.css';
 import './../vendors/@coreui/icons/css/brand.min.css';
 
 // GLOBAL ENV CONFIG
+globalEventBinders();
 const envConf = document.querySelector('#session-env-config');
 const ssologin =
   envConf && envConf.getAttribute('sso_login') && envConf.getAttribute('sso_login') == 'true';
@@ -130,7 +135,7 @@ if (loginForm)
     $('#import-page').append(importpage);
     $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab');
 
-    // choose run collection of the run tab
+    // choose "run" collection as default in the run tab
     const runID = $('#allcollections option')
       .filter(function() {
         return $(this).text() == 'run';

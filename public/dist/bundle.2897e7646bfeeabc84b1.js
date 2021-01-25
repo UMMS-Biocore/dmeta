@@ -9702,7 +9702,6 @@ module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/axios/li
   \************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 11:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -9710,6 +9709,7 @@ module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/axios/li
 
 var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
 var settle = __webpack_require__(/*! ./../core/settle */ "./node_modules/axios/lib/core/settle.js");
+var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
 var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
 var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_modules/axios/lib/core/buildFullPath.js");
 var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
@@ -9730,7 +9730,7 @@ module.exports = function xhrAdapter(config) {
     // HTTP basic authentication
     if (config.auth) {
       var username = config.auth.username || '';
-      var password = config.auth.password || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
       requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
     }
 
@@ -9811,8 +9811,6 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
-
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
         cookies.read(config.xsrfCookieName) :
@@ -9878,7 +9876,7 @@ module.exports = function xhrAdapter(config) {
       });
     }
 
-    if (requestData === undefined) {
+    if (!requestData) {
       requestData = null;
     }
 
@@ -9896,7 +9894,6 @@ module.exports = function xhrAdapter(config) {
   \*****************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 50:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -9949,6 +9946,9 @@ axios.all = function all(promises) {
 };
 axios.spread = __webpack_require__(/*! ./helpers/spread */ "./node_modules/axios/lib/helpers/spread.js");
 
+// Expose isAxiosError
+axios.isAxiosError = __webpack_require__(/*! ./helpers/isAxiosError */ "./node_modules/axios/lib/helpers/isAxiosError.js");
+
 module.exports = axios;
 
 // Allow use of default import syntax in TypeScript
@@ -9963,7 +9963,6 @@ module.exports.default = axios;
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 19:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -9996,7 +9995,6 @@ module.exports = Cancel;
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 57:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10067,7 +10065,6 @@ module.exports = CancelToken;
   \***************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -10086,7 +10083,6 @@ module.exports = function isCancel(value) {
   \**********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 94:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10165,9 +10161,10 @@ Axios.prototype.getUri = function getUri(config) {
 utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
   /*eslint func-names:0*/
   Axios.prototype[method] = function(url, config) {
-    return this.request(utils.merge(config || {}, {
+    return this.request(mergeConfig(config || {}, {
       method: method,
-      url: url
+      url: url,
+      data: (config || {}).data
     }));
   };
 });
@@ -10175,7 +10172,7 @@ utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData
 utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
   /*eslint func-names:0*/
   Axios.prototype[method] = function(url, data, config) {
-    return this.request(utils.merge(config || {}, {
+    return this.request(mergeConfig(config || {}, {
       method: method,
       url: url,
       data: data
@@ -10194,7 +10191,6 @@ module.exports = Axios;
   \***********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 52:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10260,7 +10256,6 @@ module.exports = InterceptorManager;
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 15:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10294,7 +10289,6 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 15:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10326,7 +10320,6 @@ module.exports = function createError(message, config, code, request, response) 
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 23:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10419,7 +10412,6 @@ module.exports = function dispatchRequest(config) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -10445,7 +10437,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   error.response = response;
   error.isAxiosError = true;
 
-  error.toJSON = function() {
+  error.toJSON = function toJSON() {
     return {
       // Standard
       message: this.message,
@@ -10475,7 +10467,6 @@ module.exports = function enhanceError(error, config, code, request, response) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10496,59 +10487,73 @@ module.exports = function mergeConfig(config1, config2) {
   config2 = config2 || {};
   var config = {};
 
-  var valueFromConfig2Keys = ['url', 'method', 'params', 'data'];
-  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy'];
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
   var defaultToConfig2Keys = [
-    'baseURL', 'url', 'transformRequest', 'transformResponse', 'paramsSerializer',
-    'timeout', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
-    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress',
-    'maxContentLength', 'validateStatus', 'maxRedirects', 'httpAgent',
-    'httpsAgent', 'cancelToken', 'socketPath'
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
   ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
 
   utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
-    if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
     }
   });
 
-  utils.forEach(mergeDeepPropertiesKeys, function mergeDeepProperties(prop) {
-    if (utils.isObject(config2[prop])) {
-      config[prop] = utils.deepMerge(config1[prop], config2[prop]);
-    } else if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
-    } else if (utils.isObject(config1[prop])) {
-      config[prop] = utils.deepMerge(config1[prop]);
-    } else if (typeof config1[prop] !== 'undefined') {
-      config[prop] = config1[prop];
-    }
-  });
+  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
 
   utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
-    if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
-    } else if (typeof config1[prop] !== 'undefined') {
-      config[prop] = config1[prop];
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
     }
   });
 
   var axiosKeys = valueFromConfig2Keys
     .concat(mergeDeepPropertiesKeys)
-    .concat(defaultToConfig2Keys);
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
 
   var otherKeys = Object
-    .keys(config2)
+    .keys(config1)
+    .concat(Object.keys(config2))
     .filter(function filterAxiosKeys(key) {
       return axiosKeys.indexOf(key) === -1;
     });
 
-  utils.forEach(otherKeys, function otherKeysDefaultToConfig2(prop) {
-    if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
-    } else if (typeof config1[prop] !== 'undefined') {
-      config[prop] = config1[prop];
-    }
-  });
+  utils.forEach(otherKeys, mergeDeepProperties);
 
   return config;
 };
@@ -10562,7 +10567,6 @@ module.exports = function mergeConfig(config1, config2) {
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 12:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10579,7 +10583,7 @@ var createError = __webpack_require__(/*! ./createError */ "./node_modules/axios
  */
 module.exports = function settle(resolve, reject, response) {
   var validateStatus = response.config.validateStatus;
-  if (!validateStatus || validateStatus(response.status)) {
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
     resolve(response);
   } else {
     reject(createError(
@@ -10601,7 +10605,6 @@ module.exports = function settle(resolve, reject, response) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10635,7 +10638,6 @@ module.exports = function transformData(data, headers, fns) {
   \********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 97:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10715,6 +10717,7 @@ var defaults = {
   xsrfHeaderName: 'X-XSRF-TOKEN',
 
   maxContentLength: -1,
+  maxBodyLength: -1,
 
   validateStatus: function validateStatus(status) {
     return status >= 200 && status < 300;
@@ -10746,7 +10749,6 @@ module.exports = defaults;
   \************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -10771,7 +10773,6 @@ module.exports = function bind(fn, thisArg) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 23:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10781,7 +10782,6 @@ var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/util
 
 function encode(val) {
   return encodeURIComponent(val).
-    replace(/%40/gi, '@').
     replace(/%3A/gi, ':').
     replace(/%24/g, '$').
     replace(/%2C/gi, ',').
@@ -10856,7 +10856,6 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 10:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -10884,7 +10883,6 @@ module.exports = function combineURLs(baseURL, relativeURL) {
   \***************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -10951,7 +10949,6 @@ module.exports = (
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 9:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -10973,13 +10970,36 @@ module.exports = function isAbsoluteURL(url) {
 
 /***/ }),
 
+/***/ "./node_modules/axios/lib/helpers/isAxiosError.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \********************************************************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: module */
+/***/ ((module) => {
+
+"use strict";
+
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/axios/lib/helpers/isURLSameOrigin.js":
 /*!***********************************************************!*\
   !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
   \***********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -11061,7 +11081,6 @@ module.exports = (
   \***************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -11087,7 +11106,6 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 27:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -11154,7 +11172,6 @@ module.exports = function parseHeaders(headers) {
   \**************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 23:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -11195,7 +11212,6 @@ module.exports = function spread(callback) {
   \*****************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 322:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -11304,6 +11320,21 @@ function isNumber(val) {
  */
 function isObject(val) {
   return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
 }
 
 /**
@@ -11462,34 +11493,12 @@ function forEach(obj, fn) {
 function merge(/* obj1, obj2, obj3, ... */) {
   var result = {};
   function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
       result[key] = merge(result[key], val);
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Function equal to merge with the difference being that no reference
- * to original objects is kept.
- *
- * @see merge
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function deepMerge(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
-      result[key] = deepMerge(result[key], val);
-    } else if (typeof val === 'object') {
-      result[key] = deepMerge({}, val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
     } else {
       result[key] = val;
     }
@@ -11520,6 +11529,19 @@ function extend(a, b, thisArg) {
   return a;
 }
 
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
 module.exports = {
   isArray: isArray,
   isArrayBuffer: isArrayBuffer,
@@ -11529,6 +11551,7 @@ module.exports = {
   isString: isString,
   isNumber: isNumber,
   isObject: isObject,
+  isPlainObject: isPlainObject,
   isUndefined: isUndefined,
   isDate: isDate,
   isFile: isFile,
@@ -11539,9 +11562,9 @@ module.exports = {
   isStandardBrowserEnv: isStandardBrowserEnv,
   forEach: forEach,
   merge: merge,
-  deepMerge: deepMerge,
   extend: extend,
-  trim: trim
+  trim: trim,
+  stripBOM: stripBOM
 };
 
 
@@ -11565,15 +11588,130 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _jsfuncs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jsfuncs */ "./public/js/jsfuncs.js");
+/* harmony import */ var _dashboard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dashboard */ "./public/js/dashboard.js");
+/* harmony import */ var _crudData__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./crudData */ "./public/js/crudData.js");
 /* eslint-disable */
 ;
+
+
  // GLOBAL SCOPE
 
 let $s = {
   data: {}
 };
-$s.AdminCollectionFields = ['name', 'label', 'type', 'required', 'active', 'enum', 'checkvalid', 'min', 'max', 'minlength', 'maxlength', 'ref', 'collectionID', 'id', 'creationDate', 'lastUpdateDate'];
+$s.AdminCollectionFields = ['name', 'label', 'type', 'required', 'unique', 'hidden', 'active', 'required', 'default', 'enum', 'checkvalid', 'min', 'max', 'lowercase', 'uppercase', 'minlength', 'maxlength', 'trim', 'ref', 'collectionID', 'id', 'creationDate', 'lastUpdateDate'];
 $s.AdminAllCollectionFields = ['name', 'label', 'slug', 'version', 'active', 'parentCollectionID', 'projectID', 'id', 'perms', 'restrictTo', 'owner', 'creationDate', 'lastUpdateDate'];
+const fieldsOfFieldsModel = {
+  name: {
+    name: 'name',
+    label: 'Name',
+    type: 'String',
+    required: true
+  },
+  label: {
+    name: 'label',
+    label: 'Label',
+    type: 'String',
+    required: true
+  },
+  type: {
+    name: 'type',
+    label: 'Type',
+    type: 'String',
+    required: true,
+    default: 'String',
+    enum: ['String', 'Number', 'Boolean', 'Array', 'Date', 'Mixed', 'mongoose.Schema.ObjectId']
+  },
+  collectionID: {
+    name: 'collectionID',
+    label: 'Collection',
+    type: 'mongoose.Schema.ObjectId',
+    ref: 'collections',
+    required: true
+  },
+  description: {
+    name: 'description',
+    label: 'Description',
+    type: 'String'
+  },
+  unique: {
+    name: 'unique',
+    label: 'Unique',
+    type: 'boolean'
+  },
+  hidden: {
+    name: 'hidden',
+    label: 'Hidden',
+    type: 'boolean'
+  },
+  active: {
+    name: 'active',
+    label: 'Active',
+    type: 'boolean',
+    default: true
+  },
+  required: {
+    name: 'required',
+    label: 'Required',
+    type: 'Mixed',
+    default: false
+  },
+  checkvalid: {
+    name: 'checkvalid',
+    label: 'CheckValid',
+    type: 'Mixed'
+  },
+  default: {
+    name: 'default',
+    label: 'Default',
+    type: 'String'
+  },
+  ref: {
+    name: 'ref',
+    label: 'Ref',
+    type: 'String'
+  },
+  enum: {
+    name: 'enum',
+    label: 'Enum',
+    type: 'Mixed'
+  },
+  min: {
+    name: 'min',
+    label: 'Min',
+    type: 'Mixed'
+  },
+  max: {
+    name: 'max',
+    label: 'Max',
+    type: 'Mixed'
+  },
+  lowercase: {
+    name: 'lowercase',
+    label: 'Lowercase',
+    type: 'boolean'
+  },
+  uppercase: {
+    name: 'uppercase',
+    label: 'Uppercase',
+    type: 'boolean'
+  },
+  trim: {
+    name: 'trim',
+    label: 'Trim',
+    type: 'boolean'
+  },
+  minlength: {
+    name: 'minlength',
+    label: 'Minlength',
+    type: 'Number'
+  },
+  maxlength: {
+    name: 'maxlength',
+    label: 'Maxlength',
+    type: 'Number'
+  }
+};
 
 const ajaxCall = async (method, url) => {
   try {
@@ -11591,6 +11729,8 @@ const ajaxCall = async (method, url) => {
 
 const getTableHeaders = collID => {
   let ret = '';
+  ret += `<th></th>`; // for checkboxes
+
   let headerList;
 
   if (collID == 'all_collections') {
@@ -11663,6 +11803,10 @@ const refreshDataTables = async TableID => {
       fieldList = $s.AdminCollectionFields;
     }
 
+    columns.push({
+      data: '_id'
+    }); // for checkboxes
+
     for (var i = 0; i < fieldList.length; i++) {
       columns.push({
         data: fieldList[i]
@@ -11672,11 +11816,19 @@ const refreshDataTables = async TableID => {
     var dataTableObj = {
       columns: columns,
       columnDefs: [{
-        defaultContent: '-',
+        defaultContent: '',
         targets: '_all'
-      } //hides undefined error
-      ],
-      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']]
+      }, //hides undefined error,
+      {
+        targets: 0,
+        checkboxes: {
+          selectRow: true
+        }
+      }],
+      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+      select: {
+        style: 'multiple'
+      }
     };
     dataTableObj.dom = '<"pull-left"f>lrt<"pull-left"i><"bottom"p><"clear">';
     dataTableObj.destroy = true;
@@ -11689,6 +11841,10 @@ const refreshDataTables = async TableID => {
     dataTableObj.colReorder = true;
     dataTableObj.scrollX = '500';
     $s.TableID = $(`#${TableID}`).DataTable(dataTableObj);
+  } else {
+    $s.fields = await ajaxCall('GET', '/api/v1/fields');
+    const data = await prepareDataForSingleColumn(TableID);
+    $(`#${TableID}`).DataTable().clear().rows.add(data).draw();
   }
 };
 
@@ -11700,10 +11856,157 @@ const showTableTabs = () => {
   $(document).on('shown.coreui.tab', 'a.collection[data-toggle="tab"]', function (e) {
     $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
   });
+};
+
+const getErrorDiv = () => {
+  return '<p style="background-color:#e211112b;" id="crudModalError"></p>';
+};
+
+const bindEventHandlers = () => {
+  // ================= EDIT BUTTON =================
+  $(document).on('click', `button.edit-data`, async function (e) {
+    const collID = $(this).attr('collID');
+    const collLabel = $(this).attr('collLabel');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const collectionFields = await getFieldsOfFieldsDiv(collName);
+    $('#crudModalTitle').text(`Edit Field`);
+    $('#crudModalYes').text('Save');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(collectionFields);
+    $('#crudModal').off();
+    const table = $(`#${collID}`).DataTable();
+    const tableData = table.rows().data();
+    const rows_selected = table.column(0).checkboxes.selected();
+    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+    $('#crudModal').on('show.coreui.modal', function (e) {
+      (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.fillFormByName)('#crudModal', 'input, select', selectedData[0]);
+
+      if (rows_selected.length > 1) {
+        (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.prepareMultiUpdateModal)('#crudModal', '#crudModalBody', 'input, select');
+      }
+    });
+    $('#crudModal').on('click', '#crudModalYes', async function (e) {
+      e.preventDefault();
+      $('#crudModalError').empty();
+      const formValues = $('#crudModal').find('input,select');
+      const requiredValues = formValues.filter('[required]');
+      const requiredFields = $.map(requiredValues, function (el) {
+        return $(el).attr('name');
+      });
+      let [formObj, stop] = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.createFormObj)(formValues, requiredFields, true, true);
+      formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.convertFormObj)(formObj); // get only updated fields:
+
+      if (rows_selected.length === 1) {
+        formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.getUpdatedFields)(selectedData[0], formObj);
+      }
+
+      if (stop === false && collName) {
+        for (var i = 0; i < selectedData.length; i++) {
+          const success = await (0,_dashboard__WEBPACK_IMPORTED_MODULE_2__.crudAjaxRequest)('fields', 'PATCH', selectedData[i]._id, projectID, collName, formObj, formValues);
+
+          if (!success) {
+            refreshDataTables(collID);
+            break;
+          }
+
+          if (success && selectedData.length - 1 === i) {
+            refreshDataTables(collID);
+            $('#crudModal').modal('hide');
+          }
+        }
+      }
+    });
+
+    if (rows_selected.length === 0) {
+      (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.showInfoModal)('Please click checkboxes to edit items.');
+    } else if (rows_selected.length > 0) {
+      $('#crudModal').modal('show');
+    }
+  }); // ================= INSERT BUTTON =================
+
+  $(document).on('click', `button.insert-data`, async function (e) {
+    $('#crudModalError').empty();
+    const collID = $(this).attr('collID');
+    const collLabel = $(this).attr('collLabel');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const collectionFields = await getFieldsOfFieldsDiv(collName);
+    $('#crudModalTitle').text(`Insert Field`);
+    $('#crudModalYes').text('Save');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(collectionFields);
+    $('#crudModal').off();
+    $('#crudModal').on('click', '#crudModalYes', async function (e) {
+      e.preventDefault();
+      const formValues = $('#crudModal').find('input,select');
+      const requiredValues = formValues.filter('[required]');
+      const requiredFields = $.map(requiredValues, function (el) {
+        return $(el).attr('name');
+      });
+      let [formObj, stop] = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.createFormObj)(formValues, requiredFields, true, true);
+      formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.convertFormObj)(formObj);
+
+      if (stop === false && collName) {
+        const success = await (0,_dashboard__WEBPACK_IMPORTED_MODULE_2__.crudAjaxRequest)('fields', 'POST', '', projectID, collName, formObj, formValues);
+
+        if (success) {
+          refreshDataTables(collID);
+          $('#crudModal').modal('hide');
+        }
+      }
+    });
+    $('#crudModal').modal('show');
+  }); // ================= DELETE BUTTON =================
+
+  $(document).on('click', `button.delete-data`, async function (e) {
+    $('#crudModalError').empty();
+    const collID = $(this).attr('collID');
+    const collLabel = $(this).attr('collLabel');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const table = $(`#${collID}`).DataTable();
+    const tableData = table.rows().data();
+    const rows_selected = table.column(0).checkboxes.selected();
+    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+    const items = selectedData.length === 1 ? `the item?` : `${selectedData.length} items?`;
+    $('#crudModalTitle').text(`Remove Field`);
+    $('#crudModalYes').text('Remove');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(`<p>Are you sure you want to delete ${items}</p>`);
+    $('#crudModal').off();
+    $('#crudModal').on('click', '#crudModalYes', async function (e) {
+      e.preventDefault();
+
+      for (var i = 0; i < selectedData.length; i++) {
+        const success = await (0,_dashboard__WEBPACK_IMPORTED_MODULE_2__.crudAjaxRequest)('fields', 'DELETE', selectedData[i]._id, projectID, collName, {}, {});
+
+        if (!success) {
+          refreshDataTables(collID);
+          break;
+        }
+
+        if (success && selectedData.length - 1 === i) {
+          refreshDataTables(collID);
+          $('#crudModal').modal('hide');
+        }
+      }
+    });
+
+    if (selectedData.length === 0) {
+      (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.showInfoModal)('Please click checkboxes to delete items.');
+    } else if (selectedData.length > 0) {
+      $('#crudModal').modal('show');
+    }
+  });
 }; // NEEDS UPDATE! get all collection with project id
 
 
 const getCollectionNavbar = projectId => {
+  bindEventHandlers();
   let header = '<ul class="nav nav-tabs" role="tablist" style="margin-top: 10px;">';
   let content = '<div class="tab-content">';
   let tabs = [];
@@ -11719,6 +12022,7 @@ const getCollectionNavbar = projectId => {
 
     if (projectId && collectionProjectID == projectId || !projectId && !collectionProjectID) {
       k++;
+      const collectionName = tabs[i].name;
       const collectionLabel = tabs[i].label;
       const collectionId = tabs[i].id;
       const id = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.getCleanDivId)(collectionLabel);
@@ -11730,8 +12034,10 @@ const getCollectionNavbar = projectId => {
       </li>`;
       header += headerLi;
       const colNavbar = getCollectionTable(collectionId);
+      const crudButtons = (0,_dashboard__WEBPACK_IMPORTED_MODULE_2__.getCrudButtons)(collectionId, collectionLabel, collectionName, projectId);
       const contentDiv = `
       <div role="tabpanel" class="tab-pane ${active}" searchtab="true" id="${collTabID}">
+          ${crudButtons}
           ${colNavbar}
         </div>`;
       content += contentDiv;
@@ -11791,6 +12097,25 @@ const getAdminProjectNavbar = async rowdata => {
   return ret;
 };
 
+const getFieldsOfFieldsDiv = async collName => {
+  let ret = '';
+  const fields = Object.keys(fieldsOfFieldsModel);
+
+  for (var k = 0; k < fields.length; k++) {
+    const name = fields[k];
+
+    if (name == 'collectionID') {
+      fieldsOfFieldsModel[name].default = collName;
+    }
+
+    const label = fieldsOfFieldsModel[name].label;
+    const element = await (0,_crudData__WEBPACK_IMPORTED_MODULE_3__.getFormElement)(fieldsOfFieldsModel[name]);
+    ret += (0,_crudData__WEBPACK_IMPORTED_MODULE_3__.getFormRow)(element, label, fieldsOfFieldsModel[name]);
+  }
+
+  return ret;
+};
+
 /***/ }),
 
 /***/ "./public/js/crudData.js":
@@ -11798,7 +12123,12 @@ const getAdminProjectNavbar = async rowdata => {
   !*** ./public/js/crudData.js ***!
   \*******************************/
 /*! namespace exports */
+/*! export getCollectionFieldData [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getFieldsDiv [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getFormElement [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getFormRow [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getInsertDataDiv [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getParentCollection [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_require__, __webpack_require__.n, __webpack_require__.r, __webpack_exports__, __webpack_require__.d, __webpack_require__.* */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -11806,6 +12136,11 @@ const getAdminProjectNavbar = async rowdata => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getCollectionFieldData": () => /* binding */ getCollectionFieldData,
+/* harmony export */   "getFormRow": () => /* binding */ getFormRow,
+/* harmony export */   "getFormElement": () => /* binding */ getFormElement,
+/* harmony export */   "getParentCollection": () => /* binding */ getParentCollection,
+/* harmony export */   "getFieldsDiv": () => /* binding */ getFieldsDiv,
 /* harmony export */   "getInsertDataDiv": () => /* binding */ getInsertDataDiv
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
@@ -11842,8 +12177,8 @@ const getCollectionFieldData = async () => {
   $s.fields = fields;
 };
 
-const getDataDropdown = (id, el_class, el_name, data, def) => {
-  let dropdown = `<select class="form-control ${el_class}" id="${id}" name="${el_name}">`;
+const getDataDropdown = (id, el_class, el_name, data, def, required) => {
+  let dropdown = `<select ${required} class="form-control ${el_class}" id="${id}" name="${el_name}">`;
   data.forEach(i => {
     const selected = def == i.name ? 'selected' : '';
     dropdown += `<option ${selected} value="${i._id}">${i.name}</option>`;
@@ -11860,6 +12195,7 @@ const getFormRow = (element, label, settings) => {
     required = '<span style="color:red";>*</span>';
   }
 
+  if (settings && settings.hidden) return '';
   let ret = `
     <div class="form-group row">
         <label class="col-md-3 col-form-label text-right">${label}${required}</label>
@@ -11870,7 +12206,7 @@ const getFormRow = (element, label, settings) => {
   return ret;
 };
 
-const getRefFieldDropdown = async (ref, name) => {
+const getRefFieldDropdown = async (ref, name, required, def) => {
   try {
     let refData;
     var re = new RegExp(project + '_(.*)');
@@ -11884,7 +12220,7 @@ const getRefFieldDropdown = async (ref, name) => {
       refData = await ajaxCall('GET', `/api/v1/${ref}`);
     }
 
-    const collDropdown = getDataDropdown(`ref-${ref}`, 'ref-control', name, refData);
+    const collDropdown = getDataDropdown(`ref-${ref}`, 'ref-control', name, refData, def, required);
     return collDropdown;
   } catch {
     return '';
@@ -11895,6 +12231,9 @@ const getFormElement = async field => {
   console.log(field);
   let ret = '';
   const type = field.type;
+  const required = field.required ? 'required' : '';
+  const dbType = type ? `dbType="${type}"` : '';
+  const def = field.default ? field.default : '';
 
   if (type == 'String' || type == 'Number') {
     if (field.enum) {
@@ -11904,19 +12243,21 @@ const getFormElement = async field => {
           name: i
         };
       });
-      ret = getDataDropdown('', '', field.name, options, field.default);
+      ret = getDataDropdown('', '', field.name, options, def, required);
     } else {
-      const def = field.default ? field.default : '';
-      ret = `<input class="form-control" type="text" name="${field.name}">${def}</input>`;
+      ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required}>${def}</input>`;
     }
   } else if (type == 'Date') {
-    ret = `<input class="form-control" type="date" name="${field.name}"></input>`;
+    ret = `<input ${dbType} class="form-control" type="date" name="${field.name}" ${required}></input>`;
   } else if (type == 'Mixed' || type == 'Array') {
-    ret = `<input class="form-control" type="text" name="${field.name}"></input>`;
+    ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required}>${def}</input>`;
   } else if (type == 'mongoose.Schema.ObjectId') {
     if (field.ref) {
-      ret = await getRefFieldDropdown(field.ref, field.name);
+      ret = await getRefFieldDropdown(field.ref, field.name, required, def);
     }
+  } else if (type == 'boolean') {
+    const checked = def == true ? 'checked' : '';
+    ret = `<input ${dbType} style="margin-left:0rem; margin-top:0.70rem;" type="checkbox" name="${field.name}" ${required} ${checked}></input>`;
   }
 
   return ret;
@@ -11945,8 +12286,8 @@ const getParentCollection = collectionID => {
   };
 }; // get all form fields of selected data collection
 
-
 const getFieldsDiv = async collectionID => {
+  await getCollectionFieldData();
   let ret = ''; // 1. if parent collection id is defined, insert as a new field
 
   const {
@@ -11968,6 +12309,7 @@ const getFieldsDiv = async collectionID => {
 
 
   const fields = getFieldsOfCollection(collectionID);
+  console.log('collectionID', collectionID);
   console.log('fields', fields);
 
   for (var k = 0; k < fields.length; k++) {
@@ -11994,7 +12336,7 @@ const bindEventHandlers = () => {
     e.preventDefault();
     const formValues = $(this).closest('form').find('input,select');
     const requiredFields = [];
-    const [formObj, stop] = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.createFormObj)(formValues, requiredFields, true);
+    let [formObj, stop] = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.createFormObj)(formValues, requiredFields, true);
     console.log(formObj);
     const collectionName = $('#allcollections option:selected').text();
     let body = '';
@@ -12002,18 +12344,8 @@ const bindEventHandlers = () => {
     body += '<table class="table" style="width:100%"><tbody>';
     Object.keys(formObj).forEach(key => {
       body += `<tr><td>${key}</td><td>${formObj[key]}</td></tr>`;
-
-      try {
-        if (formObj[key] && (formObj[key].charAt(0) == '{' || formObj[key].charAt(0) == '[')) {
-          console.log(formObj[key]);
-          let val = JSON.parse(formObj[key]);
-          console.log(val);
-          formObj[key] = val;
-        }
-      } catch (err) {
-        console.log('format error', err);
-      }
     });
+    formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.convertFormObj)(formObj);
     console.log(formObj);
     body += '</tbody></table>';
     $('#insert-data-coll-body').parent().css('display', 'block');
@@ -12054,7 +12386,7 @@ const bindEventHandlers = () => {
 const getInsertDataDiv = async () => {
   bindEventHandlers();
   await getCollectionFieldData();
-  const collDropdown = getDataDropdown('allcollections', 'collection-control', 'collection', $s.collections);
+  const collDropdown = getDataDropdown('allcollections', 'collection-control', 'collection', $s.collections, '', '');
   const collDropdownDiv = getFormRow(collDropdown, 'Collection', '');
   let ret = `
     <div class="col-sm-6" style="margin-top: 20px;">
@@ -12090,7 +12422,10 @@ const getInsertDataDiv = async () => {
   !*** ./public/js/dashboard.js ***!
   \********************************/
 /*! namespace exports */
+/*! export crudAjaxRequest [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getCrudButtons [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getProjectNavbar [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export showInfoInDiv [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_require__, __webpack_require__.n, __webpack_require__.r, __webpack_exports__, __webpack_require__.d, __webpack_require__.* */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -12098,13 +12433,18 @@ const getInsertDataDiv = async () => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "showInfoInDiv": () => /* binding */ showInfoInDiv,
+/* harmony export */   "crudAjaxRequest": () => /* binding */ crudAjaxRequest,
+/* harmony export */   "getCrudButtons": () => /* binding */ getCrudButtons,
 /* harmony export */   "getProjectNavbar": () => /* binding */ getProjectNavbar
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _jsfuncs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./jsfuncs */ "./public/js/jsfuncs.js");
+/* harmony import */ var _crudData__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./crudData */ "./public/js/crudData.js");
 /* eslint-disable */
 ;
+
  // GLOBAL SCOPE
 
 let $s = {
@@ -12127,12 +12467,233 @@ const ajaxCall = async (method, url) => {
 
 const getTableHeaders = collID => {
   let ret = '';
+  ret += `<th></th>`; // for checkboxes
+  // const { parentCollLabel } = getParentCollection(collID);
+  // if (parentCollLabel) ret += `<th>${parentCollLabel}</th>`;
 
   for (var i = 0; i < $s.fields.length; i++) {
-    if ($s.fields[i].collectionID == collID && $s.fields[i].label) ret += `<th>${$s.fields[i].label}</th>`;
+    if ($s.fields[i].collectionID == collID && $s.fields[i].label && $s.fields[i].hidden !== true) ret += `<th>${$s.fields[i].label}</th>`;
   }
 
   ret += `<th>ID</th>`;
+  return ret;
+};
+
+const showInfoInDiv = (textID, text) => {
+  //true if modal is open
+  const oldText = $(textID).html();
+  let newText = '';
+
+  if (oldText.length) {
+    newText = oldText + '<br/>' + text;
+  } else {
+    newText = text;
+  }
+
+  $(textID).html(newText);
+};
+const crudAjaxRequest = async (type, method, id, projectID, collName, formObj, formValues) => {
+  let url = '';
+  const idsPart = id ? `/${id}` : '';
+
+  if (type == 'data') {
+    const {
+      projectPart
+    } = getProjectData(projectID);
+    url = `/api/v1/${projectPart}data/${collName}${idsPart}`;
+  } else {
+    url = `/api/v1/${type}${idsPart}`;
+  }
+
+  try {
+    const res = await axios__WEBPACK_IMPORTED_MODULE_0___default()({
+      method: method,
+      url: url,
+      data: formObj
+    });
+
+    if (res && res.data && res.data.status === 'success') {
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    console.log(e);
+    let err = '';
+
+    if (e.response && e.response.data) {
+      console.log(e.response.data);
+
+      if (e.response.data.error && e.response.data.error.errors) {
+        (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.showFormError)(formValues, e.response.data.error.errors, true);
+        return;
+      }
+
+      if (e.response.data.message) err += JSON.stringify(e.response.data.message);
+    }
+
+    if (!err) err = JSON.stringify(e);
+    if (err) showInfoInDiv('#crudModalError', err);
+    return false;
+  }
+};
+
+const getErrorDiv = () => {
+  return '<p style="background-color:#e211112b;" id="crudModalError"></p>';
+};
+
+const bindEventHandlers = () => {
+  // ================= EDIT BUTTON =================
+  $(document).on('click', `button.edit-data`, async function (e) {
+    const collID = $(this).attr('collID');
+    const collLabel = $(this).attr('collLabel');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const collectionFields = await (0,_crudData__WEBPACK_IMPORTED_MODULE_2__.getFieldsDiv)(collID);
+    $('#crudModalTitle').text(`Edit ${collLabel}`);
+    $('#crudModalYes').text('Save');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(collectionFields);
+    $('#crudModal').off();
+    const table = $(`#${collID}`).DataTable();
+    const tableData = table.rows().data();
+    const rows_selected = table.column(0).checkboxes.selected();
+    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+    $('#crudModal').on('show.coreui.modal', function (e) {
+      (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.fillFormByName)('#crudModal', 'input, select', selectedData[0]);
+
+      if (rows_selected.length > 1) {
+        (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.prepareMultiUpdateModal)('#crudModal', '#crudModalBody', 'input, select');
+      }
+    });
+    $('#crudModal').on('click', '#crudModalYes', async function (e) {
+      e.preventDefault();
+      $('#crudModalError').empty();
+      const formValues = $('#crudModal').find('input,select');
+      const requiredValues = formValues.filter('[required]');
+      const requiredFields = $.map(requiredValues, function (el) {
+        return $(el).attr('name');
+      });
+      let [formObj, stop] = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.createFormObj)(formValues, requiredFields, true, true);
+      formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.convertFormObj)(formObj); // get only updated fields:
+
+      if (rows_selected.length === 1) {
+        formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.getUpdatedFields)(selectedData[0], formObj);
+      }
+
+      if (stop === false && collName) {
+        for (var i = 0; i < selectedData.length; i++) {
+          const success = await crudAjaxRequest('data', 'PATCH', selectedData[i]._id, projectID, collName, formObj, formValues);
+
+          if (!success) {
+            refreshDataTables(collID, collName, projectID);
+            break;
+          }
+
+          if (success && selectedData.length - 1 === i) {
+            refreshDataTables(collID, collName, projectID);
+            $('#crudModal').modal('hide');
+          }
+        }
+      }
+    });
+
+    if (rows_selected.length === 0) {
+      (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.showInfoModal)('Please click checkboxes to edit items.');
+    } else if (rows_selected.length > 0) {
+      $('#crudModal').modal('show');
+    }
+  }); // ================= INSERT BUTTON =================
+
+  $(document).on('click', `button.insert-data`, async function (e) {
+    $('#crudModalError').empty();
+    const collID = $(this).attr('collID');
+    const collLabel = $(this).attr('collLabel');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const collectionFields = await (0,_crudData__WEBPACK_IMPORTED_MODULE_2__.getFieldsDiv)(collID);
+    $('#crudModalTitle').text(`Insert ${collLabel}`);
+    $('#crudModalYes').text('Save');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(collectionFields);
+    $('#crudModal').off();
+    $('#crudModal').on('click', '#crudModalYes', async function (e) {
+      e.preventDefault();
+      const formValues = $('#crudModal').find('input,select');
+      const requiredValues = formValues.filter('[required]');
+      const requiredFields = $.map(requiredValues, function (el) {
+        return $(el).attr('name');
+      });
+      let [formObj, stop] = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.createFormObj)(formValues, requiredFields, true, true);
+      formObj = (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.convertFormObj)(formObj);
+
+      if (stop === false && collName) {
+        const success = await crudAjaxRequest('data', 'POST', '', projectID, collName, formObj, formValues);
+
+        if (success) {
+          refreshDataTables(collID, collName, projectID);
+          $('#crudModal').modal('hide');
+        }
+      }
+    });
+    $('#crudModal').modal('show');
+  }); // ================= DELETE BUTTON =================
+
+  $(document).on('click', `button.delete-data`, async function (e) {
+    $('#crudModalError').empty();
+    const collID = $(this).attr('collID');
+    const collLabel = $(this).attr('collLabel');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const table = $(`#${collID}`).DataTable();
+    const tableData = table.rows().data();
+    const rows_selected = table.column(0).checkboxes.selected();
+    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+    const items = selectedData.length === 1 ? `the item?` : `${selectedData.length} items?`;
+    $('#crudModalTitle').text(`Remove ${collLabel}`);
+    $('#crudModalYes').text('Remove');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(`<p>Are you sure you want to delete ${items}</p>`);
+    $('#crudModal').off();
+    $('#crudModal').on('click', '#crudModalYes', async function (e) {
+      e.preventDefault();
+
+      for (var i = 0; i < selectedData.length; i++) {
+        const success = await crudAjaxRequest('data', 'DELETE', selectedData[i]._id, projectID, collName, {}, {});
+
+        if (!success) {
+          refreshDataTables(collID, collName, projectID);
+          break;
+        }
+
+        if (success && selectedData.length - 1 === i) {
+          refreshDataTables(collID, collName, projectID);
+          $('#crudModal').modal('hide');
+        }
+      }
+    });
+
+    if (selectedData.length === 0) {
+      (0,_jsfuncs__WEBPACK_IMPORTED_MODULE_1__.showInfoModal)('Please click checkboxes to delete items.');
+    } else if (selectedData.length > 0) {
+      $('#crudModal').modal('show');
+    }
+  });
+};
+
+const getCrudButtons = (collID, collLabel, collName, projectID) => {
+  const data = `collLabel="${collLabel}" collID="${collID}" projectID="${projectID}" collName="${collName}"`;
+  const ret = `
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-sm-12">
+      <button class="btn insert-data btn-primary" type="button" ${data}>Insert</button>
+      <button class="btn edit-data btn-primary" type="button" ${data}">Edit</button>
+      <button class="btn delete-data btn-primary" type="button" ${data}">Delete</button>
+    </div>
+  </div>`;
   return ret;
 };
 
@@ -12154,13 +12715,24 @@ const getCollectionTable = collID => {
 };
 
 const getFieldsOfCollection = collectionID => {
-  return $s.fields.filter(field => field.collectionID === collectionID);
+  return $s.fields.filter(field => field.collectionID === collectionID && field.hidden !== true);
 };
 
-const prepareDataForSingleColumn = async (collName, projectID) => {
+const getProjectData = projectID => {
   const project = $s.projects.filter(item => item.id === projectID);
   const projectName = project[0] && project[0].name ? project[0].name : '';
   const projectPart = projectName ? `projects/${projectName}/` : '';
+  return {
+    projectName,
+    projectPart
+  };
+};
+
+const prepareDataForSingleColumn = async (collName, projectID) => {
+  const {
+    projectPart,
+    projectName
+  } = getProjectData(projectID);
   const data = await ajaxCall('GET', `/api/v1/${projectPart}data/${collName}`);
   let ret = [];
 
@@ -12182,10 +12754,20 @@ const prepareDataForSingleColumn = async (collName, projectID) => {
 };
 
 const refreshDataTables = async (TableID, collName, projectID) => {
+  const data = await prepareDataForSingleColumn(collName, projectID);
+  const collectionID = TableID;
+
   if (!$.fn.DataTable.isDataTable(`#${TableID}`)) {
     const collFields = getFieldsOfCollection(TableID);
-    const data = await prepareDataForSingleColumn(collName, projectID);
     let columns = [];
+    columns.push({
+      data: '_id'
+    }); // for checkboxes
+    // 1. if parent collection id is defined, insert as a new field
+    // const { parentCollName } = getParentCollection(collectionID);
+    // if (parentCollName) {
+    //   columns.push({ data: `${parentCollName}_id` }); // for checkboxes
+    // }
 
     for (var i = 0; i < collFields.length; i++) {
       columns.push({
@@ -12199,11 +12781,19 @@ const refreshDataTables = async (TableID, collName, projectID) => {
     var dataTableObj = {
       columns: columns,
       columnDefs: [{
-        defaultContent: '-',
+        defaultContent: '',
         targets: '_all'
-      } //hides undefined error
-      ],
-      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']]
+      }, //hides undefined error,
+      {
+        targets: 0,
+        checkboxes: {
+          selectRow: true
+        }
+      }],
+      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+      select: {
+        style: 'multiple'
+      }
     };
     dataTableObj.dom = '<"pull-left"f>lrt<"pull-left"i><"bottom"p><"clear">';
     dataTableObj.destroy = true;
@@ -12217,6 +12807,8 @@ const refreshDataTables = async (TableID, collName, projectID) => {
     dataTableObj.colReorder = true;
     dataTableObj.sScrollX = true;
     $s.TableID = $(`#${TableID}`).DataTable(dataTableObj);
+  } else {
+    $(`#${TableID}`).DataTable().clear().rows.add(data).draw();
   }
 };
 
@@ -12232,7 +12824,9 @@ const showTableTabs = () => {
   });
 };
 
-const getCollectionNavbar = projectId => {
+const getCollectionNavbar = async projectId => {
+  bindEventHandlers(); // await getCollectionFieldData();
+
   let header = '<ul class="nav nav-tabs" role="tablist" style="margin-top: 10px;">';
   let content = '<div class="tab-content">';
 
@@ -12260,8 +12854,10 @@ const getCollectionNavbar = projectId => {
       </li>`;
       header += headerLi;
       const colNavbar = getCollectionTable(collectionId);
+      const crudButtons = getCrudButtons(collectionId, collectionLabel, collectionName, projectId);
       const contentDiv = `
       <div role="tabpanel" class="tab-pane ${active}" searchtab="true" id="${collTabID}">
+          ${crudButtons}
           ${colNavbar}
         </div>`;
       content += contentDiv;
@@ -12307,7 +12903,7 @@ const getProjectNavbar = async () => {
         <a class="nav-link ${active}" data-toggle="tab" href="#${projectTabID}" aria-expanded="true">${projectLabel}</a>
     </li>`;
     header += headerLi;
-    const colNavbar = getCollectionNavbar(projectId);
+    const colNavbar = await getCollectionNavbar(projectId);
     const contentDiv = `
     <div role="tabpanel" class="tab-pane ${active}" searchtab="true" id="${projectTabID}">
         ${colNavbar}
@@ -12998,14 +13594,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dashboard_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./dashboard.js */ "./public/js/dashboard.js");
 /* harmony import */ var _admin_dashboard_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./admin-dashboard.js */ "./public/js/admin-dashboard.js");
 /* harmony import */ var _importpage_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./importpage.js */ "./public/js/importpage.js");
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery-exposed.js");
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _coreui_coreui__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @coreui/coreui */ "./node_modules/@coreui/coreui/dist/js/coreui.esm.js");
-/* harmony import */ var _vendors_coreui_icons_css_free_min_css__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./../vendors/@coreui/icons/css/free.min.css */ "./public/vendors/@coreui/icons/css/free.min.css");
-/* harmony import */ var _vendors_coreui_icons_css_flag_min_css__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../vendors/@coreui/icons/css/flag.min.css */ "./public/vendors/@coreui/icons/css/flag.min.css");
-/* harmony import */ var _vendors_coreui_icons_css_brand_min_css__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../vendors/@coreui/icons/css/brand.min.css */ "./public/vendors/@coreui/icons/css/brand.min.css");
+/* harmony import */ var _jsfuncs_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./jsfuncs.js */ "./public/js/jsfuncs.js");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery-exposed.js");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _coreui_coreui__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @coreui/coreui */ "./node_modules/@coreui/coreui/dist/js/coreui.esm.js");
+/* harmony import */ var _vendors_coreui_icons_css_free_min_css__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./../vendors/@coreui/icons/css/free.min.css */ "./public/vendors/@coreui/icons/css/free.min.css");
+/* harmony import */ var _vendors_coreui_icons_css_flag_min_css__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./../vendors/@coreui/icons/css/flag.min.css */ "./public/vendors/@coreui/icons/css/flag.min.css");
+/* harmony import */ var _vendors_coreui_icons_css_brand_min_css__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./../vendors/@coreui/icons/css/brand.min.css */ "./public/vendors/@coreui/icons/css/brand.min.css");
 /* eslint-disable */
 ;
+
 
 
 
@@ -13025,7 +13623,9 @@ __webpack_require__(/*! datatables.net-bs4/css/dataTables.bootstrap4.css */ "./n
 
 __webpack_require__(/*! datatables.net-colreorder */ "./node_modules/datatables.net-colreorder/js/dataTables.colReorder.js");
 
-__webpack_require__(/*! datatables.net-colreorder-bs4 */ "./node_modules/datatables.net-colreorder-bs4/js/colReorder.bootstrap4.js"); // require('datatables.net-buttons');
+__webpack_require__(/*! datatables.net-colreorder-bs4 */ "./node_modules/datatables.net-colreorder-bs4/js/colReorder.bootstrap4.js");
+
+__webpack_require__(/*! jquery-datatables-checkboxes */ "./node_modules/jquery-datatables-checkboxes/js/dataTables.checkboxes.js"); // require('datatables.net-buttons');
 // require('datatables.net-buttons-bs4');
 // require('bootstrap-select');
 // require('bootstrap-select/js/i18n/defaults-en_US');
@@ -13036,6 +13636,7 @@ __webpack_require__(/*! datatables.net-colreorder-bs4 */ "./node_modules/datatab
 
  // GLOBAL ENV CONFIG
 
+(0,_jsfuncs_js__WEBPACK_IMPORTED_MODULE_6__.globalEventBinders)();
 const envConf = document.querySelector('#session-env-config');
 const ssologin = envConf && envConf.getAttribute('sso_login') && envConf.getAttribute('sso_login') == 'true'; // DOM ELEMENTS
 
@@ -13129,7 +13730,7 @@ if (loginForm) loginForm.addEventListener('submit', e => {
   if (importpageNav && googleSheetId) {
     const importpage = await (0,_importpage_js__WEBPACK_IMPORTED_MODULE_5__.getImportPageNavBar)(googleSheetId);
     $('#import-page').append(importpage);
-    $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab'); // choose run collection of the run tab
+    $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab'); // choose "run" collection as default in the run tab
 
     const runID = $('#allcollections option').filter(function () {
       return $(this).text() == 'run';
@@ -13146,9 +13747,15 @@ if (loginForm) loginForm.addEventListener('submit', e => {
   !*** ./public/js/jsfuncs.js ***!
   \******************************/
 /*! namespace exports */
+/*! export convertFormObj [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export createFormObj [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export fillFormByName [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export getCleanDivId [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export getUpdatedFields [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export globalEventBinders [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export prepareMultiUpdateModal [provided] [no usage info] [missing usage info prevents renaming] */
 /*! export showFormError [provided] [no usage info] [missing usage info prevents renaming] */
+/*! export showInfoModal [provided] [no usage info] [missing usage info prevents renaming] */
 /*! other exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_require__.r, __webpack_exports__, __webpack_require__.d, __webpack_require__.* */
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
@@ -13156,11 +13763,29 @@ if (loginForm) loginForm.addEventListener('submit', e => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "globalEventBinders": () => /* binding */ globalEventBinders,
 /* harmony export */   "getCleanDivId": () => /* binding */ getCleanDivId,
 /* harmony export */   "createFormObj": () => /* binding */ createFormObj,
-/* harmony export */   "showFormError": () => /* binding */ showFormError
+/* harmony export */   "convertFormObj": () => /* binding */ convertFormObj,
+/* harmony export */   "getUpdatedFields": () => /* binding */ getUpdatedFields,
+/* harmony export */   "showFormError": () => /* binding */ showFormError,
+/* harmony export */   "showInfoModal": () => /* binding */ showInfoModal,
+/* harmony export */   "prepareMultiUpdateModal": () => /* binding */ prepareMultiUpdateModal,
+/* harmony export */   "fillFormByName": () => /* binding */ fillFormByName
 /* harmony export */ });
 /* eslint-disable */
+const globalEventBinders = () => {
+  /* modal show form values on multiple values */
+  $(document).on('click', `.multi-value`, function (e) {
+    $(this).css('display', 'none');
+    $(this).next().css('display', 'block');
+    $(this).siblings('.multi-restore').css('display', 'block');
+  });
+  $(document).on('click', `.multi-restore`, function (e) {
+    $(this).css('display', 'none');
+    $(this).siblings('.multi-value').css('display', 'block').next().css('display', 'none');
+  });
+};
 const getCleanDivId = n => {
   if (n) {
     n = n.replace(/ /g, '_').replace(/-/g, '_').replace(/:/g, '_').replace(/,/g, '_').replace(/\$/g, '_').replace(/\!/g, '_').replace(/\</g, '_').replace(/\>/g, '_').replace(/\?/g, '_').replace(/\(/g, '_').replace(/\)/g, '_').replace(/\"/g, '_').replace(/\'/g, '_').replace(/\./g, '_').replace(/\//g, '_').replace(/\\/g, '_').replace(/@/g, '_');
@@ -13169,12 +13794,17 @@ const getCleanDivId = n => {
   return n;
 }; // creates object of the form fields and change color of requiredFields
 // if warn set to true, 'Please provide a valid information.' information will be added to field
+// if visible set to true => display of field shouldn't be none;
 
-const createFormObj = (formValues, requiredFields, warn) => {
+const createFormObj = (formValues, requiredFields, warn, visible) => {
   var formObj = {};
   var stop = false;
 
   for (var i = 0; i < formValues.length; i++) {
+    if (visible && $(formValues[i]).css('display') == 'none') {
+      continue;
+    }
+
     var name = $(formValues[i]).attr('name');
     var type = $(formValues[i]).attr('type');
     var val = '';
@@ -13190,7 +13820,9 @@ const createFormObj = (formValues, requiredFields, warn) => {
       }
     } else if (type == 'checkbox') {
       if ($(formValues[i]).is(':checked')) {
-        val = 'on';
+        val = true;
+      } else {
+        val = false;
       }
     } else {
       val = $(formValues[i]).val();
@@ -13217,7 +13849,36 @@ const createFormObj = (formValues, requiredFields, warn) => {
     formObj[name] = val;
   }
 
+  console.log(formObj);
   return [formObj, stop];
+}; // convert string fields to array/object
+
+const convertFormObj = formObj => {
+  Object.keys(formObj).forEach(key => {
+    try {
+      if (formObj[key] && typeof formObj[key] === 'string' && (formObj[key].charAt(0) == '{' || formObj[key].charAt(0) == '[')) {
+        let val = JSON.parse(formObj[key]);
+        formObj[key] = val;
+      }
+    } catch (err) {
+      console.log('format error', err);
+    }
+  });
+  return formObj;
+};
+const getUpdatedFields = (beforeUpdate, formObj) => {
+  Object.keys(formObj).forEach(key => {
+    if (beforeUpdate[key]) {
+      if (JSON.stringify(beforeUpdate[key]) == JSON.stringify(formObj[key])) {
+        delete formObj[key];
+      }
+    }
+
+    if (!beforeUpdate[key] && formObj[key] === '') {
+      delete formObj[key];
+    }
+  });
+  return formObj;
 };
 const showFormError = (formValues, errorFields, warn) => {
   console.log(errorFields);
@@ -13237,6 +13898,68 @@ const showFormError = (formValues, errorFields, warn) => {
           } else {
             $(formValues[i]).next('div.invalid-feedback').remove().after(`<div class="invalid-feedback text-left">${errorText}</div>`);
           }
+        }
+      }
+    }
+  }
+};
+const showInfoModal = text => {
+  const modalId = '#infoModal';
+  const textID = '#infoModalText'; //true if modal is open
+
+  if ($(textID).html().length) {
+    const oldText = $(textID).html();
+    const newText = oldText + '<br/><br/>' + text;
+    $(textID).html(newText);
+  } else {
+    $(modalId).off();
+    $(modalId).on('show.coreui.modal', function (event) {
+      $(textID).html(text);
+    });
+    $(modalId).on('hide.coreui.modal', function (event) {
+      $(textID).html('');
+    });
+    $(modalId).modal('show');
+  }
+};
+const prepareMultiUpdateModal = (formId, formBodyId, find) => {
+  console.log('prepareMultiUpdateModal');
+  const formValues = $(formId).find(find);
+  $(formBodyId).prepend('<p> Each field contains different values for that input. To edit and set all items to the same value, click on the field, otherwise they will retain their individual values.</p>');
+
+  for (var k = 0; k < formValues.length; k++) {
+    $(formValues[k]).before(`<div class="multi-value" > Multiple Values</div>`);
+    $(formValues[k]).after(`<div class="multi-restore" style="display:none;"> Undo changes</div>`);
+    $(formValues[k]).css('display', 'none');
+  }
+}; //use name attr to fill form
+
+const fillFormByName = (formId, find, data) => {
+  const formValues = $(formId).find(find);
+
+  for (var k = 0; k < formValues.length; k++) {
+    const nameAttr = $(formValues[k]).attr('name');
+    const radioCheck = $(formValues[k]).is(':radio');
+    const checkboxCheck = $(formValues[k]).is(':checkbox');
+    console.log('checkboxCheck', checkboxCheck);
+    console.log('val', $(formValues[k]).val()); // var keys = Object.keys(data);
+
+    if (data[nameAttr]) {
+      if (radioCheck) {
+        if (data[nameAttr] == $(formValues[k]).val()) {
+          $(formValues[k]).attr('checked', true);
+        }
+      } else if (checkboxCheck) {
+        if (data[nameAttr] == $(formValues[k]).val() || data[nameAttr] === true) {
+          $(formValues[k]).attr('checked', true);
+        } else {
+          $(formValues[k]).attr('checked', false);
+        }
+      } else {
+        if (data[nameAttr] === 'on') {
+          $(formValues[k]).attr('checked', true);
+        } else {
+          $(formValues[k]).val(data[nameAttr]);
         }
       }
     }
@@ -13615,7 +14338,6 @@ module.exports = __webpack_require__(/*! ../../modules/_core */ "./node_modules/
   \**********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 __webpack_require__(/*! ../../modules/es7.symbol.async-iterator */ "./node_modules/core-js/modules/es7.symbol.async-iterator.js");
@@ -13645,7 +14367,6 @@ module.exports = __webpack_require__(/*! ../modules/_core */ "./node_modules/cor
   \*************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (it) {
@@ -13662,7 +14383,6 @@ module.exports = function (it) {
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/library/modules/_is-object.js");
@@ -13680,7 +14400,6 @@ module.exports = function (it) {
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:11-25 */
 /***/ ((module) => {
 
 var core = module.exports = { version: '2.6.11' };
@@ -13695,7 +14414,6 @@ if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // optional / simple context binding
@@ -13728,7 +14446,6 @@ module.exports = function (fn, that, length) {
   \**************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // Thank's IE8 for his funny defineProperty
@@ -13745,7 +14462,6 @@ module.exports = !__webpack_require__(/*! ./_fails */ "./node_modules/core-js/li
   \*************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/library/modules/_is-object.js");
@@ -13765,7 +14481,6 @@ module.exports = function (it) {
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 62:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/library/modules/_global.js");
@@ -13840,7 +14555,6 @@ module.exports = $export;
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (exec) {
@@ -13860,7 +14574,6 @@ module.exports = function (exec) {
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:13-27 */
 /***/ ((module) => {
 
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
@@ -13879,7 +14592,6 @@ if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 var hasOwnProperty = {}.hasOwnProperty;
@@ -13896,7 +14608,6 @@ module.exports = function (it, key) {
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var dP = __webpack_require__(/*! ./_object-dp */ "./node_modules/core-js/library/modules/_object-dp.js");
@@ -13917,7 +14628,6 @@ module.exports = __webpack_require__(/*! ./_descriptors */ "./node_modules/core-
   \*****************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = !__webpack_require__(/*! ./_descriptors */ "./node_modules/core-js/library/modules/_descriptors.js") && !__webpack_require__(/*! ./_fails */ "./node_modules/core-js/library/modules/_fails.js")(function () {
@@ -13933,7 +14643,6 @@ module.exports = !__webpack_require__(/*! ./_descriptors */ "./node_modules/core
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (it) {
@@ -13979,7 +14688,6 @@ exports.f = __webpack_require__(/*! ./_descriptors */ "./node_modules/core-js/li
   \****************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (bitmap, value) {
@@ -14000,7 +14708,6 @@ module.exports = function (bitmap, value) {
   \***************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
@@ -14041,7 +14748,6 @@ $export($export.G, { global: __webpack_require__(/*! ./_global */ "./node_module
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (it) {
@@ -14058,7 +14764,6 @@ module.exports = function (it) {
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var cof = __webpack_require__(/*! ./_cof */ "./node_modules/core-js/modules/_cof.js");
@@ -14076,7 +14781,6 @@ module.exports = function (it, msg) {
   \*************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 22.1.3.31 Array.prototype[@@unscopables]
@@ -14096,7 +14800,6 @@ module.exports = function (key) {
   \***************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14118,7 +14821,6 @@ module.exports = function (S, index, unicode) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (it, Constructor, name, forbiddenField) {
@@ -14136,7 +14838,6 @@ module.exports = function (it, Constructor, name, forbiddenField) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/modules/_is-object.js");
@@ -14154,7 +14855,6 @@ module.exports = function (it) {
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 7:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14194,7 +14894,6 @@ module.exports = [].copyWithin || function copyWithin(target /* = 0 */, start /*
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14223,7 +14922,6 @@ module.exports = function fill(value /* , start = 0, end = @length */) {
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // false -> Array#indexOf
@@ -14259,7 +14957,6 @@ module.exports = function (IS_INCLUDES) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 0 -> Array#forEach
@@ -14316,7 +15013,6 @@ module.exports = function (TYPE, $create) {
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var aFunction = __webpack_require__(/*! ./_a-function */ "./node_modules/core-js/modules/_a-function.js");
@@ -14357,7 +15053,6 @@ module.exports = function (that, callbackfn, aLen, memo, isRight) {
   \********************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/modules/_is-object.js");
@@ -14386,7 +15081,6 @@ module.exports = function (original) {
   \***************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 9.4.2.3 ArraySpeciesCreate(originalArray, length)
@@ -14405,7 +15099,6 @@ module.exports = function (original, length) {
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 16:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14444,7 +15137,6 @@ module.exports = Function.bind || function bind(that /* , ...args */) {
   \**************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 14:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
@@ -14480,7 +15172,6 @@ module.exports = function (it) {
   \**********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module) => {
 
 var toString = {}.toString;
@@ -14498,7 +15189,6 @@ module.exports = function (it) {
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 27:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14656,7 +15346,6 @@ module.exports = {
   \**********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 49:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14755,7 +15444,6 @@ module.exports = {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 15:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14854,7 +15542,6 @@ module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:11-25 */
 /***/ ((module) => {
 
 var core = module.exports = { version: '2.6.11' };
@@ -14869,7 +15556,6 @@ if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
   \**********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14891,7 +15577,6 @@ module.exports = function (object, index, value) {
   \**********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // optional / simple context binding
@@ -14924,7 +15609,6 @@ module.exports = function (fn, that, length) {
   \*************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 12:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14964,7 +15648,6 @@ module.exports = (fails(function () {
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -14987,7 +15670,6 @@ module.exports = function (hint) {
   \**************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 // 7.2.1 RequireObjectCoercible(argument)
@@ -15005,7 +15687,6 @@ module.exports = function (it) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // Thank's IE8 for his funny defineProperty
@@ -15022,7 +15703,6 @@ module.exports = !__webpack_require__(/*! ./_fails */ "./node_modules/core-js/mo
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/modules/_is-object.js");
@@ -15042,7 +15722,6 @@ module.exports = function (it) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 // IE 8- don't enum bug keys
@@ -15059,7 +15738,6 @@ module.exports = (
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // all enumerable object keys, includes symbols
@@ -15087,7 +15765,6 @@ module.exports = function (it) {
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 43:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js");
@@ -15143,7 +15820,6 @@ module.exports = $export;
   \**********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var MATCH = __webpack_require__(/*! ./_wks */ "./node_modules/core-js/modules/_wks.js")('match');
@@ -15168,7 +15844,6 @@ module.exports = function (KEY) {
   \************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (exec) {
@@ -15188,7 +15863,6 @@ module.exports = function (exec) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 34:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -15298,7 +15972,6 @@ module.exports = function (KEY, length, exec) {
   \************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -15325,7 +15998,6 @@ module.exports = function () {
   \*************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 39:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -15378,7 +16050,6 @@ module.exports = flattenIntoArray;
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 9:14-28 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var ctx = __webpack_require__(/*! ./_ctx */ "./node_modules/core-js/modules/_ctx.js");
@@ -15416,7 +16087,6 @@ exports.RETURN = RETURN;
   \*************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = __webpack_require__(/*! ./_shared */ "./node_modules/core-js/modules/_shared.js")('native-function-to-string', Function.toString);
@@ -15430,7 +16100,6 @@ module.exports = __webpack_require__(/*! ./_shared */ "./node_modules/core-js/mo
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:13-27 */
 /***/ ((module) => {
 
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
@@ -15449,7 +16118,6 @@ if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
   \**********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 var hasOwnProperty = {}.hasOwnProperty;
@@ -15466,7 +16134,6 @@ module.exports = function (it, key) {
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var dP = __webpack_require__(/*! ./_object-dp */ "./node_modules/core-js/modules/_object-dp.js");
@@ -15487,7 +16154,6 @@ module.exports = __webpack_require__(/*! ./_descriptors */ "./node_modules/core-
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var document = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js").document;
@@ -15502,7 +16168,6 @@ module.exports = document && document.documentElement;
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = !__webpack_require__(/*! ./_descriptors */ "./node_modules/core-js/modules/_descriptors.js") && !__webpack_require__(/*! ./_fails */ "./node_modules/core-js/modules/_fails.js")(function () {
@@ -15518,7 +16183,6 @@ module.exports = !__webpack_require__(/*! ./_descriptors */ "./node_modules/core
   \**************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/modules/_is-object.js");
@@ -15540,7 +16204,6 @@ module.exports = function (that, target, C) {
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 // fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -15569,7 +16232,6 @@ module.exports = function (fn, args, that) {
   \**************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -15588,7 +16250,6 @@ module.exports = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // check on default Array iterator
@@ -15609,7 +16270,6 @@ module.exports = function (it) {
   \***************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.2.2 IsArray(argument)
@@ -15627,7 +16287,6 @@ module.exports = Array.isArray || function isArray(arg) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 20.1.2.3 Number.isInteger(number)
@@ -15646,7 +16305,6 @@ module.exports = function isInteger(it) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (it) {
@@ -15662,7 +16320,6 @@ module.exports = function (it) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.2.8 IsRegExp(argument)
@@ -15683,7 +16340,6 @@ module.exports = function (it) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // call something on iterator step with safe closing on error
@@ -15708,7 +16364,6 @@ module.exports = function (iterator, fn, value, entries) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 10:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -15735,7 +16390,6 @@ module.exports = function (Constructor, NAME, next) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 18:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -15818,7 +16472,6 @@ module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 11:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var ITERATOR = __webpack_require__(/*! ./_wks */ "./node_modules/core-js/modules/_wks.js")('iterator');
@@ -15853,7 +16506,6 @@ module.exports = function (exec, skipClosing) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (done, value) {
@@ -15869,7 +16521,6 @@ module.exports = function (done, value) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = {};
@@ -15883,7 +16534,6 @@ module.exports = {};
   \**************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = false;
@@ -15897,7 +16547,6 @@ module.exports = false;
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module) => {
 
 // 20.2.2.14 Math.expm1(x)
@@ -15920,7 +16569,6 @@ module.exports = (!$expm1
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 13:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 20.2.2.16 Math.fround(x)
@@ -15956,7 +16604,6 @@ module.exports = Math.fround || function fround(x) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 // 20.2.2.20 Math.log1p(x)
@@ -15973,7 +16620,6 @@ module.exports = Math.log1p || function log1p(x) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 // 20.2.2.28 Math.sign(x)
@@ -15991,7 +16637,6 @@ module.exports = Math.sign || function sign(x) {
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 47:11-25 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var META = __webpack_require__(/*! ./_uid */ "./node_modules/core-js/modules/_uid.js")('meta');
@@ -16057,7 +16702,6 @@ var meta = module.exports = {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 8:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js");
@@ -16172,7 +16816,6 @@ module.exports.f = function (C) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 12:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -16224,7 +16867,6 @@ module.exports = !$assign || __webpack_require__(/*! ./_fails */ "./node_modules
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 31:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
@@ -16308,7 +16950,6 @@ exports.f = __webpack_require__(/*! ./_descriptors */ "./node_modules/core-js/mo
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var dP = __webpack_require__(/*! ./_object-dp */ "./node_modules/core-js/modules/_object-dp.js");
@@ -16433,7 +17074,6 @@ exports.f = Object.getOwnPropertySymbols;
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 7:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
@@ -16459,7 +17099,6 @@ module.exports = Object.getPrototypeOf || function (O) {
   \***************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var has = __webpack_require__(/*! ./_has */ "./node_modules/core-js/modules/_has.js");
@@ -16489,7 +17128,6 @@ module.exports = function (object, names) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
@@ -16524,7 +17162,6 @@ exports.f = {}.propertyIsEnumerable;
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // most Object methods by ES6 should accept primitives
@@ -16547,7 +17184,6 @@ module.exports = function (KEY, exec) {
   \**********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var DESCRIPTORS = __webpack_require__(/*! ./_descriptors */ "./node_modules/core-js/modules/_descriptors.js");
@@ -16581,7 +17217,6 @@ module.exports = function (isEntries) {
   \***************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // all object keys, includes non-enumerable and symbols
@@ -16604,7 +17239,6 @@ module.exports = Reflect && Reflect.ownKeys || function ownKeys(it) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var $parseFloat = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js").parseFloat;
@@ -16625,7 +17259,6 @@ module.exports = 1 / $parseFloat(__webpack_require__(/*! ./_string-ws */ "./node
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var $parseInt = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js").parseInt;
@@ -16647,7 +17280,6 @@ module.exports = $parseInt(ws + '08') !== 8 || $parseInt(ws + '0x16') !== 22 ? f
   \**************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (exec) {
@@ -16667,7 +17299,6 @@ module.exports = function (exec) {
   \**********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var anObject = __webpack_require__(/*! ./_an-object */ "./node_modules/core-js/modules/_an-object.js");
@@ -16692,7 +17323,6 @@ module.exports = function (C, x) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = function (bitmap, value) {
@@ -16713,7 +17343,6 @@ module.exports = function (bitmap, value) {
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var redefine = __webpack_require__(/*! ./_redefine */ "./node_modules/core-js/modules/_redefine.js");
@@ -16731,7 +17360,6 @@ module.exports = function (target, src, safe) {
   \***************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 13:1-15 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js");
@@ -16775,7 +17403,6 @@ __webpack_require__(/*! ./_core */ "./node_modules/core-js/modules/_core.js").in
   \***************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 8:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -16810,7 +17437,6 @@ module.exports = function (R, S) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 58:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -16882,7 +17508,6 @@ module.exports = patchedExec;
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module) => {
 
 // 7.2.9 SameValue(x, y)
@@ -16900,7 +17525,6 @@ module.exports = Object.is || function is(x, y) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 9:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // Works with __proto__ only. Old v8 can't work with null proto objects.
@@ -16938,7 +17562,6 @@ module.exports = {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 7:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -16965,7 +17588,6 @@ module.exports = function (KEY) {
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var def = __webpack_require__(/*! ./_object-dp */ "./node_modules/core-js/modules/_object-dp.js").f;
@@ -16985,7 +17607,6 @@ module.exports = function (it, tag, stat) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var shared = __webpack_require__(/*! ./_shared */ "./node_modules/core-js/modules/_shared.js")('keys');
@@ -17003,7 +17624,6 @@ module.exports = function (key) {
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:1-15 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var core = __webpack_require__(/*! ./_core */ "./node_modules/core-js/modules/_core.js");
@@ -17028,7 +17648,6 @@ var store = global[SHARED] || (global[SHARED] = {});
   \**************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.3.20 SpeciesConstructor(O, defaultConstructor)
@@ -17050,7 +17669,6 @@ module.exports = function (O, D) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -17073,7 +17691,6 @@ module.exports = function (method, arg) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var toInteger = __webpack_require__(/*! ./_to-integer */ "./node_modules/core-js/modules/_to-integer.js");
@@ -17103,7 +17720,6 @@ module.exports = function (TO_STRING) {
   \*********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // helper for String#{startsWith, endsWith, includes}
@@ -17124,7 +17740,6 @@ module.exports = function (that, searchString, NAME) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 12:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var $export = __webpack_require__(/*! ./_export */ "./node_modules/core-js/modules/_export.js");
@@ -17156,7 +17771,6 @@ module.exports = function (NAME, exec) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // https://github.com/tc39/proposal-string-pad-start-end
@@ -17185,7 +17799,6 @@ module.exports = function (that, maxLength, fillString, left) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -17211,7 +17824,6 @@ module.exports = function repeat(count) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 30:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var $export = __webpack_require__(/*! ./_export */ "./node_modules/core-js/modules/_export.js");
@@ -17254,7 +17866,6 @@ module.exports = exporter;
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 1:0-14 */
 /***/ ((module) => {
 
 module.exports = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
@@ -17269,7 +17880,6 @@ module.exports = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u20
   \***********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 81:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var ctx = __webpack_require__(/*! ./_ctx */ "./node_modules/core-js/modules/_ctx.js");
@@ -17366,7 +17976,6 @@ module.exports = {
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var toInteger = __webpack_require__(/*! ./_to-integer */ "./node_modules/core-js/modules/_to-integer.js");
@@ -17386,7 +17995,6 @@ module.exports = function (index, length) {
   \***************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // https://tc39.github.io/ecma262/#sec-toindex
@@ -17409,7 +18017,6 @@ module.exports = function (it) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module) => {
 
 // 7.1.4 ToInteger
@@ -17428,7 +18035,6 @@ module.exports = function (it) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
@@ -17447,7 +18053,6 @@ module.exports = function (it) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.1.15 ToLength
@@ -17466,7 +18071,6 @@ module.exports = function (it) {
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.1.13 ToObject(argument)
@@ -17484,7 +18088,6 @@ module.exports = function (it) {
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 5:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
@@ -17509,8 +18112,6 @@ module.exports = function (it, S) {
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 325:2-16 */
-/*! CommonJS bailout: module.exports is used directly at 480:7-21 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -18004,8 +18605,6 @@ if (__webpack_require__(/*! ./_descriptors */ "./node_modules/core-js/modules/_d
   \*******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, __webpack_exports__ */
-/*! CommonJS bailout: exports is used directly at 275:0-7 */
-/*! CommonJS bailout: exports is used directly at 276:0-7 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
@@ -18295,7 +18894,6 @@ exports[DATA_VIEW] = $DataView;
   \************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 23:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js");
@@ -18336,7 +18934,6 @@ module.exports = {
   \**********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module) => {
 
 var id = 0;
@@ -18354,7 +18951,6 @@ module.exports = function (key) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js");
@@ -18371,7 +18967,6 @@ module.exports = navigator && navigator.userAgent || '';
   \**************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 2:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var isObject = __webpack_require__(/*! ./_is-object */ "./node_modules/core-js/modules/_is-object.js");
@@ -18389,7 +18984,6 @@ module.exports = function (it, TYPE) {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 6:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var global = __webpack_require__(/*! ./_global */ "./node_modules/core-js/modules/_global.js");
@@ -18427,7 +19021,6 @@ exports.f = __webpack_require__(/*! ./_wks */ "./node_modules/core-js/modules/_w
   \**********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: __webpack_require__, module */
-/*! CommonJS bailout: module.exports is used directly at 6:15-29 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var store = __webpack_require__(/*! ./_shared */ "./node_modules/core-js/modules/_shared.js")('wks');
@@ -18451,7 +19044,6 @@ $exports.store = store;
   \******************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var classof = __webpack_require__(/*! ./_classof */ "./node_modules/core-js/modules/_classof.js");
@@ -18726,7 +19318,6 @@ $export($export.S, 'Array', { isArray: __webpack_require__(/*! ./_is-array */ ".
   \************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 11:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -19223,7 +19814,6 @@ NAME in FProto || __webpack_require__(/*! ./_descriptors */ "./node_modules/core
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 7:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -21608,7 +22198,6 @@ if (__webpack_require__(/*! ./_fails */ "./node_modules/core-js/modules/_fails.j
   \*************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 7:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -22627,7 +23216,6 @@ __webpack_require__(/*! ./_typed-array */ "./node_modules/core-js/modules/_typed
   \******************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 40:15-29 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -23891,7 +24479,6 @@ ___CSS_LOADER_EXPORT___.push([module.id, "@charset \"UTF-8\";/*!\n * CoreUI Icon
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 9:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -23970,7 +24557,6 @@ module.exports = function (cssWithMappingToString) {
   \************************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 15:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -24015,7 +24601,6 @@ module.exports = function cssWithMappingToString(item) {
   \********************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 3:0-14 */
 /***/ ((module) => {
 
 "use strict";
@@ -41134,7 +41719,6 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! DataTables 1
   \****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__ */
-/*! CommonJS bailout: module.exports is used directly at 8:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var ___EXPOSE_LOADER_IMPORT___ = __webpack_require__(/*! -!./jquery.js */ "./node_modules/jquery/dist/jquery.js");
@@ -41155,7 +41739,6 @@ module.exports = ___EXPOSE_LOADER_IMPORT___;
   \******************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__.g, __webpack_require__.* */
-/*! CommonJS bailout: module.exports is used directly at 4:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -45090,15 +45673,1257 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/jquery-datatables-checkboxes/js/dataTables.checkboxes.js":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/jquery-datatables-checkboxes/js/dataTables.checkboxes.js ***!
+  \*******************************************************************************/
+/*! unknown exports (runtime-defined) */
+/*! runtime requirements: __webpack_require__, __webpack_exports__, module */
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*! 
+ * jQuery DataTables Checkboxes (https://www.gyrocode.com/projects/jquery-datatables-checkboxes/)
+ * Checkboxes extension for jQuery DataTables
+ *
+ * @version     1.2.12
+ * @author      Gyrocode LLC (https://www.gyrocode.com)
+ * @copyright   (c) Gyrocode LLC
+ * @license     MIT
+ */
+(function( factory ){
+/* eslint-disable */
+   if ( true ) {
+      // AMD
+      !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery-exposed.js"), __webpack_require__(/*! datatables.net */ "./node_modules/datatables.net/js/jquery.dataTables.js")], __WEBPACK_AMD_DEFINE_RESULT__ = (function ( $ ) {
+         return factory( $, window, document );
+      }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+   }
+   else {}
+/* eslint-enable */
+}(function( $, window, document ) {
+   'use strict';
+   var DataTable = $.fn.dataTable;
+
+
+   /**
+   * Checkboxes is an extension for the jQuery DataTables library that provides
+   * universal solution for working with checkboxes in a table.
+   *
+   *  @class
+   *  @param {object} settings DataTables settings object for the host table
+   *  @requires jQuery 1.7+
+   *  @requires DataTables 1.10.8+
+   *
+   *  @example
+   *     $('#example').DataTable({
+   *        'columnDefs': [
+   *           {
+   *              'targets': 0,
+   *              'checkboxes': true
+   *           }
+   *        ]
+   *     });
+   */
+   var Checkboxes = function ( settings ) {
+      // Sanity check that we are using DataTables 1.10.8 or newer
+      if ( ! DataTable.versionCheck || ! DataTable.versionCheck( '1.10.8' ) ) {
+         throw 'DataTables Checkboxes requires DataTables 1.10.8 or newer';
+      }
+
+      this.s = {
+         dt: new DataTable.Api( settings ),
+         columns: [],
+         data: [],
+         dataDisabled: [],
+         ignoreSelect: false
+      };
+
+      // Get settings object
+      this.s.ctx = this.s.dt.settings()[0];
+
+      // Check if checkboxes have already been initialised on this table
+      if ( this.s.ctx.checkboxes ) {
+         return;
+      }
+
+      settings.checkboxes = this;
+
+      this._constructor();
+   };
+
+
+   Checkboxes.prototype = {
+      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+      * Constructor
+      */
+
+      /**
+      * Initialise the Checkboxes instance
+      *
+      * @private
+      */
+      _constructor: function ()
+      {
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+         var hasCheckboxes = false;
+         var hasCheckboxesSelectRow = false;
+
+         for(var i = 0; i < ctx.aoColumns.length; i++){
+            if (ctx.aoColumns[i].checkboxes){
+               var $colHeader = $(dt.column(i).header());
+
+               //
+               // INITIALIZATION
+               //
+
+               hasCheckboxes = true;
+
+               if(!$.isPlainObject(ctx.aoColumns[i].checkboxes)){
+                  ctx.aoColumns[i].checkboxes = {};
+               }
+
+               ctx.aoColumns[i].checkboxes = $.extend(
+                  {}, Checkboxes.defaults, ctx.aoColumns[i].checkboxes
+               );
+
+               //
+               // OPTIONS
+               //
+
+               var colOptions = {
+                  'searchable': false,
+                  'orderable': false
+               };
+
+               if(ctx.aoColumns[i].sClass === ''){
+                  colOptions['className'] = 'dt-checkboxes-cell';
+               } else {
+                  colOptions['className'] = ctx.aoColumns[i].sClass + ' dt-checkboxes-cell';
+               }
+
+               if(ctx.aoColumns[i].sWidthOrig === null){
+                  colOptions['width'] = '1%';
+               }
+
+               if(ctx.aoColumns[i].mRender === null){
+                  colOptions['render'] = function(){
+                     return '<input type="checkbox" class="dt-checkboxes" autocomplete="off">';
+                  };
+               }
+
+               DataTable.ext.internal._fnColumnOptions(ctx, i, colOptions);
+
+
+               // WORKAROUND: Remove "sorting" class
+               $colHeader.removeClass('sorting');
+
+               // WORKAROUND: Detach all event handlers for this column
+               $colHeader.off('.dt');
+
+               // If table has data source other than Ajax
+               if(ctx.sAjaxSource === null){
+                  // WORKAROUND: Invalidate column data
+                  var cells = dt.cells('tr', i);
+                  cells.invalidate('data');
+
+                  // WORKAROUND: Add required class to existing cells
+                  $(cells.nodes()).addClass(colOptions['className']);
+               }
+
+
+               //
+               // DATA
+               //
+
+               // Initialize object holding data for selected checkboxes
+               self.s.data[i] = {};
+               self.s.dataDisabled[i] = {};
+
+               // Store column index for easy column selection later
+               self.s.columns.push(i);
+
+
+               //
+               // CLASSES
+               //
+
+               // If row selection is enabled for this column
+               if(ctx.aoColumns[i].checkboxes.selectRow){
+
+                  // If Select extension is enabled
+                  if(ctx._select){
+                     hasCheckboxesSelectRow = true;
+
+                  // Otherwise, if Select extension is not enabled
+                  } else {
+                     // Disable row selection for this column
+                     ctx.aoColumns[i].checkboxes.selectRow = false;
+                  }
+               }
+
+               // If "Select all" control is enabled
+               if(ctx.aoColumns[i].checkboxes.selectAll){
+                  // Save previous HTML content
+                  $colHeader.data('html', $colHeader.html());
+
+                  // If "Select all" control markup is provided
+                  if(ctx.aoColumns[i].checkboxes.selectAllRender !== null){
+                     var selectAllHtml = '';
+
+                     // If "selectAllRender" option is a function
+                     if($.isFunction(ctx.aoColumns[i].checkboxes.selectAllRender)){
+                        selectAllHtml = ctx.aoColumns[i].checkboxes.selectAllRender();
+
+                     // Otherwise, if "selectAllRender" option is a string
+                     } else if(typeof ctx.aoColumns[i].checkboxes.selectAllRender === 'string'){
+                        selectAllHtml = ctx.aoColumns[i].checkboxes.selectAllRender;
+                     }
+
+                     $colHeader
+                        .html(selectAllHtml)
+                        .addClass('dt-checkboxes-select-all')
+                        .attr('data-col', i);
+                  }
+               }
+            }
+         }
+
+         // If table has at least one checkbox column
+         if(hasCheckboxes){
+
+            // Load previous state
+            self.loadState();
+
+            //
+            // EVENT HANDLERS
+            //
+
+            var $table = $(dt.table().node());
+            var $tableBody = $(dt.table().body());
+            var $tableContainer = $(dt.table().container());
+
+            // If there is at least one column that has row selection enabled
+            if(hasCheckboxesSelectRow){
+               $table.addClass('dt-checkboxes-select');
+
+               // Handle event before row is selected/deselected
+               $table.on('user-select.dt.dtCheckboxes', function (e, dt, type, cell , originalEvent){
+                  self.onDataTablesUserSelect(e, dt, type, cell , originalEvent);
+               });
+
+               // Handle row select/deselect event
+               $table.on('select.dt.dtCheckboxes deselect.dt.dtCheckboxes', function(e, api, type, indexes){
+                  self.onDataTablesSelectDeselect(e, type, indexes);
+               });
+
+               // If displaying of Select extension information is enabled
+               if(ctx._select.info){
+                  // Disable Select extension information display
+                  dt.select.info(false);
+
+                  // Update the table information element with selected item summary
+                  //
+                  // NOTE: Needed to display correct count of selected rows
+                  // when using server-side processing mode
+                  $table.on('draw.dt.dtCheckboxes select.dt.dtCheckboxes deselect.dt.dtCheckboxes', function(){
+                     self.showInfoSelected();
+                  });
+               }
+            }
+
+            // Handle table draw event
+            $table.on('draw.dt.dtCheckboxes', function(e){
+               self.onDataTablesDraw(e);
+            });
+
+            // Handle checkbox click event
+            $tableBody.on('click.dtCheckboxes', 'input.dt-checkboxes', function(e){
+               self.onClick(e, this);
+            });
+
+            // Handle click on "Select all" control
+            $tableContainer.on('click.dtCheckboxes', 'thead th.dt-checkboxes-select-all input[type="checkbox"]', function(e){
+               self.onClickSelectAll(e, this);
+            });
+
+            // Handle click on heading containing "Select all" control
+            $tableContainer.on('click.dtCheckboxes', 'thead th.dt-checkboxes-select-all', function() {
+               $('input[type="checkbox"]', this).not(':disabled').trigger('click');
+            });
+
+            // If row selection is disabled
+            if(!hasCheckboxesSelectRow){
+               // Handle click on cell containing checkbox
+               $tableContainer.on('click.dtCheckboxes', 'tbody td.dt-checkboxes-cell', function() {
+                  $('input[type="checkbox"]', this).not(':disabled').trigger('click');
+               });
+            }
+
+            // Handle click on label node in heading containing "Select all" control
+            // and in cell containing checkbox
+            $tableContainer.on('click.dtCheckboxes', 'thead th.dt-checkboxes-select-all label, tbody td.dt-checkboxes-cell label', function(e) {
+               // Prevent default behavior
+               e.preventDefault();
+            });
+
+            // Handle click on "Select all" control in floating fixed header
+            $(document).on('click.dtCheckboxes', '.fixedHeader-floating thead th.dt-checkboxes-select-all input[type="checkbox"]', function(e){
+               // If FixedHeader is enabled in this instance
+               if(ctx._fixedHeader){
+                  // If header is floating in this instance
+                  if(ctx._fixedHeader.dom['header'].floating){
+                     self.onClickSelectAll(e, this);
+                  }
+               }
+            });
+
+            // Handle click on heading containing "Select all" control in floating fixed header
+            $(document).on('click.dtCheckboxes', '.fixedHeader-floating thead th.dt-checkboxes-select-all', function() {
+               // If FixedHeader is enabled in this instance
+               if(ctx._fixedHeader){
+                  // If header is floating in this instance
+                  if(ctx._fixedHeader.dom['header'].floating){
+                     $('input[type="checkbox"]', this).trigger('click');
+                  }
+               }
+            });
+
+            // Handle table initialization event
+            $table.on('init.dt.dtCheckboxes', function(){
+               // Use delay to handle initialization event
+               // because certain extensions (FixedColumns) are initialized
+               // only when initialization event is triggered.
+               setTimeout(function(){
+                   self.onDataTablesInit();
+               }, 0);
+            });
+
+            // Handle state saving event
+            $table.on('stateSaveParams.dt.dtCheckboxes', function (e, settings, data) {
+               self.onDataTablesStateSave(e, settings, data);
+            });
+
+            // Handle table destroy event
+            $table.one('destroy.dt.dtCheckboxes', function(e, settings){
+               self.onDataTablesDestroy(e, settings);
+            });
+         }
+      },
+
+      // Handles DataTables initialization event
+      onDataTablesInit: function(){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If server-side processing mode is not enabled
+         // NOTE: Needed to avoid duplicate call to updateStateCheckboxes() in onDataTablesDraw()
+         if(!ctx.oFeatures.bServerSide){
+
+            // If state saving is enabled
+            if(ctx.oFeatures.bStateSave){
+               self.updateState();
+            }
+
+            // Handle Ajax request completion event
+            // NOTE: Needed to update table state 
+            // if table is reloaded via ajax.reload() API method
+            $(dt.table().node()).on('xhr.dt.dtCheckboxes', function ( e, settings , json, xhr ) {
+               self.onDataTablesXhr(e. settings, json, xhr);
+            });
+         }
+      },
+
+      // Handles DataTables user initiated select event
+      onDataTablesUserSelect: function ( e, dt, type, cell /*, originalEvent*/ ){
+         var self = this;
+
+         var cellIdx = cell.index();
+         var rowIdx = cellIdx.row;
+         var colIdx = self.getSelectRowColIndex();
+         var cellData = dt.cell({ row: rowIdx, column: colIdx }).data();
+
+         // If checkbox in the cell cannot be checked
+         if(!self.isCellSelectable(colIdx, cellData)){
+            // Prevent row selection
+            e.preventDefault();
+         }
+      },
+
+      // Handles DataTables row select/deselect event
+      onDataTablesSelectDeselect: function(e, type, indexes){
+         var self = this;
+         var dt = self.s.dt;
+
+         if(self.s.ignoreSelect){ return; }
+
+         if(type === 'row'){
+            // Get index of the first column that has checkbox and row selection enabled
+            var colIdx = self.getSelectRowColIndex();
+            if(colIdx !== null){
+               var cells = dt.cells(indexes, colIdx);
+
+               self.updateData(cells, colIdx, (e.type === 'select') ? true : false);
+               self.updateCheckbox(cells, colIdx, (e.type === 'select') ? true : false);
+               self.updateSelectAll(colIdx);
+            }
+         }
+      },
+
+      // Handles DataTables state save event
+      onDataTablesStateSave: function (e, settings, data) {
+         var self = this;
+         var ctx = self.s.ctx;
+
+         // Initialize array holding checkbox state for each column
+         data.checkboxes = [];
+
+         // For every column where checkboxes are enabled
+         $.each(self.s.columns, function(index, colIdx){
+            // If checkbox state saving is enabled
+            if(ctx.aoColumns[colIdx].checkboxes.stateSave){
+               // Store data associated with this plug-in
+               data.checkboxes[colIdx] = self.s.data[colIdx];
+            }
+         });
+      },
+
+      // Handles DataTables destroy event
+      onDataTablesDestroy: function(){
+         var self = this;
+         var dt = self.s.dt;
+
+         // Get table elements
+         var $table = $(dt.table().node());
+         var $tableBody = $(dt.table().body());
+         var $tableContainer = $(dt.table().container());
+
+         // Detach event handlers
+         $(document).off('click.dtCheckboxes');
+         $tableContainer.off('.dtCheckboxes');
+         $tableBody.off('.dtCheckboxes');
+         $table.off('.dtCheckboxes');
+
+         // Clear data
+         //
+         // NOTE: Needed only to reduce memory footprint
+         // in case user saves instance of DataTable object.
+         self.s.data = {};
+         self.s.dataDisabled = {};
+
+         // Remove added elements
+         $('.dt-checkboxes-select-all', $table).each(function(index, el){
+            $(el)
+               .html($(el).data('html'))
+               .removeClass('dt-checkboxes-select-all');
+         });
+      },
+
+      // Handles DataTables draw event
+      onDataTablesDraw: function(){
+         var self = this;
+         var ctx = self.s.ctx;
+
+         // If server-side processing is enabled
+         // or deferred render is enabled
+         //
+         // TODO: it's not optimal to update state of checkboxes
+         // for already created rows in deferred rendering mode
+         if(ctx.oFeatures.bServerSide || ctx.oFeatures.bDeferRender){
+            self.updateStateCheckboxes({ page: 'current', search: 'none' });
+         }
+
+         $.each(self.s.columns, function(index, colIdx){
+            self.updateSelectAll(colIdx);
+         });         
+      },
+
+      // Handles DataTables Ajax request completion event
+      onDataTablesXhr: function( /* e, settings , json, xhr */ ){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // Get table elements
+         var $table = $(dt.table().node());
+
+         // For every column where checkboxes are enabled
+         $.each(self.s.columns, function(index, colIdx){
+            // Reset data
+            self.s.data[colIdx] = {};
+            self.s.dataDisabled[colIdx] = {};
+         });
+
+         // If state saving is enabled
+         if(ctx.oFeatures.bStateSave){
+            // Load previous state
+            self.loadState();
+
+            // Update table state on next redraw
+            $table.one('draw.dt.dtCheckboxes', function(){
+               self.updateState();
+            });
+         }
+      },
+
+      // Updates array holding data for selected checkboxes
+      updateData: function(cells, colIdx, isSelected){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If Checkboxes extension is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes){
+            var cellsData = cells.data();
+            cellsData.each(function(cellData){
+               // If checkbox is checked
+               if(isSelected){
+                  ctx.checkboxes.s.data[colIdx][cellData] = 1;
+
+               // Otherwise, if checkbox is not checked
+               } else {
+                  delete ctx.checkboxes.s.data[colIdx][cellData];
+               }
+            });
+
+            // If state saving is enabled
+            if(ctx.oFeatures.bStateSave){
+               // If checkbox state saving is enabled
+               if(ctx.aoColumns[colIdx].checkboxes.stateSave){
+                  // Save state
+                  dt.state.save();
+               }
+            }
+         }
+      },
+
+      // Updates row selection
+      updateSelect: function(selector, isSelected){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If Select extension is enabled
+         if(ctx._select){
+            // Disable select event hanlder temporarily
+            self.s.ignoreSelect = true;
+
+            if(isSelected){
+               dt.rows(selector).select();
+            } else {
+               dt.rows(selector).deselect();
+            }
+
+            // Re-enable select event handler
+            self.s.ignoreSelect = false;
+         }
+      },
+
+      // Updates state of single checkbox
+      updateCheckbox: function(cells, colIdx, isSelected){
+         var self = this;
+         var ctx = self.s.ctx;
+
+         var cellNodes = cells.nodes();
+         if(cellNodes.length){
+            $('input.dt-checkboxes', cellNodes).not(':disabled').prop('checked', isSelected);
+
+            // If selectCallback is a function
+            if($.isFunction(ctx.aoColumns[colIdx].checkboxes.selectCallback)){
+               ctx.aoColumns[colIdx].checkboxes.selectCallback(cellNodes, isSelected);
+            }
+         }
+      },
+
+      // Update table state
+      updateState: function(){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         self.updateStateCheckboxes({ page: 'all', search: 'none' });
+
+         // If FixedColumns extension is enabled
+         if(ctx._oFixedColumns){                   
+            // Use delay to let FixedColumns construct the header
+            // before we update the "Select all" checkbox
+            setTimeout(function(){
+               // For every column where checkboxes are enabled
+               $.each(self.s.columns, function(index, colIdx){
+                  self.updateSelectAll(colIdx);
+               });
+            }, 0);
+         }
+      },
+
+      // Updates state of multiple checkboxes
+      updateStateCheckboxes: function(opts){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // Enumerate all cells
+         dt.cells('tr', self.s.columns, opts).every(function(rowIdx, colIdx){
+            // Get cell data
+            var cellData = this.data();
+
+            // Determine if checkbox in the cell can be selected
+            var isCellSelectable = self.isCellSelectable(colIdx, cellData);
+
+            // If checkbox is checked
+            if(ctx.checkboxes.s.data[colIdx].hasOwnProperty(cellData)){
+               self.updateCheckbox(this, colIdx, true);
+
+               // If row selection is enabled
+               // and checkbox can be checked
+               if(ctx.aoColumns[colIdx].checkboxes.selectRow && isCellSelectable){
+                  self.updateSelect(rowIdx, true);
+               }
+            }
+
+            // If checkbox is disabled
+            if(!isCellSelectable){
+               $('input.dt-checkboxes', this.node()).prop('disabled', true);
+            }
+         });
+      },
+
+      // Handles checkbox click event
+      onClick: function(e, ctrl){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         var cellSelector;
+
+         // Get cell
+         var $cell = $(ctrl).closest('td');
+
+         // If cell is in a fixed column using FixedColumns extension
+         if($cell.parents('.DTFC_Cloned').length){
+            cellSelector = dt.fixedColumns().cellIndex($cell);
+
+         } else {
+            cellSelector = $cell;
+         }
+
+         var cell    = dt.cell(cellSelector);
+         var cellIdx = cell.index();
+         var colIdx  = cellIdx.column;
+
+         // If row selection is not enabled
+         // NOTE: if row selection is enabled, checkbox selection/deselection
+         // would be handled by onDataTablesSelectDeselect event handler instead
+         if(!ctx.aoColumns[colIdx].checkboxes.selectRow){
+            cell.checkboxes.select(ctrl.checked);
+
+            // Prevent click event from propagating to parent
+            e.stopPropagation();
+
+         } else {
+            // WORKAROUND:
+            // Select extension may keep the row selected
+            // when checkbox is unchecked with SHIFT key.
+            //
+            // We need to update the state of the checkbox AFTER handling
+            // select/deselect event from Select extension.
+            //
+            // Call to setTimeout is needed to let select/deselect event handler
+            // update the data first.
+            setTimeout(function(){
+               // Get cell data
+               var cellData = cell.data();
+
+               // Determine whether data is in the list
+               var hasData = self.s.data[colIdx].hasOwnProperty(cellData);
+
+               // If state of the checkbox needs to be updated
+               if(hasData !== ctrl.checked){
+                  self.updateCheckbox(cell, colIdx, hasData);
+                  self.updateSelectAll(colIdx);
+               }
+            }, 0);
+         }
+      },
+
+      // Handles checkbox click event
+      onClickSelectAll: function(e, ctrl){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // Calculate column index
+         var colIdx = null;
+         var $th = $(ctrl).closest('th');
+
+         // If column is fixed using FixedColumns extension
+         if($th.parents('.DTFC_Cloned').length){
+            var cellIdx = dt.fixedColumns().cellIndex($th);
+            colIdx = cellIdx.column;
+         } else {
+            colIdx = dt.column($th).index();
+         }
+
+         // Indicate that state of "Select all" control has been changed
+         $(ctrl).data('is-changed', true);
+
+         dt.column(colIdx, {
+            page: (
+               (ctx.aoColumns[colIdx].checkboxes && ctx.aoColumns[colIdx].checkboxes.selectAllPages)
+                  ? 'all'
+                  : 'current'
+            ),
+            search: 'applied'
+         }).checkboxes.select(ctrl.checked);
+
+         // Prevent click event from propagating to parent
+         e.stopPropagation();
+      },
+
+      // Loads previosly saved sate
+      loadState: function () {
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If state saving is enabled
+         if(ctx.oFeatures.bStateSave){
+            // Retrieve stored state
+            var state = dt.state.loaded();
+
+            // For every column where checkboxes are enabled
+            $.each(self.s.columns, function(index, colIdx){
+               // If state is loaded and contains data for this column
+               if(state && state.checkboxes && state.checkboxes.hasOwnProperty(colIdx)){
+                  // If checkbox state saving is enabled
+                  if(ctx.aoColumns[colIdx].checkboxes.stateSave){
+                     // Load previous state
+                     self.s.data[colIdx] = state.checkboxes[colIdx];
+                  }
+               }
+            });
+         }
+      },
+
+      // Updates state of the "Select all" controls
+      updateSelectAll: function(colIdx){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If Checkboxes extension is enabled for this column
+         // and "Select all" control is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes && ctx.aoColumns[colIdx].checkboxes.selectAll){
+            var cells = dt.cells('tr', colIdx, {
+               page: (
+                  (ctx.aoColumns[colIdx].checkboxes.selectAllPages)
+                     ? 'all'
+                     : 'current'
+               ),
+               search: 'applied'
+            });
+
+            var $tableContainer = dt.table().container();
+            var $checkboxesSelectAll = $('.dt-checkboxes-select-all[data-col="' + colIdx + '"] input[type="checkbox"]', $tableContainer);
+
+            var countChecked = 0;
+            var countDisabled = 0;
+            var cellsData = cells.data();
+            $.each(cellsData, function(index, cellData){
+               // If checkbox is not disabled
+               if(self.isCellSelectable(colIdx, cellData)){
+                  if(self.s.data[colIdx].hasOwnProperty(cellData)){ countChecked++; }
+
+               // Otherwise, if checkbox is disabled
+               } else {
+                  countDisabled++;
+               }
+            });
+
+            // If FixedHeader is enabled in this instance
+            if(ctx._fixedHeader){
+               // If header is floating in this instance
+               if(ctx._fixedHeader.dom['header'].floating){
+                  $checkboxesSelectAll = $('.fixedHeader-floating .dt-checkboxes-select-all[data-col="' + colIdx + '"] input[type="checkbox"]');
+               }
+            }
+
+            var isSelected;
+            var isIndeterminate;
+
+            // If none of the checkboxes are checked
+            if (countChecked === 0){
+               isSelected      = false;
+               isIndeterminate = false;
+
+            // If all of the checkboxes are checked
+            } else if ((countChecked + countDisabled) === cellsData.length){
+               isSelected      = true;
+               isIndeterminate = false;
+
+            // If some of the checkboxes are checked
+            } else {
+               isSelected      = true;
+               isIndeterminate = true;
+            }
+
+            var isChanged          = $checkboxesSelectAll.data('is-changed');
+            var isSelectedNow      = $checkboxesSelectAll.prop('checked');
+            var isIndeterminateNow = $checkboxesSelectAll.prop('indeterminate');
+
+            // If state of "Select all" control has been changed
+            if(isChanged || isSelectedNow !== isSelected || isIndeterminateNow !== isIndeterminate){
+               // Reset "Select all" control state flag
+               $checkboxesSelectAll.data('is-changed', false);
+
+               $checkboxesSelectAll.prop({
+                  // NOTE: If checkbox has indeterminate state, 
+                  // "checked" property must be set to false.
+                  'checked': isIndeterminate ? false : isSelected,
+                  'indeterminate': isIndeterminate
+               });
+
+               // If selectAllCallback is a function
+               if($.isFunction(ctx.aoColumns[colIdx].checkboxes.selectAllCallback)){
+                  ctx.aoColumns[colIdx].checkboxes.selectAllCallback($checkboxesSelectAll.closest('th').get(0), isSelected, isIndeterminate);
+               }
+            }
+         }
+      },
+
+      // Updates the information element of the DataTable showing information about the
+      // items selected. Based on info() method of Select extension.
+      showInfoSelected: function(){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         if ( ! ctx.aanFeatures.i ) {
+            return;
+         }
+
+         // Get index of the first column that has checkbox and row selection enabled
+         var colIdx = self.getSelectRowColIndex();
+
+         // If there is a column that has checkbox and row selection enabled
+         if(colIdx !== null){
+            // Count number of selected rows
+            var countRows = 0;
+            for (var cellData in ctx.checkboxes.s.data[colIdx]){
+               if (ctx.checkboxes.s.data[colIdx].hasOwnProperty(cellData)){
+                  countRows++;
+               }
+            }
+
+            var add = function($el, name, num){
+               $el.append( $('<span class="select-item"/>').append( dt.i18n(
+                  'select.'+name+'s',
+                  { _: '%d '+name+'s selected', 0: '', 1: '1 '+name+' selected' },
+                  num
+               ) ) );
+            };
+
+            // Internal knowledge of DataTables to loop over all information elements
+            $.each( ctx.aanFeatures.i, function ( i, el ) {
+               var $el = $(el);
+
+               var $output  = $('<span class="select-info"/>');
+               add($output, 'row', countRows);
+
+               var $existing = $el.children('span.select-info');
+               if($existing.length){
+                  $existing.remove();
+               }
+
+               if($output.text() !== ''){
+                  $el.append($output);
+               }
+            });
+         }
+      },
+
+      // Determines whether checkbox in the cell can be checked
+      isCellSelectable: function(colIdx, cellData){
+         var self = this;
+         var ctx = self.s.ctx;
+
+         // If data is in the list of disabled elements
+         if(ctx.checkboxes.s.dataDisabled[colIdx].hasOwnProperty(cellData)){
+            return false;
+
+         // Otherwise, if checkbox can be selected
+         } else {
+            return true;
+         }
+      },
+
+      // Gets cell index
+      getCellIndex: function(cell){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If FixedColumns extension is available
+         if(ctx._oFixedColumns){
+            return dt.fixedColumns().cellIndex(cell);
+
+         } else {
+            return dt.cell(cell).index();
+         }
+      },
+
+      // Gets index of the first column that has checkbox and row selection enabled
+      getSelectRowColIndex: function(){
+         var self = this;
+         var ctx = self.s.ctx;
+
+         var colIdx = null;
+
+         for(var i = 0; i < ctx.aoColumns.length; i++){
+            // If Checkboxes extension is enabled
+            // and row selection is enabled for this column
+            if(ctx.aoColumns[i].checkboxes && ctx.aoColumns[i].checkboxes.selectRow){
+               colIdx = i;
+               break;
+            }
+         }
+
+         return colIdx;
+      },
+
+      // Updates fixed column if FixedColumns extension is enabled
+      // and given column is inside a fixed column
+      updateFixedColumn: function(colIdx){
+         var self = this;
+         var dt = self.s.dt;
+         var ctx = self.s.ctx;
+
+         // If FixedColumns extension is enabled
+         if(ctx._oFixedColumns){
+            var leftCols = ctx._oFixedColumns.s.iLeftColumns;
+            var rightCols = ctx.aoColumns.length - ctx._oFixedColumns.s.iRightColumns - 1;
+
+            if (colIdx < leftCols || colIdx > rightCols){
+               // Update the data shown in the fixed column
+               dt.fixedColumns().update();
+
+               // Use delay to let FixedColumns construct the header
+               // before we update the "Select all" checkbox
+               setTimeout(function(){
+                  // For every column where checkboxes are enabled
+                  $.each(self.s.columns, function(index, colIdx){
+                     self.updateSelectAll(colIdx);
+                  });
+               }, 0);
+            }
+         }
+      }
+   };
+
+
+   /**
+   * Checkboxes default settings for initialisation
+   *
+   * @namespace
+   * @name Checkboxes.defaults
+   * @static
+   */
+   Checkboxes.defaults = {
+      /**
+      * Enable / disable checkbox state loading/saving if state saving is enabled globally
+      *
+      * @type {Boolean}
+      * @default `true`
+      */
+      stateSave: true,
+
+      /**
+      * Enable / disable row selection
+      *
+      * @type {Boolean}
+      * @default `false`
+      */
+      selectRow: false,
+
+      /**
+      * Enable / disable "select all" control in the header
+      *
+      * @type {Boolean}
+      * @default `true`
+      */
+      selectAll: true,
+
+      /**
+      * Enable / disable ability to select checkboxes from all pages
+      *
+      * @type {Boolean}
+      * @default `true`
+      */
+      selectAllPages: true,
+
+      /**
+      * Checkbox select/deselect callback
+      *
+      * @type {Function}
+      * @default  `null`
+      */
+      selectCallback: null,
+
+      /**
+      * "Select all" control select/deselect callback
+      *
+      * @type {Function}
+      * @default  `null`
+      */
+      selectAllCallback: null,
+
+      /**
+      * "Select all" control markup
+      *
+      * @type {mixed}
+      * @default `<input type="checkbox">`
+      */
+      selectAllRender: '<input type="checkbox" autocomplete="off">'
+   };
+
+
+   /*
+   * API
+   */
+   var Api = $.fn.dataTable.Api;
+
+   // Doesn't do anything - work around for a bug in DT... Not documented
+   Api.register( 'checkboxes()', function () {
+      return this;
+   } );
+
+   Api.registerPlural( 'columns().checkboxes.select()', 'column().checkboxes.select()', function ( state ) {
+      if(typeof state === 'undefined'){ state = true; }
+
+      return this.iterator( 'column-rows', function ( ctx, colIdx, i, j, rowsIdx ) {
+         // If Checkboxes extension is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes){
+            // Prepare a list of all cells
+            var selector = [];
+            $.each(rowsIdx, function(index, rowIdx){
+               selector.push({ row: rowIdx, column: colIdx });
+            });
+
+            var cells = this.cells(selector);
+            var cellsData = cells.data();
+
+            // Prepare a list of cells that contain checkboxes that can be selected
+            var rowsSelectableIdx = [];
+            selector = [];
+            $.each(cellsData, function(index, cellData){
+               // If checkbox in the cell can be selected
+               if(ctx.checkboxes.isCellSelectable(colIdx, cellData)){
+                  selector.push({ row: rowsIdx[index], column: colIdx });
+                  rowsSelectableIdx.push(rowsIdx[index]);
+               }
+            });
+
+            cells = this.cells(selector);
+
+            ctx.checkboxes.updateData(cells, colIdx, state);
+            ctx.checkboxes.updateCheckbox(cells, colIdx, state);
+
+            // If row selection is enabled
+            if(ctx.aoColumns[colIdx].checkboxes.selectRow){
+               ctx.checkboxes.updateSelect(rowsSelectableIdx, state);
+            }
+
+            ctx.checkboxes.updateSelectAll(colIdx);
+
+            ctx.checkboxes.updateFixedColumn(colIdx);
+         }
+      }, 1 );
+   } );
+
+   Api.registerPlural( 'cells().checkboxes.select()', 'cell().checkboxes.select()', function ( state ) {
+      if(typeof state === 'undefined'){ state = true; }
+
+      return this.iterator( 'cell', function ( ctx, rowIdx, colIdx ) {
+         // If Checkboxes extension is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes){
+            var cells = this.cells([{ row: rowIdx, column: colIdx }]);
+            var cellData = this.cell({ row: rowIdx, column: colIdx }).data();
+
+            // If checkbox in the cell can be selected
+            if(ctx.checkboxes.isCellSelectable(colIdx, cellData)){
+               ctx.checkboxes.updateData(cells, colIdx, state);
+               ctx.checkboxes.updateCheckbox(cells, colIdx, state);
+
+               // If row selection is enabled
+               if(ctx.aoColumns[colIdx].checkboxes.selectRow){
+                  ctx.checkboxes.updateSelect(rowIdx, state);
+               }
+
+               ctx.checkboxes.updateSelectAll(colIdx);
+
+               ctx.checkboxes.updateFixedColumn(colIdx);
+            }
+         }
+      }, 1 );
+   } );
+
+   Api.registerPlural( 'cells().checkboxes.enable()', 'cell().checkboxes.enable()', function ( state ) {
+      if(typeof state === 'undefined'){ state = true; }
+
+      return this.iterator( 'cell', function ( ctx, rowIdx, colIdx ) {
+         // If Checkboxes extension is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes){
+            var cell = this.cell({ row: rowIdx, column: colIdx });
+
+            // Get cell data
+            var cellData = cell.data();
+
+            // If checkbox should be enabled
+            if(state){
+               delete ctx.checkboxes.s.dataDisabled[colIdx][cellData];
+
+            // Otherwise, if checkbox should be disabled
+            } else {
+               ctx.checkboxes.s.dataDisabled[colIdx][cellData] = 1;
+            }
+
+            // Determine if cell node is available
+            // (deferRender is not enabled or cell has been already created)
+            var cellNode = cell.node();
+            if(cellNode){
+               $('input.dt-checkboxes', cellNode).prop('disabled', !state);
+            }
+
+            // If row selection is enabled
+            // and checkbox can be checked
+            if(ctx.aoColumns[colIdx].checkboxes.selectRow){
+               // If data is in the list
+               if(ctx.checkboxes.s.data[colIdx].hasOwnProperty(cellData)){
+                  // Update selection based on current state:
+                  // if checkbox is enabled then select row;
+                  // otherwise, deselect row
+                  ctx.checkboxes.updateSelect(rowIdx, state);
+               }
+            }
+         }
+      }, 1 );
+   } );
+
+   Api.registerPlural( 'cells().checkboxes.disable()', 'cell().checkboxes.disable()', function ( state ) {
+      if(typeof state === 'undefined'){ state = true; }
+      return this.checkboxes.enable(!state);
+   } );
+
+   Api.registerPlural( 'columns().checkboxes.deselect()', 'column().checkboxes.deselect()', function ( state ) {
+      if(typeof state === 'undefined'){ state = true; }
+      return this.checkboxes.select(!state);
+   } );
+
+   Api.registerPlural( 'cells().checkboxes.deselect()', 'cell().checkboxes.deselect()', function ( state ) {
+      if(typeof state === 'undefined'){ state = true; }
+      return this.checkboxes.select(!state);
+   } );
+
+   Api.registerPlural( 'columns().checkboxes.deselectAll()', 'column().checkboxes.deselectAll()', function () {
+      return this.iterator( 'column', function (ctx, colIdx){
+         // If Checkboxes extension is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes){
+            ctx.checkboxes.s.data[colIdx] = {};
+
+            this.column(colIdx).checkboxes.select(false);
+         }
+      }, 1 );
+   } );
+
+   Api.registerPlural( 'columns().checkboxes.selected()', 'column().checkboxes.selected()', function () {
+      return this.iterator( 'column-rows', function ( ctx, colIdx, i, j, rowsIdx ) {
+
+         // If Checkboxes extension is enabled for this column
+         if(ctx.aoColumns[colIdx].checkboxes){
+            var data = [];
+
+            // If server-side processing mode is enabled
+            if(ctx.oFeatures.bServerSide){
+               $.each(ctx.checkboxes.s.data[colIdx], function(cellData){
+                  // If checkbox in the cell can be checked
+                  if(ctx.checkboxes.isCellSelectable(colIdx, cellData)){
+                     data.push(cellData);
+                  }
+               });
+
+            // Otherwise, if server-side processing mode is not enabled
+            } else {
+               // Prepare a list of all cells
+               var selector = [];
+               $.each(rowsIdx, function(index, rowIdx){
+                  selector.push({ row: rowIdx, column: colIdx });
+               });
+
+               // Get all cells data
+               var cells = this.cells(selector);
+               var cellsData = cells.data();
+
+               // Enumerate all cells data
+               $.each(cellsData, function(index, cellData){
+                  // If checkbox is checked
+                  if(ctx.checkboxes.s.data[colIdx].hasOwnProperty(cellData)){
+                     // If checkbox in the cell can be selected
+                     if(ctx.checkboxes.isCellSelectable(colIdx, cellData)){
+                        data.push(cellData);
+                     }
+                  }
+               });
+            }
+
+            return data;
+
+         } else {
+            return [];
+         }
+      }, 1 );
+   } );
+
+
+   /**
+    * Version information
+    *
+    * @name Checkboxes.version
+    * @static
+    */
+   Checkboxes.version = '1.2.12';
+
+
+
+   $.fn.DataTable.Checkboxes = Checkboxes;
+   $.fn.dataTable.Checkboxes = Checkboxes;
+
+
+   // Attach a listener to the document which listens for DataTables initialisation
+   // events so we can automatically initialise
+   $(document).on( 'preInit.dt.dtCheckboxes', function (e, settings /*, json */ ) {
+      if ( e.namespace !== 'dt' ) {
+         return;
+      }
+
+      new Checkboxes( settings );
+   } );
+
+
+   return Checkboxes;
+}));
+
+
+/***/ }),
+
 /***/ "./node_modules/jquery/dist/jquery.js":
 /*!********************************************!*\
   !*** ./node_modules/jquery/dist/jquery.js ***!
   \********************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, top-level-this-exports, __webpack_exports__ */
-/*! CommonJS bailout: this is used directly at 40:46-50 */
-/*! CommonJS bailout: module.exports is used directly at 18:43-57 */
-/*! CommonJS bailout: module.exports is used directly at 27:2-16 */
 /***/ (function(module, exports) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -57344,7 +59169,6 @@ PerfectScrollbar.prototype.removePsClasses = function removePsClasses () {
   \*****************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module */
-/*! CommonJS bailout: module.exports is used directly at 732:31-45 */
 /***/ ((module) => {
 
 /**
@@ -58241,7 +60065,6 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
   \****************************************************************************/
 /*! unknown exports (runtime-defined) */
 /*! runtime requirements: module, __webpack_require__.nc, __webpack_require__.* */
-/*! CommonJS bailout: module.exports is used directly at 230:0-14 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -58607,4 +60430,4 @@ module.exports = function (list, options) {
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=bundle.354a64a6526196d5cf42.js.map
+//# sourceMappingURL=bundle.2897e7646bfeeabc84b1.js.map

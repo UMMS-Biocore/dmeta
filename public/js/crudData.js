@@ -1,6 +1,6 @@
 /* eslint-disable */
 import axios from 'axios';
-import { createFormObj, showFormError } from './jsfuncs';
+import { createFormObj, convertFormObj } from './jsfuncs';
 
 // GLOBAL SCOPE
 let $s = { data: {}, collections: {}, fields: {} };
@@ -21,7 +21,7 @@ const ajaxCall = async (method, url) => {
   }
 };
 
-const getCollectionFieldData = async () => {
+export const getCollectionFieldData = async () => {
   let [collections, fields] = await Promise.all([
     ajaxCall('GET', '/api/v1/collections'),
     ajaxCall('GET', '/api/v1/fields')
@@ -30,8 +30,8 @@ const getCollectionFieldData = async () => {
   $s.fields = fields;
 };
 
-const getDataDropdown = (id, el_class, el_name, data, def) => {
-  let dropdown = `<select class="form-control ${el_class}" id="${id}" name="${el_name}">`;
+const getDataDropdown = (id, el_class, el_name, data, def, required) => {
+  let dropdown = `<select ${required} class="form-control ${el_class}" id="${id}" name="${el_name}">`;
   data.forEach(i => {
     const selected = def == i.name ? 'selected' : '';
     dropdown += `<option ${selected} value="${i._id}">${i.name}</option>`;
@@ -40,12 +40,13 @@ const getDataDropdown = (id, el_class, el_name, data, def) => {
   return dropdown;
 };
 
-const getFormRow = (element, label, settings) => {
+export const getFormRow = (element, label, settings) => {
   let required = '';
   let description = '';
   if (settings && settings.required) {
     required = '<span style="color:red";>*</span>';
   }
+  if (settings && settings.hidden) return '';
   let ret = `
     <div class="form-group row">
         <label class="col-md-3 col-form-label text-right">${label}${required}</label>
@@ -56,7 +57,7 @@ const getFormRow = (element, label, settings) => {
   return ret;
 };
 
-const getRefFieldDropdown = async (ref, name) => {
+const getRefFieldDropdown = async (ref, name, required, def) => {
   try {
     let refData;
     var re = new RegExp(project + '_(.*)');
@@ -68,35 +69,40 @@ const getRefFieldDropdown = async (ref, name) => {
     } else {
       refData = await ajaxCall('GET', `/api/v1/${ref}`);
     }
-    const collDropdown = getDataDropdown(`ref-${ref}`, 'ref-control', name, refData);
+    const collDropdown = getDataDropdown(`ref-${ref}`, 'ref-control', name, refData, def, required);
     return collDropdown;
   } catch {
     return '';
   }
 };
 
-const getFormElement = async field => {
+export const getFormElement = async field => {
   console.log(field);
   let ret = '';
   const type = field.type;
+  const required = field.required ? 'required' : '';
+  const dbType = type ? `dbType="${type}"` : '';
+  const def = field.default ? field.default : '';
   if (type == 'String' || type == 'Number') {
     if (field.enum) {
       const options = field.enum.map(i => {
         return { _id: i, name: i };
       });
-      ret = getDataDropdown('', '', field.name, options, field.default);
+      ret = getDataDropdown('', '', field.name, options, def, required);
     } else {
-      const def = field.default ? field.default : '';
-      ret = `<input class="form-control" type="text" name="${field.name}">${def}</input>`;
+      ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required}>${def}</input>`;
     }
   } else if (type == 'Date') {
-    ret = `<input class="form-control" type="date" name="${field.name}"></input>`;
+    ret = `<input ${dbType} class="form-control" type="date" name="${field.name}" ${required}></input>`;
   } else if (type == 'Mixed' || type == 'Array') {
-    ret = `<input class="form-control" type="text" name="${field.name}"></input>`;
+    ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required}>${def}</input>`;
   } else if (type == 'mongoose.Schema.ObjectId') {
     if (field.ref) {
-      ret = await getRefFieldDropdown(field.ref, field.name);
+      ret = await getRefFieldDropdown(field.ref, field.name, required, def);
     }
+  } else if (type == 'boolean') {
+    const checked = def == true ? 'checked' : '';
+    ret = `<input ${dbType} style="margin-left:0rem; margin-top:0.70rem;" type="checkbox" name="${field.name}" ${required} ${checked}></input>`;
   }
 
   return ret;
@@ -106,7 +112,7 @@ const getFieldsOfCollection = collectionID => {
   return $s.fields.filter(field => field.collectionID === collectionID);
 };
 
-const getParentCollection = collectionID => {
+export const getParentCollection = collectionID => {
   let parentCollID = '';
   let parentCollLabel = '';
   let parentCollName = '';
@@ -122,7 +128,8 @@ const getParentCollection = collectionID => {
 };
 
 // get all form fields of selected data collection
-const getFieldsDiv = async collectionID => {
+export const getFieldsDiv = async collectionID => {
+  await getCollectionFieldData();
   let ret = '';
   // 1. if parent collection id is defined, insert as a new field
   const { parentCollLabel, parentCollName } = getParentCollection(collectionID);
@@ -139,6 +146,7 @@ const getFieldsDiv = async collectionID => {
   }
   // 2. get all fields of collection
   const fields = getFieldsOfCollection(collectionID);
+  console.log('collectionID', collectionID);
   console.log('fields', fields);
   for (var k = 0; k < fields.length; k++) {
     const label = fields[k].label;
@@ -168,7 +176,7 @@ const bindEventHandlers = () => {
       .closest('form')
       .find('input,select');
     const requiredFields = [];
-    const [formObj, stop] = createFormObj(formValues, requiredFields, true);
+    let [formObj, stop] = createFormObj(formValues, requiredFields, true);
     console.log(formObj);
     const collectionName = $('#allcollections option:selected').text();
 
@@ -177,17 +185,8 @@ const bindEventHandlers = () => {
     body += '<table class="table" style="width:100%"><tbody>';
     Object.keys(formObj).forEach(key => {
       body += `<tr><td>${key}</td><td>${formObj[key]}</td></tr>`;
-      try {
-        if (formObj[key] && (formObj[key].charAt(0) == '{' || formObj[key].charAt(0) == '[')) {
-          console.log(formObj[key]);
-          let val = JSON.parse(formObj[key]);
-          console.log(val);
-          formObj[key] = val;
-        }
-      } catch (err) {
-        console.log('format error', err);
-      }
     });
+    formObj = convertFormObj(formObj);
     console.log(formObj);
 
     body += '</tbody></table>';
@@ -231,7 +230,9 @@ export const getInsertDataDiv = async () => {
     'allcollections',
     'collection-control',
     'collection',
-    $s.collections
+    $s.collections,
+    '',
+    ''
   );
   const collDropdownDiv = getFormRow(collDropdown, 'Collection', '');
   let ret = `

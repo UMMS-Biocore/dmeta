@@ -28,3 +28,23 @@ div.card-body.summary_card {
 .table-not-striped tbody tr:nth-of-type(odd) {
   background-color: transparent !important;
 }
+
+/* modal show form values on multiple values */
+div.multi-value {
+  border: 1px dotted #666;
+  border-radius: 3px;
+  padding: 5px;
+  background-color: #fafafa;
+  cursor: pointer;
+}
+
+div.multi-restore {
+  margin-top: 0.5em;
+  font-size: 0.8em;
+  line-height: 1.25em;
+  color: #3879d9;
+}
+div.multi-restore:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}

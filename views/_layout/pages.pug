@@ -9,5 +9,6 @@ html(lang='en')
   body.c-app.flex-row.align-items-center(style="background:linear-gradient(to top right, #7474BF 10%, #5c7cc2 55%, #348AC7 100%);")
     div#session-env-config(style="display: none;" base_url= env.BASE_URL SSO_LOGIN= env.SSO_LOGIN SSO_URL= env.SSO_URL CLIENT_ID= env.CLIENT_ID)
     block view
-
+    
+    include ../_partials/modals.pug
     include ../_partials/scripts.pug
