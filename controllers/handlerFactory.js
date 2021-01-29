@@ -50,6 +50,19 @@ exports.updateOne = Model =>
     ['owner', 'creationDate', 'lastUpdateDate', 'lastUpdatedUser'].forEach(function(key) {
       delete req.body[key];
     });
+
+    // find undefined fields to remove from document
+    // prepare: { $set: setObj, $unset: unsetObj }
+    let unsetObj = {};
+    let setObj = {};
+    Object.keys(req.body).forEach(k => {
+      if (req.body[k] == 'undefined') {
+        unsetObj[k] = 1;
+      } else {
+        setObj[k] = req.body[k];
+      }
+    });
+
     // Check if update is allowed
     if (res.locals.Perms) {
       let query = Model.findById(req.params.id);
@@ -61,11 +74,15 @@ exports.updateOne = Model =>
       }
     }
 
-    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-      context: 'query' //  lets you set `this` as a query object in model validators
-    });
+    const doc = await Model.findByIdAndUpdate(
+      req.params.id,
+      { $set: setObj, $unset: unsetObj },
+      {
+        new: true,
+        runValidators: true,
+        context: 'query' //  lets you set `this` as a query object in model validators
+      }
+    );
     if (!doc) {
       return next(new AppError(`No document found with ${req.params.id}!`, 404));
     }
@@ -91,6 +108,13 @@ exports.createOne = Model =>
         return next(new AppError(`Permission denied: no write permission`, 404));
       }
     }
+    // remove fields that has value undefined
+    // Object.keys(req.body).forEach(k => {
+    //   if (req.body[k] == 'undefined') {
+    //     delete req.body[k];
+    //   }
+    // });
+
     const doc = await Model.create(req.body);
     if (res.locals.After) res.locals.After();
     if (res.locals.Event) {

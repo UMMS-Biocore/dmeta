@@ -3,7 +3,7 @@ import '@babel/polyfill';
 import axios from 'axios';
 import { login, logout } from './login';
 import { getProjectNavbar } from './dashboard.js';
-import { getAdminProjectNavbar } from './admin-dashboard.js';
+import { refreshAdminProjectNavbar } from './admin-dashboard.js';
 import { getImportPageNavBar } from './importpage.js';
 import { globalEventBinders } from './jsfuncs.js';
 
@@ -105,7 +105,7 @@ if (loginForm)
     $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab');
   }
   if (adminAllProjectNav) {
-    const adminProjectNavbar = await getAdminProjectNavbar();
+    const adminProjectNavbar = await refreshAdminProjectNavbar();
     $('#admin-allProjectNav').append(adminProjectNavbar);
     // load all tab content
     $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab');

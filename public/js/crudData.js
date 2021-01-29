@@ -32,6 +32,7 @@ export const getCollectionFieldData = async () => {
 
 const getDataDropdown = (id, el_class, el_name, data, def, required) => {
   let dropdown = `<select ${required} class="form-control ${el_class}" id="${id}" name="${el_name}">`;
+  if (!required) dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
     const selected = def == i.name ? 'selected' : '';
     dropdown += `<option ${selected} value="${i._id}">${i.name}</option>`;
@@ -90,12 +91,12 @@ export const getFormElement = async field => {
       });
       ret = getDataDropdown('', '', field.name, options, def, required);
     } else {
-      ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required}>${def}</input>`;
+      ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required} value="${def}"></input>`;
     }
   } else if (type == 'Date') {
     ret = `<input ${dbType} class="form-control" type="date" name="${field.name}" ${required}></input>`;
   } else if (type == 'Mixed' || type == 'Array') {
-    ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required}>${def}</input>`;
+    ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required} value="${def}"></input>`;
   } else if (type == 'mongoose.Schema.ObjectId') {
     if (field.ref) {
       ret = await getRefFieldDropdown(field.ref, field.name, required, def);
@@ -146,8 +147,6 @@ export const getFieldsDiv = async collectionID => {
   }
   // 2. get all fields of collection
   const fields = getFieldsOfCollection(collectionID);
-  console.log('collectionID', collectionID);
-  console.log('fields', fields);
   for (var k = 0; k < fields.length; k++) {
     const label = fields[k].label;
     const element = await getFormElement(fields[k]);

@@ -7,7 +7,8 @@ import {
   convertFormObj,
   fillFormByName,
   getUpdatedFields,
-  prepareMultiUpdateModal
+  prepareMultiUpdateModal,
+  prepareClickToActivateModal
 } from './jsfuncs';
 import { getCrudButtons, crudAjaxRequest } from './dashboard';
 import { getFormElement, getFormRow } from './crudData';
@@ -21,8 +22,6 @@ $s.AdminCollectionFields = [
   'required',
   'unique',
   'hidden',
-  'active',
-  'required',
   'default',
   'enum',
   'checkvalid',
@@ -45,7 +44,7 @@ $s.AdminAllCollectionFields = [
   'label',
   'slug',
   'version',
-  'active',
+  'required',
   'parentCollectionID',
   'projectID',
   'id',
@@ -56,6 +55,82 @@ $s.AdminAllCollectionFields = [
   'lastUpdateDate'
 ];
 
+$s.AdminAllProjectFields = [
+  'name',
+  'label',
+  'slug',
+  'id',
+  'perms',
+  'restrictTo',
+  'owner',
+  'creationDate',
+  'lastUpdateDate'
+];
+
+const fieldsOfProjectModel = {
+  name: {
+    name: 'name',
+    label: 'Name',
+    type: 'String',
+    required: true
+  },
+  slug: {
+    name: 'slug',
+    label: 'Slug',
+    type: 'String'
+  },
+  label: {
+    name: 'label',
+    label: 'Label',
+    type: 'String',
+    required: true
+  }
+};
+
+const fieldsOfCollectionsModel = {
+  name: {
+    name: 'name',
+    label: 'Name',
+    type: 'String',
+    required: true
+  },
+  slug: {
+    name: 'slug',
+    label: 'Slug',
+    type: 'String'
+  },
+  label: {
+    name: 'label',
+    label: 'Label',
+    type: 'String',
+    required: true
+  },
+  parentCollectionID: {
+    name: 'parentCollectionID',
+    label: 'Parent Collection',
+    type: 'mongoose.Schema.ObjectId',
+    ref: 'collections'
+  },
+  projectID: {
+    name: 'projectID',
+    label: 'Project',
+    type: 'mongoose.Schema.ObjectId',
+    ref: 'projects'
+  },
+  version: {
+    name: 'version',
+    label: 'Version',
+    type: 'Number',
+    required: true,
+    default: '1'
+  },
+  required: {
+    name: 'required',
+    label: 'Required',
+    type: 'boolean',
+    default: false
+  }
+};
 const fieldsOfFieldsModel = {
   name: {
     name: 'name',
@@ -98,12 +173,6 @@ const fieldsOfFieldsModel = {
     name: 'hidden',
     label: 'Hidden',
     type: 'boolean'
-  },
-  active: {
-    name: 'active',
-    label: 'Active',
-    type: 'boolean',
-    default: true
   },
   required: {
     name: 'required',
@@ -167,6 +236,7 @@ const fieldsOfFieldsModel = {
     type: 'Number'
   }
 };
+
 const ajaxCall = async (method, url) => {
   try {
     const res = await axios({
@@ -181,13 +251,15 @@ const ajaxCall = async (method, url) => {
   }
 };
 
-const getTableHeaders = collID => {
+const getTableHeaders = (collID, projectId) => {
   let ret = '';
   ret += `<th></th>`; // for checkboxes
 
   let headerList;
-  if (collID == 'all_collections') {
+  if (collID == `all_collections_${projectId}`) {
     headerList = $s.AdminAllCollectionFields;
+  } else if (collID == 'all_projects') {
+    headerList = $s.AdminAllProjectFields;
   } else {
     headerList = $s.AdminCollectionFields;
   }
@@ -198,8 +270,8 @@ const getTableHeaders = collID => {
   return ret;
 };
 
-const getCollectionTable = collID => {
-  const headers = getTableHeaders(collID);
+const getCollectionTable = (collID, projectID) => {
+  const headers = getTableHeaders(collID, projectID);
   const ret = `
   <div class="table-responsive" style="overflow-x:auto; width:100%; ">
     <table id="${collID}" class="table table-striped" style="white-space:nowrap;  width:100%;" cellspacing="0" cellpadding="0" border="0">
@@ -218,15 +290,23 @@ const getCollectionTable = collID => {
 const getFieldsOfCollection = collectionID => {
   return $s.fields.filter(field => field.collectionID === collectionID);
 };
+const getCollectionsOfProject = projectID => {
+  console.log('projectID', projectID);
+  return $s.collections.filter(field => field.projectID === projectID);
+};
 
-const prepareDataForSingleColumn = async collID => {
+const prepareDataForSingleColumn = async (tableID, projectID) => {
   let data;
-  if (collID == 'all_collections') {
+  if (tableID == `all_collections_${projectID}`) {
     // Use "$s.collections" prepare all_collections table
-    data = $s.collections;
+    data = getCollectionsOfProject(projectID);
+    console.log('all collections', data);
+  } else if (tableID == 'all_projects') {
+    // Use "$s.projects" prepare all_projects table
+    data = $s.projects;
   } else {
     // Use $s.fields to prepare data
-    data = getFieldsOfCollection(collID);
+    data = getFieldsOfCollection(tableID);
   }
   const dataCopy = data.slice();
   const ret = dataCopy.map(el => {
@@ -240,13 +320,16 @@ const prepareDataForSingleColumn = async collID => {
   return ret;
 };
 
-const refreshDataTables = async TableID => {
+const refreshDataTables = async (TableID, projectID) => {
   if (!$.fn.DataTable.isDataTable(`#${TableID}`)) {
-    const data = await prepareDataForSingleColumn(TableID);
+    const data = await prepareDataForSingleColumn(TableID, projectID);
+    console.log(TableID, data);
     let columns = [];
     let fieldList;
-    if (TableID == 'all_collections') {
+    if (TableID == `all_collections_${projectID}`) {
       fieldList = $s.AdminAllCollectionFields;
+    } else if (TableID == 'all_projects') {
+      fieldList = $s.AdminAllProjectFields;
     } else {
       fieldList = $s.AdminCollectionFields;
     }
@@ -285,8 +368,10 @@ const refreshDataTables = async TableID => {
     dataTableObj.scrollX = '500';
     $s.TableID = $(`#${TableID}`).DataTable(dataTableObj);
   } else {
+    $s.collections = await ajaxCall('GET', '/api/v1/collections');
     $s.fields = await ajaxCall('GET', '/api/v1/fields');
-    const data = await prepareDataForSingleColumn(TableID);
+    $s.projects = await ajaxCall('GET', '/api/v1/projects');
+    const data = await prepareDataForSingleColumn(TableID, projectID);
 
     $(`#${TableID}`)
       .DataTable()
@@ -298,7 +383,10 @@ const refreshDataTables = async TableID => {
 const showTableTabs = () => {
   $(document).on('show.coreui.tab', 'a.collection[data-toggle="tab"]', function(e) {
     const tableID = $(e.target).attr('tableID');
-    refreshDataTables(tableID);
+    const projectID = $(e.target).attr('projectID');
+    console.log(tableID);
+    console.log(projectID);
+    refreshDataTables(tableID, projectID);
   });
   $(document).on('shown.coreui.tab', 'a.collection[data-toggle="tab"]', function(e) {
     $($.fn.dataTable.tables(true))
@@ -311,6 +399,16 @@ const getErrorDiv = () => {
   return '<p style="background-color:#e211112b;" id="crudModalError"></p>';
 };
 
+const updateNavbarTables = async (collID, projectID) => {
+  if (collID == 'all_projects') {
+    await refreshAdminProjectNavbar();
+  } else if (collID == `all_collections_${projectID}`) {
+    await refreshCollectionNavbar(projectID);
+  } else {
+    refreshDataTables(collID, projectID);
+  }
+};
+
 const bindEventHandlers = () => {
   // ================= EDIT BUTTON =================
   $(document).on('click', `button.edit-data`, async function(e) {
@@ -318,8 +416,21 @@ const bindEventHandlers = () => {
     const collLabel = $(this).attr('collLabel');
     const collName = $(this).attr('collName');
     const projectID = $(this).attr('projectID');
-    const collectionFields = await getFieldsOfFieldsDiv(collName);
-    $('#crudModalTitle').text(`Edit Field`);
+    let targetUrl = '';
+    let collectionFields = '';
+    if (collID == `all_collections_${projectID}`) {
+      collectionFields = await getFieldsOfCollectionDiv(collName, projectID);
+      $('#crudModalTitle').text(`Edit Collection`);
+      targetUrl = 'collections';
+    } else if (collID == 'all_projects') {
+      collectionFields = await getFieldsOfProjectDiv();
+      $('#crudModalTitle').text(`Edit Project`);
+      targetUrl = 'projects';
+    } else {
+      collectionFields = await getFieldsOfFieldsDiv(collName);
+      $('#crudModalTitle').text(`Edit Field`);
+      targetUrl = 'fields';
+    }
     $('#crudModalYes').text('Save');
     $('#crudModalBody').empty();
     $('#crudModalBody').append(getErrorDiv());
@@ -334,6 +445,13 @@ const bindEventHandlers = () => {
       fillFormByName('#crudModal', 'input, select', selectedData[0]);
       if (rows_selected.length > 1) {
         prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
+      } else {
+        prepareClickToActivateModal(
+          '#crudModal',
+          '#crudModalBody',
+          'input, select',
+          selectedData[0]
+        );
       }
     });
 
@@ -345,7 +463,12 @@ const bindEventHandlers = () => {
       const requiredFields = $.map(requiredValues, function(el) {
         return $(el).attr('name');
       });
-      let [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+      let formObj, stop;
+      if (rows_selected.length > 1) {
+        [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+      } else {
+        [formObj, stop] = createFormObj(formValues, requiredFields, true, 'undefined');
+      }
       formObj = convertFormObj(formObj);
       // get only updated fields:
       if (rows_selected.length === 1) {
@@ -354,7 +477,7 @@ const bindEventHandlers = () => {
       if (stop === false && collName) {
         for (var i = 0; i < selectedData.length; i++) {
           const success = await crudAjaxRequest(
-            'fields',
+            targetUrl,
             'PATCH',
             selectedData[i]._id,
             projectID,
@@ -363,11 +486,11 @@ const bindEventHandlers = () => {
             formValues
           );
           if (!success) {
-            refreshDataTables(collID);
+            updateNavbarTables(collID, projectID);
             break;
           }
           if (success && selectedData.length - 1 === i) {
-            refreshDataTables(collID);
+            updateNavbarTables(collID, projectID);
             $('#crudModal').modal('hide');
           }
         }
@@ -388,13 +511,27 @@ const bindEventHandlers = () => {
     const collLabel = $(this).attr('collLabel');
     const collName = $(this).attr('collName');
     const projectID = $(this).attr('projectID');
-    const collectionFields = await getFieldsOfFieldsDiv(collName);
-    $('#crudModalTitle').text(`Insert Field`);
+    let collectionFields;
+    let targetUrl;
+    if (collID == `all_collections_${projectID}`) {
+      collectionFields = await getFieldsOfCollectionDiv(collName, projectID);
+      $('#crudModalTitle').text(`Insert Collection`);
+      targetUrl = 'collections';
+    } else if (collID == 'all_projects') {
+      collectionFields = await getFieldsOfProjectDiv();
+      $('#crudModalTitle').text(`Insert Project`);
+      targetUrl = 'projects';
+    } else {
+      collectionFields = await getFieldsOfFieldsDiv(collName);
+      $('#crudModalTitle').text(`Insert Field`);
+      targetUrl = 'fields';
+    }
     $('#crudModalYes').text('Save');
     $('#crudModalBody').empty();
     $('#crudModalBody').append(getErrorDiv());
     $('#crudModalBody').append(collectionFields);
     $('#crudModal').off();
+    prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
     $('#crudModal').on('click', '#crudModalYes', async function(e) {
       e.preventDefault();
       const formValues = $('#crudModal').find('input,select');
@@ -406,7 +543,7 @@ const bindEventHandlers = () => {
       formObj = convertFormObj(formObj);
       if (stop === false && collName) {
         const success = await crudAjaxRequest(
-          'fields',
+          targetUrl,
           'POST',
           '',
           projectID,
@@ -415,7 +552,7 @@ const bindEventHandlers = () => {
           formValues
         );
         if (success) {
-          refreshDataTables(collID);
+          await updateNavbarTables(collID, projectID);
           $('#crudModal').modal('hide');
         }
       }
@@ -435,7 +572,17 @@ const bindEventHandlers = () => {
     const rows_selected = table.column(0).checkboxes.selected();
     const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
     const items = selectedData.length === 1 ? `the item?` : `${selectedData.length} items?`;
-    $('#crudModalTitle').text(`Remove Field`);
+    let targetUrl = '';
+    if (collID == `all_collections_${projectID}`) {
+      $('#crudModalTitle').text(`Remove Collection`);
+      targetUrl = 'collections';
+    } else if (collID == 'all_projects') {
+      $('#crudModalTitle').text(`Remove Project`);
+      targetUrl = 'projects';
+    } else {
+      $('#crudModalTitle').text(`Remove Field`);
+      targetUrl = 'fields';
+    }
     $('#crudModalYes').text('Remove');
     $('#crudModalBody').empty();
     $('#crudModalBody').append(getErrorDiv());
@@ -445,7 +592,7 @@ const bindEventHandlers = () => {
       e.preventDefault();
       for (var i = 0; i < selectedData.length; i++) {
         const success = await crudAjaxRequest(
-          'fields',
+          targetUrl,
           'DELETE',
           selectedData[i]._id,
           projectID,
@@ -454,11 +601,11 @@ const bindEventHandlers = () => {
           {}
         );
         if (!success) {
-          refreshDataTables(collID);
+          updateNavbarTables(collID, projectID);
           break;
         }
         if (success && selectedData.length - 1 === i) {
-          refreshDataTables(collID);
+          updateNavbarTables(collID, projectID);
           $('#crudModal').modal('hide');
         }
       }
@@ -471,31 +618,46 @@ const bindEventHandlers = () => {
   });
 };
 
-// NEEDS UPDATE! get all collection with project id
-const getCollectionNavbar = projectId => {
-  bindEventHandlers();
+const refreshCollectionNavbar = async projectId => {
+  console.log('refreshCollectionNavbar');
+  const projectTabID = 'projectTab_' + getCleanDivId(projectId);
+  console.log(projectTabID);
+  const isNavbarExist = $(`#${projectTabID}`).html();
+  console.log('isNavbarExist', isNavbarExist);
+  if (isNavbarExist) {
+    await getAjaxData();
+  }
+
   let header = '<ul class="nav nav-tabs" role="tablist" style="margin-top: 10px;">';
   let content = '<div class="tab-content">';
   let tabs = [];
-  tabs.push({ label: 'All Collections', id: 'all_collections' });
+  tabs.push({
+    name: 'all_collections',
+    label: 'All Collections',
+    id: `all_collections_${projectId}`
+  });
   tabs = tabs.concat($s.collections);
   let k = 0;
   for (var i = 0; i < tabs.length; i++) {
     const collectionProjectID = tabs[i].projectID;
-    if ((projectId && collectionProjectID == projectId) || (!projectId && !collectionProjectID)) {
+    if (
+      (projectId && collectionProjectID == projectId) ||
+      (!projectId && !collectionProjectID) ||
+      tabs[i].id == `all_collections_${projectId}`
+    ) {
       k++;
       const collectionName = tabs[i].name;
       const collectionLabel = tabs[i].label;
       const collectionId = tabs[i].id;
-      const id = getCleanDivId(collectionLabel);
+      const id = getCleanDivId(collectionId);
       const collTabID = 'collTab_' + id;
       const active = k === 1 ? 'active' : '';
       const headerLi = `
       <li class="nav-item">
-          <a class="nav-link ${active} collection" data-toggle="tab" tableID="${collectionId}" href="#${collTabID}" aria-expanded="true">${collectionLabel}</a>
+          <a class="nav-link ${active} collection" data-toggle="tab" tableID="${collectionId}" collectionId="${collectionId}" projectID="${projectId}" href="#${collTabID}" aria-expanded="true">${collectionLabel}</a>
       </li>`;
       header += headerLi;
-      const colNavbar = getCollectionTable(collectionId);
+      const colNavbar = getCollectionTable(collectionId, projectId);
       const crudButtons = getCrudButtons(collectionId, collectionLabel, collectionName, projectId);
 
       const contentDiv = `
@@ -514,22 +676,38 @@ const getCollectionNavbar = projectId => {
   ret += header;
   ret += content;
   ret += '</div>';
-  return ret;
+  if (isNavbarExist) {
+    $(`#${projectTabID}`).html('');
+    $(`#${projectTabID}`).append(ret);
+    $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab');
+    return;
+  } else {
+    return ret;
+  }
 };
 
-export const getAdminProjectNavbar = async rowdata => {
-  showTableTabs();
+const getAjaxData = async () => {
   let [collections, fields, projects] = await Promise.all([
     ajaxCall('GET', '/api/v1/collections'),
     ajaxCall('GET', '/api/v1/fields'),
     ajaxCall('GET', '/api/v1/projects')
   ]);
   $s.collections = collections;
-  console.log($s.collections);
   $s.fields = fields;
   $s.projects = projects;
+};
+
+export const refreshAdminProjectNavbar = async () => {
+  console.log('refreshAdminProjectNavbar');
+  const isNavbarExist = $('#admin-allProjectNav').html();
+  if (!isNavbarExist) {
+    showTableTabs();
+    bindEventHandlers();
+  }
+  await getAjaxData();
+
   let tabs = [];
-  // tabs.push({ label: 'Public', id: '', name: 'public' });
+  tabs.push({ name: 'all_projects', label: 'All Projects', id: 'all_projects' });
   tabs = tabs.concat($s.projects);
 
   let header = '<ul class="nav nav-tabs" role="tablist">';
@@ -539,18 +717,27 @@ export const getAdminProjectNavbar = async rowdata => {
     const projectId = tabs[i].id;
     const projectLabel = tabs[i].label;
     const projectName = tabs[i].name;
-    const id = getCleanDivId(projectName);
+    const id = getCleanDivId(projectId);
     const projectTabID = 'projectTab_' + id;
     const active = i === 0 ? 'active' : '';
     const headerLi = `
     <li class="nav-item">
-        <a class="nav-link ${active}" data-toggle="tab" href="#${projectTabID}" aria-expanded="true">${projectLabel}</a>
+        <a class="nav-link ${active} collection" data-toggle="tab" tableID="${projectId}" projectID="${projectId}" href="#${projectTabID}" aria-expanded="true">${projectLabel}</a>
     </li>`;
     header += headerLi;
-    const colNavbar = getCollectionNavbar(projectId);
+
+    let colNavbar = '';
+    let crudButtons = '';
+    if (tabs[i].id == 'all_projects') {
+      colNavbar = getCollectionTable(projectId, projectId);
+      crudButtons = getCrudButtons(projectId, projectLabel, projectName, projectId);
+    } else {
+      colNavbar = await refreshCollectionNavbar(projectId);
+    }
 
     const contentDiv = `
     <div role="tabpanel" class="tab-pane ${active}" searchtab="true" id="${projectTabID}">
+        ${crudButtons}
         ${colNavbar}
       </div>`;
     content += contentDiv;
@@ -563,7 +750,14 @@ export const getAdminProjectNavbar = async rowdata => {
   ret += header;
   ret += content;
   ret += '</div>';
-  return ret;
+  if (isNavbarExist) {
+    $('#admin-allProjectNav').html('');
+    $('#admin-allProjectNav').append(ret);
+    $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab');
+    return;
+  } else {
+    return ret;
+  }
 };
 
 const getFieldsOfFieldsDiv = async collName => {
@@ -577,6 +771,36 @@ const getFieldsOfFieldsDiv = async collName => {
     const label = fieldsOfFieldsModel[name].label;
     const element = await getFormElement(fieldsOfFieldsModel[name]);
     ret += getFormRow(element, label, fieldsOfFieldsModel[name]);
+  }
+  return ret;
+};
+
+const getFieldsOfCollectionDiv = async (collName, projectID) => {
+  let ret = '';
+  const fields = Object.keys(fieldsOfCollectionsModel);
+  for (var k = 0; k < fields.length; k++) {
+    const name = fields[k];
+    if (name == 'projectID') {
+      fieldsOfCollectionsModel[name].default = projectID;
+    }
+    const label = fieldsOfCollectionsModel[name].label;
+    const element = await getFormElement(fieldsOfCollectionsModel[name]);
+    ret += getFormRow(element, label, fieldsOfCollectionsModel[name]);
+  }
+  return ret;
+};
+
+const getFieldsOfProjectDiv = async () => {
+  let ret = '';
+  const fields = Object.keys(fieldsOfProjectModel);
+  for (var k = 0; k < fields.length; k++) {
+    const name = fields[k];
+    // if (name == 'projectID') {
+    //   fieldsOfProjectModel[name].default = projectID;
+    // }
+    const label = fieldsOfProjectModel[name].label;
+    const element = await getFormElement(fieldsOfProjectModel[name]);
+    ret += getFormRow(element, label, fieldsOfProjectModel[name]);
   }
   return ret;
 };

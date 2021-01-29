@@ -8,7 +8,8 @@ import {
   getUpdatedFields,
   showFormError,
   fillFormByName,
-  prepareMultiUpdateModal
+  prepareMultiUpdateModal,
+  prepareClickToActivateModal
 } from './jsfuncs';
 import { getCollectionFieldData, getFieldsDiv, getParentCollection } from './crudData';
 
@@ -54,50 +55,6 @@ export const showInfoInDiv = (textID, text) => {
   $(textID).html(newText);
 };
 
-export const crudAjaxRequest = async (
-  type,
-  method,
-  id,
-  projectID,
-  collName,
-  formObj,
-  formValues
-) => {
-  let url = '';
-  const idsPart = id ? `/${id}` : '';
-  if (type == 'data') {
-    const { projectPart } = getProjectData(projectID);
-    url = `/api/v1/${projectPart}data/${collName}${idsPart}`;
-  } else {
-    url = `/api/v1/${type}${idsPart}`;
-  }
-  try {
-    const res = await axios({
-      method: method,
-      url: url,
-      data: formObj
-    });
-    if (res && res.data && res.data.status === 'success') {
-      return true;
-    }
-    return false;
-  } catch (e) {
-    console.log(e);
-    let err = '';
-    if (e.response && e.response.data) {
-      console.log(e.response.data);
-      if (e.response.data.error && e.response.data.error.errors) {
-        showFormError(formValues, e.response.data.error.errors, true);
-        return;
-      }
-      if (e.response.data.message) err += JSON.stringify(e.response.data.message);
-    }
-    if (!err) err = JSON.stringify(e);
-    if (err) showInfoInDiv('#crudModalError', err);
-    return false;
-  }
-};
-
 const getErrorDiv = () => {
   return '<p style="background-color:#e211112b;" id="crudModalError"></p>';
 };
@@ -125,6 +82,13 @@ const bindEventHandlers = () => {
       fillFormByName('#crudModal', 'input, select', selectedData[0]);
       if (rows_selected.length > 1) {
         prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
+      } else {
+        prepareClickToActivateModal(
+          '#crudModal',
+          '#crudModalBody',
+          'input, select',
+          selectedData[0]
+        );
       }
     });
 
@@ -136,7 +100,12 @@ const bindEventHandlers = () => {
       const requiredFields = $.map(requiredValues, function(el) {
         return $(el).attr('name');
       });
-      let [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+      let formObj, stop;
+      if (rows_selected.length > 1) {
+        [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+      } else {
+        [formObj, stop] = createFormObj(formValues, requiredFields, true, 'undefined');
+      }
       formObj = convertFormObj(formObj);
       // get only updated fields:
       if (rows_selected.length === 1) {
@@ -186,6 +155,8 @@ const bindEventHandlers = () => {
     $('#crudModalBody').append(getErrorDiv());
     $('#crudModalBody').append(collectionFields);
     $('#crudModal').off();
+    prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
+
     $('#crudModal').on('click', '#crudModalYes', async function(e) {
       e.preventDefault();
       const formValues = $('#crudModal').find('input,select');
@@ -303,6 +274,51 @@ const getProjectData = projectID => {
   return { projectName, projectPart };
 };
 
+export const crudAjaxRequest = async (
+  targetCollection,
+  method,
+  id,
+  projectID,
+  collName,
+  formObj,
+  formValues
+) => {
+  let url = '';
+  const idsPart = id ? `/${id}` : '';
+  if (targetCollection == 'data') {
+    const { projectPart } = getProjectData(projectID);
+    url = `/api/v1/${projectPart}data/${collName}${idsPart}`;
+  } else {
+    url = `/api/v1/${targetCollection}${idsPart}`;
+  }
+  try {
+    console.log('formObj', formObj);
+    const res = await axios({
+      method: method,
+      url: url,
+      data: formObj
+    });
+    if (res && res.data && res.data.status === 'success') {
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.log(e);
+    let err = '';
+    if (e.response && e.response.data) {
+      console.log(e.response.data);
+      if (e.response.data.error && e.response.data.error.errors) {
+        showFormError(formValues, e.response.data.error.errors, true);
+        return;
+      }
+      if (e.response.data.message) err += JSON.stringify(e.response.data.message);
+    }
+    if (!err) err = JSON.stringify(e);
+    if (err) showInfoInDiv('#crudModalError', err);
+    return false;
+  }
+};
+
 const prepareDataForSingleColumn = async (collName, projectID) => {
   const { projectPart, projectName } = getProjectData(projectID);
   const data = await ajaxCall('GET', `/api/v1/${projectPart}data/${collName}`);
@@ -395,9 +411,7 @@ const showTableTabs = () => {
 };
 
 const getCollectionNavbar = async projectId => {
-  bindEventHandlers();
   // await getCollectionFieldData();
-
   let header = '<ul class="nav nav-tabs" role="tablist" style="margin-top: 10px;">';
   let content = '<div class="tab-content">';
 
@@ -445,6 +459,7 @@ const getCollectionNavbar = async projectId => {
 
 export const getProjectNavbar = async () => {
   showTableTabs();
+  bindEventHandlers();
   let [projects, collections, fields] = await Promise.all([
     ajaxCall('GET', '/api/v1/projects'),
     ajaxCall('GET', '/api/v1/collections'),

@@ -51,9 +51,6 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
   var formObj = {};
   var stop = false;
   for (var i = 0; i < formValues.length; i++) {
-    if (visible && $(formValues[i]).css('display') == 'none') {
-      continue;
-    }
     var name = $(formValues[i]).attr('name');
     var type = $(formValues[i]).attr('type');
     var val = '';
@@ -71,6 +68,12 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         val = true;
       } else {
         val = false;
+      }
+    } else if ($(formValues[i]).is('select')) {
+      if ($(formValues[i]).val() === '') {
+        val = null;
+      } else {
+        val = $(formValues[i]).val();
       }
     } else {
       val = $(formValues[i]).val();
@@ -93,9 +96,15 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         stop = true;
       }
     }
+    if (visible && $(formValues[i]).css('display') == 'none') {
+      if (visible == 'undefined') {
+        val = 'undefined';
+      } else {
+        continue;
+      }
+    }
     formObj[name] = val;
   }
-  console.log(formObj);
   return [formObj, stop];
 };
 
@@ -125,15 +134,14 @@ export const getUpdatedFields = (beforeUpdate, formObj) => {
         delete formObj[key];
       }
     }
-    if (!beforeUpdate[key] && formObj[key] === '') {
-      delete formObj[key];
-    }
+    // if (!beforeUpdate[key] && formObj[key] === '') {
+    //   delete formObj[key];
+    // }
   });
   return formObj;
 };
 
 export const showFormError = (formValues, errorFields, warn) => {
-  console.log(errorFields);
   if (errorFields) {
     for (var i = 0; i < formValues.length; i++) {
       var name = $(formValues[i]).attr('name');
@@ -176,7 +184,6 @@ export const showInfoModal = text => {
 };
 
 export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
-  console.log('prepareMultiUpdateModal');
   const formValues = $(formId).find(find);
   $(formBodyId).prepend(
     '<p> Each field contains different values for that input. To edit and set all items to the same value, click on the field, otherwise they will retain their individual values.</p>'
@@ -188,6 +195,32 @@ export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
   }
 };
 
+export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
+  const formValues = $(formId).find(find);
+  $(formBodyId).prepend('<p> Please click to boxes below to set fields.</p>');
+  for (var k = 0; k < formValues.length; k++) {
+    const isRequired = $(formValues[k]).attr('required');
+    const nameAttr = $(formValues[k]).attr('name');
+    console.log('isRequired', isRequired);
+    if (!isRequired) {
+      // value not filled
+      if (!(nameAttr in data) || data[nameAttr] === null) {
+        $(formValues[k]).before(`<div class="multi-value" > Click to Set Field </div>`);
+        $(formValues[k]).after(
+          `<div class="multi-restore" style="display:none;"> Unset Field</div>`
+        );
+        $(formValues[k]).css('display', 'none');
+      } else {
+        // value filled
+        $(formValues[k]).before(
+          `<div class="multi-value" style="display:none;"> Click to Set Field </div>`
+        );
+        $(formValues[k]).after(`<div class="multi-restore" > Unset Field</div>`);
+      }
+    }
+  }
+};
+
 //use name attr to fill form
 export const fillFormByName = (formId, find, data) => {
   const formValues = $(formId).find(find);
@@ -195,9 +228,6 @@ export const fillFormByName = (formId, find, data) => {
     const nameAttr = $(formValues[k]).attr('name');
     const radioCheck = $(formValues[k]).is(':radio');
     const checkboxCheck = $(formValues[k]).is(':checkbox');
-    console.log('checkboxCheck', checkboxCheck);
-    console.log('val', $(formValues[k]).val());
-    // var keys = Object.keys(data);
     if (data[nameAttr]) {
       if (radioCheck) {
         if (data[nameAttr] == $(formValues[k]).val()) {
