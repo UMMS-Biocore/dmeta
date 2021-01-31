@@ -1,22 +1,35 @@
 /* eslint-disable */
+const JSON5 = require('json5');
+
 export const globalEventBinders = () => {
   /* modal show form values on multiple values */
+  //show field
   $(document).on('click', `.multi-value`, function(e) {
     $(this).css('display', 'none');
-    $(this)
-      .next()
-      .css('display', 'block');
+    const field = $(this).next();
+    const isSelectized = field.hasClass('selectized');
+    if (isSelectized) {
+      field.css('display', 'none');
+      field.next().css('display', 'block');
+    } else {
+      field.css('display', 'block');
+    }
     $(this)
       .siblings('.multi-restore')
       .css('display', 'block');
   });
+  //hide field
   $(document).on('click', `.multi-restore`, function(e) {
     $(this).css('display', 'none');
+    const field = $(this)
+      .siblings('.multi-value')
+      .next();
+    const isSelectized = field.hasClass('selectized');
     $(this)
       .siblings('.multi-value')
-      .css('display', 'block')
-      .next()
-      .css('display', 'none');
+      .css('display', 'block');
+    field.css('display', 'none');
+    if (isSelectized) field.next().css('display', 'none');
   });
 };
 
@@ -47,12 +60,14 @@ export const getCleanDivId = n => {
 // creates object of the form fields and change color of requiredFields
 // if warn set to true, 'Please provide a valid information.' information will be added to field
 // if visible set to true => display of field shouldn't be none;
+// if visible set to "undefined" => hidden fields set to "undefined" to remove from db.
 export const createFormObj = (formValues, requiredFields, warn, visible) => {
   var formObj = {};
   var stop = false;
   for (var i = 0; i < formValues.length; i++) {
     var name = $(formValues[i]).attr('name');
     var type = $(formValues[i]).attr('type');
+    const isSelectized = $(formValues[i]).hasClass('selectized');
     var val = '';
     if (type == 'radio') {
       for (var k = 0; k < formValues.length; k++) {
@@ -96,14 +111,14 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         stop = true;
       }
     }
-    if (visible && $(formValues[i]).css('display') == 'none') {
+    if (!isSelectized && visible && $(formValues[i]).css('display') == 'none') {
       if (visible == 'undefined') {
         val = 'undefined';
       } else {
         continue;
       }
     }
-    formObj[name] = val;
+    if (name) formObj[name] = val;
   }
   return [formObj, stop];
 };
@@ -117,7 +132,7 @@ export const convertFormObj = formObj => {
         typeof formObj[key] === 'string' &&
         (formObj[key].charAt(0) == '{' || formObj[key].charAt(0) == '[')
       ) {
-        let val = JSON.parse(formObj[key]);
+        let val = JSON5.parse(formObj[key]);
         formObj[key] = val;
       }
     } catch (err) {
@@ -189,9 +204,24 @@ export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
     '<p> Each field contains different values for that input. To edit and set all items to the same value, click on the field, otherwise they will retain their individual values.</p>'
   );
   for (var k = 0; k < formValues.length; k++) {
-    $(formValues[k]).before(`<div class="multi-value" > Multiple Values</div>`);
-    $(formValues[k]).after(`<div class="multi-restore" style="display:none;"> Undo changes</div>`);
-    $(formValues[k]).css('display', 'none');
+    const isSelectized = $(formValues[k]).hasClass('selectized');
+    const nameAttr = $(formValues[k]).attr('name');
+    if (nameAttr) {
+      $(formValues[k]).before(`<div class="multi-value" > Multiple Values</div>`);
+      $(formValues[k]).css('display', 'none');
+      if (isSelectized) {
+        $(formValues[k])
+          .next()
+          .css('display', 'none');
+        $(formValues[k])
+          .next()
+          .after(`<div class="multi-restore" style="display:none;"> Undo changes</div>`);
+      } else {
+        $(formValues[k]).after(
+          `<div class="multi-restore" style="display:none;"> Undo changes</div>`
+        );
+      }
+    }
   }
 };
 
@@ -201,21 +231,37 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
   for (var k = 0; k < formValues.length; k++) {
     const isRequired = $(formValues[k]).attr('required');
     const nameAttr = $(formValues[k]).attr('name');
-    console.log('isRequired', isRequired);
-    if (!isRequired) {
+    const isSelectized = $(formValues[k]).hasClass('selectized');
+    if (!isRequired && nameAttr) {
       // value not filled
       if (!(nameAttr in data) || data[nameAttr] === null) {
         $(formValues[k]).before(`<div class="multi-value" > Click to Set Field </div>`);
-        $(formValues[k]).after(
-          `<div class="multi-restore" style="display:none;"> Unset Field</div>`
-        );
-        $(formValues[k]).css('display', 'none');
+        if (isSelectized) {
+          $(formValues[k])
+            .next()
+            .after(`<div class="multi-restore" style="display:none;"> Unset Field</div>`);
+          $(formValues[k])
+            .css('display', 'none')
+            .next()
+            .css('display', 'none');
+        } else {
+          $(formValues[k]).after(
+            `<div class="multi-restore" style="display:none;"> Unset Field</div>`
+          );
+          $(formValues[k]).css('display', 'none');
+        }
       } else {
         // value filled
         $(formValues[k]).before(
           `<div class="multi-value" style="display:none;"> Click to Set Field </div>`
         );
-        $(formValues[k]).after(`<div class="multi-restore" > Unset Field</div>`);
+        if (isSelectized) {
+          $(formValues[k])
+            .next()
+            .after(`<div class="multi-restore" > Unset Field</div>`);
+        } else {
+          $(formValues[k]).after(`<div class="multi-restore" > Unset Field</div>`);
+        }
       }
     }
   }

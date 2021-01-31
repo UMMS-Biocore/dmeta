@@ -18,7 +18,7 @@ module.exports = {
     ignored: ['node_modules/**']
   },
   mode: 'development',
-  devtool: 'source-map', //Webpack default uses eval and throws `unsafe-eval` error
+  devtool: 'inline-source-map', //Webpack default uses eval and throws `unsafe-eval` error
   module: {
     // how to import files
     rules: [
@@ -53,7 +53,15 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin({
-      cleanEveryAfterBuildPatterns: [path.resolve(__dirname, './public/dist'), '!*contenthash.pug']
+      cleanOnceBeforeBuildPatterns: [
+        '!*contenthash.pug',
+        path.resolve(__dirname, './public/dist/*'),
+        path.resolve(__dirname, './public/dist/*.map')
+      ],
+      // cleanAfterEveryBuildPatterns: [path.resolve(__dirname, './public/dist/*.map'),path.resolve(__dirname, './public/dist/*.map')],
+      // dangerouslyAllowCleanPatternsOutsideProject: true,
+      // protectedWebpackAssets: false,
+      dry: false
     }), // removes unused files in dist folder
     new HtmlPlugin({
       filename: 'contenthash.pug',

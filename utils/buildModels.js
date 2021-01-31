@@ -110,13 +110,11 @@ const createSchema = async (fields, col) => {
         }
       } else if (k == 'required') {
         const sett = parseSchemaEntry(field[k]);
-        console.log(sett);
         let ret = [];
         ret[1] = sett.message ? sett.message : 'This field is required';
         if (sett.boolean) ret[0] = sett.boolean;
         else if (sett.function) ret[0] = sett.function;
         else ret = false;
-        console.log(ret);
         entry[k] = ret;
       } else if (k == 'checkvalid') {
         const ret = {};
@@ -176,7 +174,7 @@ exports.getModelNameByColId = async collectionId => {
   if (projectID) {
     const project = await projectsController.getProjectById(projectID);
     console.log(project);
-    if (project.name) modelName = `${project.name}_${colName}`;
+    if (project && project.name) modelName = `${project.name}_${colName}`;
   }
   return modelName;
 };

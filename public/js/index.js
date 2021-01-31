@@ -16,6 +16,8 @@ require('datatables.net-bs4/css/dataTables.bootstrap4.css'); // Datatables Boots
 require('datatables.net-colreorder');
 require('datatables.net-colreorder-bs4');
 require('jquery-datatables-checkboxes');
+require('selectize/dist/js/selectize.js');
+require('selectize/dist/css/selectize.bootstrap3.css');
 
 // require('datatables.net-buttons');
 // require('datatables.net-buttons-bs4');

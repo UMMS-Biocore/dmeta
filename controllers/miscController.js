@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const GSheetReader = require('g-sheets-api');
 const AppError = require('./../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -9,6 +10,26 @@ exports.getChangeLog = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: JSON.stringify(doc)
+  });
+});
+
+exports.getRemoteData = catchAsync(async (req, res, next) => {
+  console.log(req.body);
+  console.log(req.body.url);
+  console.log(req.body.authorization);
+  let headers = {};
+  if (req.body.authorization) {
+    headers = {
+      headers: {
+        Authorization: req.body.authorization
+      }
+    };
+  }
+  if (!req.body.url) return next(new AppError(`URL not found`, 404));
+  const { data } = await axios.get(req.body.url, headers);
+  res.status(200).json({
+    status: 'success',
+    data: data
   });
 });
 

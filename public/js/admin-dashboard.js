@@ -24,6 +24,7 @@ $s.AdminCollectionFields = [
   'hidden',
   'default',
   'enum',
+  'ontology',
   'checkvalid',
   'min',
   'max',
@@ -180,6 +181,11 @@ const fieldsOfFieldsModel = {
     type: 'Mixed',
     default: false
   },
+  ontology: {
+    name: 'ontology',
+    label: 'Ontology',
+    type: 'Mixed'
+  },
   checkvalid: {
     name: 'checkvalid',
     label: 'CheckValid',
@@ -238,6 +244,7 @@ const fieldsOfFieldsModel = {
 };
 
 const ajaxCall = async (method, url) => {
+  console.log(method, url);
   try {
     const res = await axios({
       method,
@@ -380,12 +387,11 @@ const refreshDataTables = async (TableID, projectID) => {
       .draw();
   }
 };
+
 const showTableTabs = () => {
   $(document).on('show.coreui.tab', 'a.collection[data-toggle="tab"]', function(e) {
     const tableID = $(e.target).attr('tableID');
     const projectID = $(e.target).attr('projectID');
-    console.log(tableID);
-    console.log(projectID);
     refreshDataTables(tableID, projectID);
   });
   $(document).on('shown.coreui.tab', 'a.collection[data-toggle="tab"]', function(e) {
@@ -394,7 +400,6 @@ const showTableTabs = () => {
       .columns.adjust();
   });
 };
-
 const getErrorDiv = () => {
   return '<p style="background-color:#e211112b;" id="crudModalError"></p>';
 };
@@ -621,9 +626,7 @@ const bindEventHandlers = () => {
 const refreshCollectionNavbar = async projectId => {
   console.log('refreshCollectionNavbar');
   const projectTabID = 'projectTab_' + getCleanDivId(projectId);
-  console.log(projectTabID);
   const isNavbarExist = $(`#${projectTabID}`).html();
-  console.log('isNavbarExist', isNavbarExist);
   if (isNavbarExist) {
     await getAjaxData();
   }

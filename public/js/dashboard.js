@@ -11,12 +11,18 @@ import {
   prepareMultiUpdateModal,
   prepareClickToActivateModal
 } from './jsfuncs';
-import { getCollectionFieldData, getFieldsDiv, getParentCollection } from './crudData';
+import {
+  getCollectionFieldData,
+  getFieldsDiv,
+  getParentCollection,
+  prepOntologyDropdown
+} from './crudData';
 
 // GLOBAL SCOPE
 let $s = { data: {} };
 
 const ajaxCall = async (method, url) => {
+  console.log(method, url);
   try {
     const res = await axios({
       method,
@@ -80,6 +86,7 @@ const bindEventHandlers = () => {
 
     $('#crudModal').on('show.coreui.modal', function(e) {
       fillFormByName('#crudModal', 'input, select', selectedData[0]);
+      prepOntologyDropdown('#crudModal', selectedData[0]);
       if (rows_selected.length > 1) {
         prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
       } else {
@@ -155,6 +162,7 @@ const bindEventHandlers = () => {
     $('#crudModalBody').append(getErrorDiv());
     $('#crudModalBody').append(collectionFields);
     $('#crudModal').off();
+    prepOntologyDropdown('#crudModal', {});
     prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
 
     $('#crudModal').on('click', '#crudModalYes', async function(e) {
@@ -320,9 +328,10 @@ export const crudAjaxRequest = async (
 };
 
 const prepareDataForSingleColumn = async (collName, projectID) => {
+  let ret = [];
+  if (!collName) return ret;
   const { projectPart, projectName } = getProjectData(projectID);
   const data = await ajaxCall('GET', `/api/v1/${projectPart}data/${collName}`);
-  let ret = [];
   if (data) {
     const saveDataPath = `${projectName}_${collName}`;
     $s.data[saveDataPath] = data;
@@ -487,7 +496,7 @@ export const getProjectNavbar = async () => {
     const active = i === 0 ? 'active' : '';
     const headerLi = `
     <li class="nav-item">
-        <a class="nav-link ${active}" data-toggle="tab" href="#${projectTabID}" aria-expanded="true">${projectLabel}</a>
+        <a class="nav-link ${active} collection" data-toggle="tab" href="#${projectTabID}" aria-expanded="true">${projectLabel}</a>
     </li>`;
     header += headerLi;
     const colNavbar = await getCollectionNavbar(projectId);

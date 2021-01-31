@@ -30,8 +30,10 @@ export const getCollectionFieldData = async () => {
   $s.fields = fields;
 };
 
-const getDataDropdown = (id, el_class, el_name, data, def, required) => {
-  let dropdown = `<select ${required} class="form-control ${el_class}" id="${id}" name="${el_name}">`;
+const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID) => {
+  const idText = id ? `id="${id}"` : '';
+  const fieldIDText = fieldID ? `fieldID="${fieldID}"` : '';
+  let dropdown = `<select ${required} class="form-control ${el_class}" ${fieldIDText} ${idText} name="${el_name}">`;
   if (!required) dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
     const selected = def == i.name ? 'selected' : '';
@@ -70,7 +72,15 @@ const getRefFieldDropdown = async (ref, name, required, def) => {
     } else {
       refData = await ajaxCall('GET', `/api/v1/${ref}`);
     }
-    const collDropdown = getDataDropdown(`ref-${ref}`, 'ref-control', name, refData, def, required);
+    const collDropdown = getDataDropdown(
+      `ref-${ref}`,
+      'ref-control',
+      name,
+      refData,
+      def,
+      required,
+      ''
+    );
     return collDropdown;
   } catch {
     return '';
@@ -78,18 +88,20 @@ const getRefFieldDropdown = async (ref, name, required, def) => {
 };
 
 export const getFormElement = async field => {
-  console.log(field);
   let ret = '';
   const type = field.type;
   const required = field.required ? 'required' : '';
   const dbType = type ? `dbType="${type}"` : '';
   const def = field.default ? field.default : '';
+  const fieldID = field._id;
   if (type == 'String' || type == 'Number') {
     if (field.enum) {
       const options = field.enum.map(i => {
         return { _id: i, name: i };
       });
-      ret = getDataDropdown('', '', field.name, options, def, required);
+      ret = getDataDropdown('', '', field.name, options, def, required, fieldID);
+    } else if (field.ontology) {
+      ret = getDataDropdown('', 'ontology', field.name, [], def, required, fieldID);
     } else {
       ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required} value="${def}"></input>`;
     }
@@ -124,8 +136,130 @@ export const getParentCollection = collectionID => {
     if (parentColl[0] && parentColl[0].name) parentCollName = parentColl[0].name;
     parentCollLabel = parentColl[0] && parentColl[0].label ? parentColl[0].label : parentCollName;
   }
-
   return { parentCollLabel, parentCollName };
+};
+
+export const prepOntologyDropdown = async (formId, data) => {
+  const formValues = $(formId).find('select.ontology');
+  for (var k = 0; k < formValues.length; k++) {
+    const fieldID = $(formValues[k]).attr('fieldID');
+    const nameAttr = $(formValues[k]).attr('name');
+    const ontologyField = $s.fields.filter(field => field._id === fieldID);
+    const settings = ontologyField[0] && ontologyField[0].ontology ? ontologyField[0].ontology : '';
+    console.log('settings', settings);
+    if (!settings) continue;
+    let url;
+    let authorization = '';
+    let include = [];
+    let exclude = [];
+    let filter = '';
+    let create;
+    // --- NCBO bioportal Example ---
+    // { "url":"http://data.bioontology.org/search/?q=",
+    //  "filter":"&ontologies=EFO&suggest=true"
+    //  "authorization":"apikey token=39a74770-b709-4c1c-a69d-45d8e117e87a",
+    //  "include":["Test1-Seq","Test2-Seq"],
+    //  "exclude":["RNA-Seq"],
+    //  "field":"collection.prefLabel",
+    //  "create":true
+    // }
+    //
+    // ontologies: https://bioportal.bioontology.org/ontologies
+    // EFO:Experimental Factor Ontology
+    // BAO:BioAssay Ontology
+    // e.g. filter = '&ontologies=EFO&suggest=true';
+    // e.g. filter = '&roots_only=true&ontologies=BAO&suggest=true';
+
+    // --- GITHUB API Example ---
+    // { "url":"https://api.github.com/legacy/repos/search/", "field":"repositories.name" }
+
+    // e.g. for collection.prefLabel => valueField:prefLabel, treeField:collection
+    let valueField = '';
+    let treeField = '';
+    if (typeof settings === 'string') {
+      url = settings;
+    } else {
+      url = settings.url ? settings.url : '';
+      authorization = settings.authorization ? settings.authorization : '';
+      create = settings.create ? settings.create : false;
+      filter = settings.filter ? settings.filter : '';
+      exclude = settings.exclude ? settings.exclude : [];
+      include = settings.include ? settings.include : [];
+      if (settings.field) {
+        if (settings.field.match(/\./)) {
+          valueField = settings.field.substr(settings.field.lastIndexOf('.') + 1);
+          treeField = settings.field.substr(0, settings.field.lastIndexOf('.'));
+        } else {
+          valueField = settings.field;
+          treeField = '';
+        }
+      }
+    }
+    console.log('valueField', valueField);
+    console.log('treeField', treeField);
+    if (!url) continue;
+    const options = {
+      valueField: valueField,
+      labelField: valueField,
+      searchField: valueField,
+      preload: true,
+      create: create,
+      load: function(query, callback) {
+        if (!query.length) return callback();
+        try {
+          axios
+            .post('/api/v1/misc/remoteData', {
+              url: url + encodeURIComponent(query) + filter,
+              authorization: authorization
+            })
+            .then(res => {
+              console.log(res);
+              let prepedData = [];
+              let selData = [];
+              if (treeField && res.data.data[treeField]) {
+                selData = res.data.data[treeField];
+              } else {
+                selData = res.data.data;
+              }
+              for (var n = 0; n < selData.length; n++) {
+                if (selData[n][valueField] && !exclude.includes(selData[n][valueField])) {
+                  let obj = {};
+                  obj[valueField] = selData[n][valueField];
+                  prepedData.push(obj);
+                }
+              }
+              console.log(prepedData);
+              if (prepedData.length) {
+                callback(prepedData);
+              } else {
+                callback();
+              }
+            });
+        } catch (err) {
+          console.log(err);
+          callback();
+        }
+      },
+      onInitialize: function() {
+        var selectize = this;
+        // include extra options on start
+        if (include && include.length) {
+          for (var t = 0; t < include.length; t++) {
+            let opt = {};
+            opt[valueField] = include[t];
+            selectize.addOption([opt]);
+          }
+        }
+        if (data[nameAttr]) {
+          let opt = {};
+          opt[valueField] = data[nameAttr];
+          selectize.addOption([opt]);
+          selectize.setValue([data[nameAttr]]);
+        }
+      }
+    };
+    $(formValues[k]).selectize(options);
+  }
 };
 
 // get all form fields of selected data collection
