@@ -1,7 +1,7 @@
 /* eslint-disable */
 import axios from 'axios';
 import { getCleanDivId } from './jsfuncs';
-import { getInsertDataDiv } from './crudData';
+import { getInsertDataDiv } from './formModules/crudData';
 // GLOBAL SCOPE
 let $s = { data: {}, compare: {}, diff: {} };
 let $g = { data: {} };

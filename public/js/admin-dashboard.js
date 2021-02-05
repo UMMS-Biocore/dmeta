@@ -11,8 +11,9 @@ import {
   prepareClickToActivateModal
 } from './jsfuncs';
 import { getCrudButtons, crudAjaxRequest } from './dashboard';
-import { getFormElement, getFormRow } from './crudData';
-import { prepDataPerms } from './dataPerms';
+import { getFormElement, getFormRow } from './formModules/crudData';
+import { prepDataPerms } from './formModules/dataPerms';
+import { prepDataRestrictTo } from './formModules/dataRestrictTo';
 
 // GLOBAL SCOPE
 let $s = { data: {} };
@@ -51,6 +52,7 @@ $s.AdminAllCollectionFields = [
   'parentCollectionID',
   'projectID',
   'id',
+  'restrictTo',
   'perms',
   'owner',
   'creationDate',
@@ -62,6 +64,7 @@ $s.AdminAllProjectFields = [
   'label',
   'slug',
   'id',
+  'restrictTo',
   'perms',
   'owner',
   'creationDate',
@@ -85,6 +88,11 @@ const fieldsOfProjectModel = {
     label: 'Label',
     type: 'String',
     required: true
+  },
+  restrictTo: {
+    name: 'restrictTo',
+    label: 'RestrictTo',
+    type: 'Mixed'
   },
   perms: {
     name: 'perms',
@@ -136,6 +144,11 @@ const fieldsOfCollectionsModel = {
     label: 'Required',
     type: 'boolean',
     default: false
+  },
+  restrictTo: {
+    name: 'restrictTo',
+    label: 'RestrictTo',
+    type: 'Mixed'
   },
   perms: {
     name: 'perms',
@@ -307,8 +320,6 @@ const getCollectionTable = (collID, projectID) => {
     </thead>
     </table>
   </div>`;
-  console.log(ret);
-
   return ret;
 };
 
@@ -316,7 +327,6 @@ const getFieldsOfCollection = collectionID => {
   return $s.fields.filter(field => field.collectionID === collectionID);
 };
 const getCollectionsOfProject = projectID => {
-  console.log('projectID', projectID);
   return $s.collections.filter(field => field.projectID === projectID);
 };
 
@@ -467,6 +477,7 @@ const bindEventHandlers = () => {
     $('#crudModal').on('show.coreui.modal', async function(e) {
       fillFormByName('#crudModal', 'input, select', selectedData[0]);
       await prepDataPerms('#crudModal', selectedData[0]);
+      await prepDataRestrictTo('#crudModal', selectedData[0]);
       if (rows_selected.length > 1) {
         prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
       } else {
@@ -556,6 +567,7 @@ const bindEventHandlers = () => {
     $('#crudModalBody').append(collectionFields);
     $('#crudModal').off();
     await prepDataPerms('#crudModal', {});
+    await prepDataRestrictTo('#crudModal', {});
     prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
     $('#crudModal').on('click', '#crudModalYes', async function(e) {
       e.preventDefault();
@@ -647,7 +659,6 @@ const refreshCollectionNavbar = async (projectId, type) => {
   console.log('refreshCollectionNavbar');
   const projectTabID = 'projectTab_' + getCleanDivId(projectId);
   const isNavbarExist = $(`#${projectTabID}`).html();
-  console.log(projectId, projectTabID, isNavbarExist);
   if (isNavbarExist) {
     await getAjaxData();
   }

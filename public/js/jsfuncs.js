@@ -23,7 +23,8 @@ export const globalEventBinders = () => {
     const field = $(this).next();
     const isSelectized = field.hasClass('selectized');
     const isDataPerms = field.hasClass('data-perms');
-    if (isSelectized || isDataPerms) {
+    const isDataRestrictTo = field.hasClass('data-restrictTo');
+    if (isSelectized || isDataPerms || isDataRestrictTo) {
       field.css('display', 'none');
       field.next().css('display', 'block');
     } else {
@@ -41,11 +42,12 @@ export const globalEventBinders = () => {
       .next();
     const isSelectized = field.hasClass('selectized');
     const isDataPerms = field.hasClass('data-perms');
+    const isDataRestrictTo = field.hasClass('data-restrictTo');
     $(this)
       .siblings('.multi-value')
       .css('display', 'block');
     field.css('display', 'none');
-    if (isSelectized || isDataPerms) field.next().css('display', 'none');
+    if (isSelectized || isDataPerms || isDataRestrictTo) field.next().css('display', 'none');
   });
 };
 
@@ -85,6 +87,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
     var type = $(formValues[i]).attr('type');
     const isSelectized = $(formValues[i]).hasClass('selectized');
     const isDataPerms = $(formValues[i]).hasClass('data-perms');
+    const isDataRestrictTo = $(formValues[i]).hasClass('data-restrictTo');
     const isSet =
       $(formValues[i]).siblings('.multi-value').length &&
       $(formValues[i])
@@ -134,7 +137,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         stop = true;
       }
     }
-    if (isDataPerms) {
+    if (isDataPerms || isDataRestrictTo) {
       const table = $(formValues[i])
         .next()
         .find('table');
@@ -147,18 +150,18 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         const perm = rowData[k].perm;
         const type = rowData[k].type;
         const id = rowData[k].id;
-        if (perm && type && id) {
+        if (isDataPerms && perm && type && id) {
           if (!(perm in val)) val[perm] = {};
           if (!(type in val[perm])) val[perm][type] = [];
           if (!val[perm][type].includes(id)) val[perm][type].push(id);
+        } else if (isDataRestrictTo && type && id) {
+          if (!(type in val)) val[type] = [];
+          if (!val[type].includes(id)) val[type].push(id);
         }
       }
     }
 
-    console.log(name);
-    console.log(isSelectized);
-    console.log(isSet);
-    if ((isSelectized || isDataPerms) && visible && !isSet) {
+    if ((isSelectized || isDataPerms || isDataRestrictTo) && visible && !isSet) {
       if (visible == 'undefined') {
         val = 'undefined';
       } else {
@@ -169,13 +172,13 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
     if (
       !isDataPerms &&
       !isSelectized &&
+      !isDataRestrictTo &&
       visible &&
       ($(formValues[i]).css('display') == 'none' ||
         $(formValues[i])
           .closest('.row')
           .css('display') == 'none')
     ) {
-      console.log('passed', name);
       if (visible == 'undefined') {
         val = 'undefined';
       } else {
@@ -270,12 +273,13 @@ export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
   for (var k = 0; k < formValues.length; k++) {
     const isSelectized = $(formValues[k]).hasClass('selectized');
     const isDataPerms = $(formValues[k]).hasClass('data-perms');
+    const isDataRestrictTo = $(formValues[k]).hasClass('data-restrictTo');
 
     const nameAttr = $(formValues[k]).attr('name');
     if (nameAttr) {
       $(formValues[k]).before(`<div class="multi-value" > Multiple Values</div>`);
       $(formValues[k]).css('display', 'none');
-      if (isSelectized || isDataPerms) {
+      if (isSelectized || isDataPerms || isDataRestrictTo) {
         $(formValues[k])
           .next()
           .css('display', 'none');
@@ -299,11 +303,13 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
     const nameAttr = $(formValues[k]).attr('name');
     const isSelectized = $(formValues[k]).hasClass('selectized');
     const isDataPerms = $(formValues[k]).hasClass('data-perms');
+    const isDataRestrictTo = $(formValues[k]).hasClass('data-restrictTo');
+
     if (!isRequired && nameAttr) {
       // value not filled
       if (!(nameAttr in data) || data[nameAttr] === null) {
         $(formValues[k]).before(`<div class="multi-value" > Click to Set Field </div>`);
-        if (isSelectized || isDataPerms) {
+        if (isSelectized || isDataPerms || isDataRestrictTo) {
           $(formValues[k])
             .next()
             .after(`<div class="multi-restore" style="display:none;"> Unset Field</div>`);
@@ -322,7 +328,7 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
         $(formValues[k]).before(
           `<div class="multi-value" style="display:none;"> Click to Set Field </div>`
         );
-        if (isSelectized || isDataPerms) {
+        if (isSelectized || isDataPerms || isDataRestrictTo) {
           $(formValues[k])
             .next()
             .after(`<div class="multi-restore" > Unset Field</div>`);

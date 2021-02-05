@@ -11,8 +11,8 @@ import {
   prepareMultiUpdateModal,
   prepareClickToActivateModal
 } from './jsfuncs';
-import { getFieldsDiv, prepOntologyDropdown } from './crudData';
-import { prepDataPerms } from './dataPerms';
+import { getFieldsDiv, prepOntologyDropdown } from './formModules/crudData';
+import { prepDataPerms } from './formModules/dataPerms';
 
 // GLOBAL SCOPE
 let $s = { data: {} };

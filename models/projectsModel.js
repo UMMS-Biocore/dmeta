@@ -31,8 +31,7 @@ const projectsSchema = new mongoose.Schema(
       type: 'Mixed'
     },
     restrictTo: {
-      type: 'Mixed',
-      default: { role: ['admin'] }
+      type: 'Mixed'
     },
     owner: {
       type: mongoose.Schema.ObjectId,

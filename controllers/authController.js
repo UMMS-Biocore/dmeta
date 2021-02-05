@@ -99,6 +99,9 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
           // group: defines allowed group_ids for creating item in the collection
           // role: defines allowed roles for creating item in the collection
           // returns (Boolean) true when access is permitted
+
+          // inherit restrictTo permissions by updating req.body.perms
+          if (!req.body.perms) req.body.perms = { write: col.restrictTo };
           const user = col.restrictTo.user;
           const group = col.restrictTo.group;
           const role = col.restrictTo.role;
