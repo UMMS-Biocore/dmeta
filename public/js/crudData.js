@@ -3,9 +3,7 @@ import axios from 'axios';
 import { createFormObj, convertFormObj } from './jsfuncs';
 
 // GLOBAL SCOPE
-let $s = { data: {}, collections: {}, fields: {} };
-
-const project = 'vitiligo';
+let $s = { data: {}, collections: {}, fields: {}, projects: {} };
 
 const ajaxCall = async (method, url) => {
   try {
@@ -22,12 +20,14 @@ const ajaxCall = async (method, url) => {
 };
 
 export const getCollectionFieldData = async () => {
-  let [collections, fields] = await Promise.all([
+  let [collections, fields, projects] = await Promise.all([
     ajaxCall('GET', '/api/v1/collections'),
-    ajaxCall('GET', '/api/v1/fields')
+    ajaxCall('GET', '/api/v1/fields'),
+    ajaxCall('GET', '/api/v1/projects')
   ]);
   $s.collections = collections;
   $s.fields = fields;
+  $s.projects = projects;
 };
 
 const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID) => {
@@ -36,7 +36,7 @@ const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID) =>
   let dropdown = `<select ${required} class="form-control ${el_class}" ${fieldIDText} ${idText} name="${el_name}">`;
   if (!required) dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
-    const selected = def == i.name ? 'selected' : '';
+    const selected = def == i.id || def == i.name ? 'selected' : '';
     dropdown += `<option ${selected} value="${i._id}">${i.name}</option>`;
   });
   dropdown += `</select>`;
@@ -46,12 +46,14 @@ const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID) =>
 export const getFormRow = (element, label, settings) => {
   let required = '';
   let description = '';
+  let hide = '';
   if (settings && settings.required) {
     required = '<span style="color:red";>*</span>';
   }
   if (settings && settings.hidden) return '';
+  if (settings && settings.hide) hide = `style="display:none;"`;
   let ret = `
-    <div class="form-group row">
+    <div class="form-group row" ${hide}>
         <label class="col-md-3 col-form-label text-right">${label}${required}</label>
         <div class="col-md-9">
             ${element}
@@ -60,18 +62,45 @@ export const getFormRow = (element, label, settings) => {
   return ret;
 };
 
-const getRefFieldDropdown = async (ref, name, required, def) => {
+const getFieldsOfCollection = collectionID => {
+  return $s.fields.filter(field => field.collectionID === collectionID);
+};
+
+const getRefFieldDropdown = async (ref, name, required, def, projectData) => {
   try {
-    let refData;
-    var re = new RegExp(project + '_(.*)');
-    if (ref.match(re)) {
+    let refData = [];
+    let rawRefData = [];
+    var re = projectData.name ? new RegExp(projectData.name + '_(.*)') : '';
+    if (re && ref.match(re)) {
       const coll = ref.match(re)[1];
       console.log(coll);
-      const projectPart = project ? `projects/${project}/` : '';
-      refData = await ajaxCall('GET', `/api/v1/${projectPart}data/${coll}`);
+      refData = await ajaxCall('GET', `/api/v1/projects/${projectData.name}/data/${coll}`);
     } else {
-      refData = await ajaxCall('GET', `/api/v1/${ref}`);
+      rawRefData = await ajaxCall('GET', `/api/v1/${ref}`);
+      console.log(rawRefData);
+      for (var k = 0; k < rawRefData.length; k++) {
+        // take only one project for ref== 'projects'
+        if (
+          ref == 'projects' &&
+          projectData &&
+          projectData.id &&
+          rawRefData[k].id !== projectData.id
+        ) {
+          continue;
+          // filter data if it has projectID field.
+        } else if (
+          ref !== 'projects' &&
+          projectData &&
+          projectData.id &&
+          rawRefData[k].projectID &&
+          rawRefData[k].projectID !== projectData.id
+        ) {
+          continue;
+        }
+        refData.push(rawRefData[k]);
+      }
     }
+    console.log('refData', refData);
     const collDropdown = getDataDropdown(
       `ref-${ref}`,
       'ref-control',
@@ -82,12 +111,13 @@ const getRefFieldDropdown = async (ref, name, required, def) => {
       ''
     );
     return collDropdown;
-  } catch {
+  } catch (err) {
+    console.log(err);
     return '';
   }
 };
 
-export const getFormElement = async field => {
+export const getFormElement = async (field, projectData) => {
   let ret = '';
   const type = field.type;
   const required = field.required ? 'required' : '';
@@ -108,10 +138,12 @@ export const getFormElement = async field => {
   } else if (type == 'Date') {
     ret = `<input ${dbType} class="form-control" type="date" name="${field.name}" ${required}></input>`;
   } else if (type == 'Mixed' || type == 'Array') {
-    ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required} value="${def}"></input>`;
+    let className = '';
+    if (field.name == 'perms') className = 'data-perms';
+    ret = `<input ${dbType} class="form-control ${className}" type="text" name="${field.name}" ${required} value="${def}"></input>`;
   } else if (type == 'mongoose.Schema.ObjectId') {
     if (field.ref) {
-      ret = await getRefFieldDropdown(field.ref, field.name, required, def);
+      ret = await getRefFieldDropdown(field.ref, field.name, required, def, projectData);
     }
   } else if (type == 'boolean') {
     const checked = def == true ? 'checked' : '';
@@ -119,10 +151,6 @@ export const getFormElement = async field => {
   }
 
   return ret;
-};
-
-const getFieldsOfCollection = collectionID => {
-  return $s.fields.filter(field => field.collectionID === collectionID);
 };
 
 export const getParentCollection = collectionID => {
@@ -139,7 +167,7 @@ export const getParentCollection = collectionID => {
   return { parentCollLabel, parentCollName };
 };
 
-export const prepOntologyDropdown = async (formId, data) => {
+export const prepOntologyDropdown = (formId, data) => {
   const formValues = $(formId).find('select.ontology');
   for (var k = 0; k < formValues.length; k++) {
     const fieldID = $(formValues[k]).attr('fieldID');
@@ -263,37 +291,45 @@ export const prepOntologyDropdown = async (formId, data) => {
 };
 
 // get all form fields of selected data collection
-export const getFieldsDiv = async collectionID => {
+export const getFieldsDiv = async (collectionID, projectData) => {
   await getCollectionFieldData();
   let ret = '';
   // 1. if parent collection id is defined, insert as a new field
   const { parentCollLabel, parentCollName } = getParentCollection(collectionID);
   if (parentCollLabel && parentCollName) {
-    const ref = project ? `${project}_${parentCollName}` : parentCollName;
+    const ref =
+      projectData && projectData.name ? `${projectData.name}_${parentCollName}` : parentCollName;
     const parentField = {
       ref: ref,
       name: `${parentCollName}_id`,
       type: 'mongoose.Schema.ObjectId',
       required: true
     };
-    const element = await getFormElement(parentField);
+    const element = await getFormElement(parentField, projectData);
     ret += getFormRow(element, parentCollLabel, parentField);
   }
   // 2. get all fields of collection
   const fields = getFieldsOfCollection(collectionID);
   for (var k = 0; k < fields.length; k++) {
     const label = fields[k].label;
-    const element = await getFormElement(fields[k]);
+    const element = await getFormElement(fields[k], projectData);
     ret += getFormRow(element, label, fields[k]);
   }
+  // 3. Additional fields: e.g. perms
+  const label = 'Permissions';
+  const permsField = { name: 'perms', label: 'Permissions', type: 'Mixed' };
+  const element = await getFormElement(permsField, projectData);
+  ret += getFormRow(element, label, permsField);
   return ret;
 };
 
+// NEEDS TO UPDATE: run tab in import page
 const bindEventHandlers = () => {
   // update form fields based on selected data collection
   $(document).on('change', `select.collection-control`, async function(e) {
     const collectionID = $(this).val();
-    const fieldsDiv = await getFieldsDiv(collectionID);
+    const projectData = { name: 'vitiligo' }; // NEEDS UPDATE!!
+    const fieldsDiv = await getFieldsDiv(collectionID, projectData);
     $('#fieldsOfColl').empty();
     $('#fieldsOfColl').append(fieldsDiv);
     // clean log section
@@ -328,9 +364,9 @@ const bindEventHandlers = () => {
       .css('display', 'block');
     $('#insert-data-coll-body').empty();
     $('#insert-data-coll-body').append(body);
-
+    const projectName = 'vitiligo';
     if (stop === false && collectionName) {
-      const projectPart = project ? `projects/${project}/` : '';
+      const projectPart = projectName ? `projects/${projectName}/` : '';
       try {
         const res = await axios({
           method: 'POST',

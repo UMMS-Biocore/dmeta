@@ -11,12 +11,8 @@ import {
   prepareMultiUpdateModal,
   prepareClickToActivateModal
 } from './jsfuncs';
-import {
-  getCollectionFieldData,
-  getFieldsDiv,
-  getParentCollection,
-  prepOntologyDropdown
-} from './crudData';
+import { getFieldsDiv, prepOntologyDropdown } from './crudData';
+import { prepDataPerms } from './dataPerms';
 
 // GLOBAL SCOPE
 let $s = { data: {} };
@@ -46,6 +42,7 @@ const getTableHeaders = collID => {
       ret += `<th>${$s.fields[i].label}</th>`;
   }
   ret += `<th>ID</th>`;
+  ret += `<th>Permission</th>`;
   return ret;
 };
 
@@ -65,6 +62,13 @@ const getErrorDiv = () => {
   return '<p style="background-color:#e211112b;" id="crudModalError"></p>';
 };
 
+const getProjectDataObj = projectID => {
+  if (!projectID) return '';
+  const projectData = $s.projects.filter(field => field._id === projectID);
+  if (projectData && projectData[0]) return projectData[0];
+  return '';
+};
+
 const bindEventHandlers = () => {
   // ================= EDIT BUTTON =================
   $(document).on('click', `button.edit-data`, async function(e) {
@@ -72,7 +76,7 @@ const bindEventHandlers = () => {
     const collLabel = $(this).attr('collLabel');
     const collName = $(this).attr('collName');
     const projectID = $(this).attr('projectID');
-    const collectionFields = await getFieldsDiv(collID);
+    const collectionFields = await getFieldsDiv(collID, getProjectDataObj(projectID));
     $('#crudModalTitle').text(`Edit ${collLabel}`);
     $('#crudModalYes').text('Save');
     $('#crudModalBody').empty();
@@ -84,9 +88,10 @@ const bindEventHandlers = () => {
     const rows_selected = table.column(0).checkboxes.selected();
     const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
 
-    $('#crudModal').on('show.coreui.modal', function(e) {
+    $('#crudModal').on('show.coreui.modal', async function(e) {
       fillFormByName('#crudModal', 'input, select', selectedData[0]);
       prepOntologyDropdown('#crudModal', selectedData[0]);
+      await prepDataPerms('#crudModal', selectedData[0]);
       if (rows_selected.length > 1) {
         prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
       } else {
@@ -155,7 +160,7 @@ const bindEventHandlers = () => {
     const collLabel = $(this).attr('collLabel');
     const collName = $(this).attr('collName');
     const projectID = $(this).attr('projectID');
-    const collectionFields = await getFieldsDiv(collID);
+    const collectionFields = await getFieldsDiv(collID, getProjectDataObj(projectID));
     $('#crudModalTitle').text(`Insert ${collLabel}`);
     $('#crudModalYes').text('Save');
     $('#crudModalBody').empty();
@@ -163,6 +168,7 @@ const bindEventHandlers = () => {
     $('#crudModalBody').append(collectionFields);
     $('#crudModal').off();
     prepOntologyDropdown('#crudModal', {});
+    await prepDataPerms('#crudModal', {});
     prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
 
     $('#crudModal').on('click', '#crudModalYes', async function(e) {
@@ -366,6 +372,7 @@ const refreshDataTables = async (TableID, collName, projectID) => {
       columns.push({ data: collFields[i].name });
     }
     columns.push({ data: '_id' });
+    columns.push({ data: 'perms' });
     var dataTableObj = {
       columns: columns,
       columnDefs: [

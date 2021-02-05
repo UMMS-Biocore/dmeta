@@ -1,9 +1,13 @@
 const factory = require('./handlerFactory');
 const Group = require('../models/groupModel');
 const UserGroup = require('../models/userGroupModel');
+const AppError = require('./../utils/appError');
+const APIFeatures = require('./../utils/apiFeatures');
 
 exports.setUserFilter = (req, res, next) => {
-  if (req.params.id) res.locals.Filter = { user_id: req.params.id };
+  const userId = res.locals.user.id;
+  if (!userId) return next(new AppError(`Please login.`, 404));
+  if (userId) res.locals.Filter = { user_id: userId };
   next();
 };
 exports.setGroupFilter = (req, res, next) => {
@@ -29,8 +33,51 @@ exports.createGroup = factory.createOne(Group);
 exports.updateGroup = factory.updateOne(Group);
 exports.deleteGroup = factory.deleteOne(Group);
 
-exports.getUserGroups = factory.getAll(UserGroup);
 exports.getGroupUsers = factory.getAll(UserGroup);
 exports.createUserGroup = factory.createOne(UserGroup);
 exports.updateUserGroup = factory.updateOne(UserGroup);
 exports.deleteUserGroup = factory.deleteOne(UserGroup);
+
+// exports.getUserGroups = factory.getAll(UserGroup);
+exports.getUserGroups = async (req, res, next) => {
+  const Model = UserGroup;
+  let filter = {};
+  if (res.locals.Filter) filter = res.locals.Filter;
+  const query = Model.find(filter);
+  if (res.locals.Perms) {
+    const permFilter = await res.locals.Perms('read');
+    query.find(permFilter);
+  }
+  const features = new APIFeatures(query, req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const jsonFilter = new APIFeatures(features.query, req.body).filter();
+
+  let doc = await jsonFilter.query.lean();
+  if (!doc || (Array.isArray(doc) && doc.length === 0)) {
+    return next(new AppError(`No user group found!`, 404));
+  }
+  // populate group_name information
+  for (let k = 0; k < doc.length; k++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const groupData = await Group.find({ _id: doc[k].group_id }).exec();
+      if (groupData && groupData[0] && groupData[0].name) {
+        doc[k]['group_name'] = groupData[0].name;
+      }
+    } catch {
+      console.log(`group name not found`);
+    }
+  }
+  res.status(200).json({
+    status: 'success',
+    reqeustedAt: req.requestTime,
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+};

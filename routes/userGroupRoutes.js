@@ -10,7 +10,7 @@ router.use(authController.setDefPerms);
 
 router.route('/').post(groupController.createUserGroup);
 router
-  .route('/:id')
+  .route('/')
   .get(groupController.setUserFilter, groupController.getUserGroups) //all groups belong to user
   .patch(groupController.updateUserGroup)
   .delete(groupController.deleteUserGroup);

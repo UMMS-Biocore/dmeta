@@ -1,5 +1,19 @@
 /* eslint-disable */
+import axios from 'axios';
 const JSON5 = require('json5');
+
+export const ajaxCall = async (method, url) => {
+  try {
+    const res = await axios({
+      method,
+      url
+    });
+    return res.data.data.data;
+  } catch (err) {
+    console.log(err);
+    return '';
+  }
+};
 
 export const globalEventBinders = () => {
   /* modal show form values on multiple values */
@@ -8,7 +22,8 @@ export const globalEventBinders = () => {
     $(this).css('display', 'none');
     const field = $(this).next();
     const isSelectized = field.hasClass('selectized');
-    if (isSelectized) {
+    const isDataPerms = field.hasClass('data-perms');
+    if (isSelectized || isDataPerms) {
       field.css('display', 'none');
       field.next().css('display', 'block');
     } else {
@@ -25,11 +40,12 @@ export const globalEventBinders = () => {
       .siblings('.multi-value')
       .next();
     const isSelectized = field.hasClass('selectized');
+    const isDataPerms = field.hasClass('data-perms');
     $(this)
       .siblings('.multi-value')
       .css('display', 'block');
     field.css('display', 'none');
-    if (isSelectized) field.next().css('display', 'none');
+    if (isSelectized || isDataPerms) field.next().css('display', 'none');
   });
 };
 
@@ -68,6 +84,13 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
     var name = $(formValues[i]).attr('name');
     var type = $(formValues[i]).attr('type');
     const isSelectized = $(formValues[i]).hasClass('selectized');
+    const isDataPerms = $(formValues[i]).hasClass('data-perms');
+    const isSet =
+      $(formValues[i]).siblings('.multi-value').length &&
+      $(formValues[i])
+        .siblings('.multi-value')
+        .css('display') === 'none';
+
     var val = '';
     if (type == 'radio') {
       for (var k = 0; k < formValues.length; k++) {
@@ -111,7 +134,48 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         stop = true;
       }
     }
-    if (!isSelectized && visible && $(formValues[i]).css('display') == 'none') {
+    if (isDataPerms) {
+      const table = $(formValues[i])
+        .next()
+        .find('table');
+      const rowData = table
+        .DataTable()
+        .rows()
+        .data();
+      val = {};
+      for (var k = 0; k < rowData.length; k++) {
+        const perm = rowData[k].perm;
+        const type = rowData[k].type;
+        const id = rowData[k].id;
+        if (perm && type && id) {
+          if (!(perm in val)) val[perm] = {};
+          if (!(type in val[perm])) val[perm][type] = [];
+          if (!val[perm][type].includes(id)) val[perm][type].push(id);
+        }
+      }
+    }
+
+    console.log(name);
+    console.log(isSelectized);
+    console.log(isSet);
+    if ((isSelectized || isDataPerms) && visible && !isSet) {
+      if (visible == 'undefined') {
+        val = 'undefined';
+      } else {
+        continue;
+      }
+    }
+
+    if (
+      !isDataPerms &&
+      !isSelectized &&
+      visible &&
+      ($(formValues[i]).css('display') == 'none' ||
+        $(formValues[i])
+          .closest('.row')
+          .css('display') == 'none')
+    ) {
+      console.log('passed', name);
       if (visible == 'undefined') {
         val = 'undefined';
       } else {
@@ -205,11 +269,13 @@ export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
   );
   for (var k = 0; k < formValues.length; k++) {
     const isSelectized = $(formValues[k]).hasClass('selectized');
+    const isDataPerms = $(formValues[k]).hasClass('data-perms');
+
     const nameAttr = $(formValues[k]).attr('name');
     if (nameAttr) {
       $(formValues[k]).before(`<div class="multi-value" > Multiple Values</div>`);
       $(formValues[k]).css('display', 'none');
-      if (isSelectized) {
+      if (isSelectized || isDataPerms) {
         $(formValues[k])
           .next()
           .css('display', 'none');
@@ -232,11 +298,12 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
     const isRequired = $(formValues[k]).attr('required');
     const nameAttr = $(formValues[k]).attr('name');
     const isSelectized = $(formValues[k]).hasClass('selectized');
+    const isDataPerms = $(formValues[k]).hasClass('data-perms');
     if (!isRequired && nameAttr) {
       // value not filled
       if (!(nameAttr in data) || data[nameAttr] === null) {
         $(formValues[k]).before(`<div class="multi-value" > Click to Set Field </div>`);
-        if (isSelectized) {
+        if (isSelectized || isDataPerms) {
           $(formValues[k])
             .next()
             .after(`<div class="multi-restore" style="display:none;"> Unset Field</div>`);
@@ -255,7 +322,7 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
         $(formValues[k]).before(
           `<div class="multi-value" style="display:none;"> Click to Set Field </div>`
         );
-        if (isSelectized) {
+        if (isSelectized || isDataPerms) {
           $(formValues[k])
             .next()
             .after(`<div class="multi-restore" > Unset Field</div>`);
@@ -294,4 +361,16 @@ export const fillFormByName = (formId, find, data) => {
       }
     }
   }
+};
+
+export const showInfoInDiv = (textID, text) => {
+  //true if modal is open
+  const oldText = $(textID).html();
+  let newText = '';
+  if (oldText.length) {
+    newText = oldText + '<br/>' + text;
+  } else {
+    newText = text;
+  }
+  $(textID).html(newText);
 };

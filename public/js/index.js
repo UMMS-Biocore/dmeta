@@ -9,7 +9,6 @@ import { globalEventBinders } from './jsfuncs.js';
 
 import 'jquery';
 import '@coreui/coreui';
-
 require('datatables.net'); // Datatables Core
 require('datatables.net-bs4/js/dataTables.bootstrap4.js'); // Datatables Bootstrap 4
 require('datatables.net-bs4/css/dataTables.bootstrap4.css'); // Datatables Bootstrap 4
