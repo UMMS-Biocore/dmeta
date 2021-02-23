@@ -1,13 +1,16 @@
+/* eslint-disable no-loop-func */
 /* eslint-disable no-eval */
 // eslint-disable-next-line no-unused-vars
 const validator = require('validator');
 const mongoose = require('mongoose');
+const axios = require('axios');
 const uniqueValidator = require('mongoose-unique-validator');
 const Project = require('../models/projectsModel');
 const Collection = require('../models/collectionsModel');
 const collectionsController = require('../controllers/collectionsController');
 const projectsController = require('../controllers/projectsController');
 const Field = require('../models/fieldsModel');
+const { autoIncrementModelDID, CounterModel } = require('../models/counterModel');
 const AppError = require('./appError');
 
 const modelObj = {};
@@ -148,6 +151,7 @@ const createSchema = async (fields, col) => {
   schema.lastUpdatedUser = { type: mongoose.Schema.ObjectId, ref: 'User' };
   schema.creationDate = { type: Date, default: Date.now() };
   schema.lastUpdateDate = { type: Date, default: Date.now() };
+  schema.DID = { type: Number, unique: true, min: 1, immutable: true };
   return schema;
 };
 
@@ -179,29 +183,216 @@ exports.getModelNameByColId = async collectionId => {
   return modelName;
 };
 
+const getOldModelName = async oldColl => {
+  let oldProject = null;
+  const oldProjectID = oldColl.projectID;
+  if (oldProjectID) oldProject = await projectsController.getProjectById(oldProjectID);
+  const oldModelName = exports.getModelName(oldColl, [oldProject]);
+  return oldModelName;
+};
+
+// update _id field of counter collection
+const renameCounterCollection = async (oldModelName, newModelName) => {
+  try {
+    if (oldModelName && newModelName && oldModelName != newModelName) {
+      let oldCounter = await CounterModel.findById(oldModelName).lean();
+      let newCounter = await CounterModel.findById(newModelName).lean();
+      console.log('oldCounter', oldCounter);
+      console.log('newCounter', newCounter);
+      if (oldCounter && oldCounter._id && !newCounter) {
+        const seq = oldCounter.seq;
+        console.log('insertCounter', { _id: newModelName, seq: seq });
+        const doc = await CounterModel.create({ _id: newModelName, seq: seq });
+        if (doc) console.log('Counter model updated:', doc);
+        const delDoc = await CounterModel.findByIdAndDelete(oldModelName);
+        if (delDoc) console.log('Old Counter deleted:', delDoc);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const renameMongoCollection = async (oldModelName, newModelName) => {
+  if (oldModelName && newModelName && oldModelName != newModelName) {
+    mongoose.Promise = Promise;
+    let db = mongoose.connection.db;
+    try {
+      const allcollections = (await db.listCollections().toArray()).map(
+        collection => collection.name
+      );
+      console.log('allcollections', allcollections);
+      if (allcollections.includes(oldModelName) && !allcollections.includes(newModelName)) {
+        db.collection(oldModelName).rename(newModelName);
+        console.log(`collection renamed in mongoDB. ${oldModelName} -> ${newModelName}`);
+      } else {
+        console.log('collection rename error in mongoDB database.');
+      }
+      return 'done';
+    } catch (err) {
+      console.log(err);
+      return 'fail';
+    }
+  }
+};
+
+const getDeletedModelName = modelName => {
+  let date_ob = new Date();
+  // adjust 0 before single digit date
+  let date = `0${date_ob.getDate()}`.slice(-2);
+  let month = `0${date_ob.getMonth() + 1}`.slice(-2);
+  let year = date_ob.getFullYear();
+  let hours = date_ob.getHours();
+  let minutes = date_ob.getMinutes();
+  let seconds = date_ob.getSeconds();
+  const timeStamp = `${year}${month}${date}${hours}${minutes}${seconds}`;
+  return `deleted_${timeStamp}_${modelName}`;
+};
+
+const buildSchema = (schema, modelName, fields) => {
+  // { minimize: false } => allows saving empty objects
+  const Schema = new mongoose.Schema(schema, { minimize: false, strict: 'throw' });
+  Schema.plugin(uniqueValidator);
+  // eslint-disable-next-line no-loop-func
+  Schema.pre('save', function(next) {
+    if (!this.isNew) {
+      next();
+      return;
+    }
+    autoIncrementModelDID(modelName, this, next);
+  });
+  // check if schema has ontology field -> before save check if item is valid
+  const ontologyFields = fields.filter(f => f.ontology);
+  if (ontologyFields.length > 0) {
+    Schema.pre(/^(save|findOneAndUpdate)/, async function(next) {
+      let query = this;
+      if (this.getUpdate) {
+        const update = this.getUpdate();
+        query = update['$set'];
+      }
+      for (let i = 0; i < ontologyFields.length; i++) {
+        const name = ontologyFields[i].name;
+        const value = query[name];
+        if (value) {
+          const settings = ontologyFields[i].ontology;
+          if (!settings) return next();
+          let url;
+          let authorization = '';
+          let filter = '';
+          let create;
+          let include = [];
+          let exclude = [];
+          // e.g. for collection.prefLabel => valueField:prefLabel, treeField:collection
+          let valueField = '';
+          let treeField = '';
+          url = settings.url ? settings.url : '';
+          authorization = settings.authorization ? settings.authorization : '';
+          create = settings.create ? settings.create : false;
+          filter = settings.filter ? settings.filter : '';
+          exclude = settings.exclude ? settings.exclude : [];
+          include = settings.include ? settings.include : [];
+          if (settings.field) {
+            if (settings.field.match(/\./)) {
+              valueField = settings.field.substr(settings.field.lastIndexOf('.') + 1);
+              treeField = settings.field.substr(0, settings.field.lastIndexOf('.'));
+            } else {
+              valueField = settings.field;
+              treeField = '';
+            }
+          }
+          if (exclude.includes(value)) {
+            return next(new Error(`Validation failed. ${value} excluded from possible options.`));
+          }
+          if (include.includes(value)) return next();
+          if (create) {
+            // update includeList !!!!
+            const ontologyFieldId = ontologyFields[i]._id;
+            include.push(value);
+            let ontologySett = ontologyFields[i].ontology;
+            ontologySett.include = include;
+            // eslint-disable-next-line no-await-in-loop
+            await Field.findByIdAndUpdate(
+              ontologyFieldId,
+              {
+                ontology: ontologySett
+              },
+              {},
+              function(err) {
+                if (err) console.log(err);
+              }
+            );
+            return next();
+          }
+          // check value with API
+          console.log('**** stooop');
+          if (!url) return next();
+          if (!value.length) return next();
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            const res = await axios.post(`${process.env.BASE_URL}/api/v1/misc/remoteData`, {
+              url: url + encodeURIComponent(value) + filter,
+              authorization: authorization
+            });
+            let selData = [];
+            if (treeField && res.data.data[treeField]) {
+              selData = res.data.data[treeField];
+            } else {
+              selData = res.data.data;
+            }
+            for (let k = 0; k < selData.length; k++) {
+              if (selData[k][valueField] == value) {
+                return next();
+              }
+            }
+            return next(new Error(`Value (${value}) could not found in ontology server (${url}).`));
+          } catch (err) {
+            console.log(err);
+            return next(new Error(`API call to (${url}) failed.`));
+          }
+        }
+      }
+    });
+  }
+  return Schema;
+};
+
 // Update mongoose models when collection or field changes
-exports.updateModel = async collectionId => {
+// oldColl -> old collection before query
+exports.updateModel = async (collectionId, oldColl) => {
   try {
     console.log('* Update Collection Model ID:', collectionId);
     const col = await Collection.findById(collectionId);
-    if (!col) return 'done'; // collection deleted or deactivated
+    if (!col) {
+      // collection deleted or deactivated
+      if (oldColl) {
+        const oldModelName = await getOldModelName(oldColl);
+        const newModelName = getDeletedModelName(oldModelName);
+        await renameMongoCollection(oldModelName, newModelName);
+        await renameCounterCollection(oldModelName, newModelName);
+      }
+      return 'done';
+    }
     const fields = await Field.find({ collectionID: collectionId });
     const projectID = col.projectID;
     let project = null;
     if (projectID) project = await projectsController.getProjectById(projectID);
-    console.log('project', project);
     const modelName = exports.getModelName(col, [project]);
 
+    // rename MongoDB database
+    if (oldColl) {
+      const oldModelName = await getOldModelName(oldColl);
+      await renameMongoCollection(oldModelName, modelName);
+      await renameCounterCollection(oldModelName, modelName);
+    }
     // check if model created before => delete model to prevent OverwriteModelError
     if (col && mongoose.connection.models[modelName]) {
       delete mongoose.connection.models[modelName];
     }
     const schema = await createSchema(fields, col);
-    // { minimize: false } => allows saving empty objects
-    const Schema = new mongoose.Schema(schema, { minimize: false, strict: 'throw' });
-    Schema.plugin(uniqueValidator);
+    const Schema = buildSchema(schema, modelName, fields);
     const Model = mongoose.model(modelName, Schema, modelName);
     modelObj[modelName] = Model;
+
     console.log(modelName, schema);
     return 'done';
   } catch (err) {
@@ -229,9 +420,7 @@ exports.buildModels = async () => {
       const schema = await createSchema(fields, allCollections[n]);
       console.log(modelName, schema);
       if (!modelObj[modelName]) {
-        // { minimize: false } => allows saving empty objects
-        const Schema = new mongoose.Schema(schema, { minimize: false, strict: 'throw' });
-        Schema.plugin(uniqueValidator);
+        const Schema = buildSchema(schema, modelName, fields);
         const Model = mongoose.model(modelName, Schema, modelName);
         modelObj[modelName] = Model;
       }

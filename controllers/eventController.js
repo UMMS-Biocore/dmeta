@@ -89,6 +89,7 @@ const prepareDbLib = async (docAr, req, res) => {
 
 exports.replaceAllDataIds = async (warn, docAr, req, res, next) => {
   const dbLib = await prepareDbLib(docAr, req, res);
+
   if (!dbLib) return null;
   let fileIdObj = {};
   for (let i = 0; i < docAr.length; i += 1) {

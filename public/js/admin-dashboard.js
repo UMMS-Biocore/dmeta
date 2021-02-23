@@ -345,12 +345,23 @@ const prepareDataForSingleColumn = async (tableID, projectID) => {
   }
   const dataCopy = data.slice();
   const ret = dataCopy.map(el => {
+    let newObj = {};
     $.each(el, function(k) {
-      if ((typeof el[k] === 'object' && el[k] !== null) || Array.isArray(el[k])) {
-        el[k] = JSON.stringify(el[k]);
+      // custom view for all_collections tab -> parentCollectionID field (show name of the collection)
+      if (tableID == `all_collections_${projectID}` && `parentCollectionID` === k && el[k]) {
+        const parentColl = $s.collections.filter(col => col._id == el[k]);
+        if (parentColl[0].name) {
+          newObj[k] = parentColl[0].name;
+        } else {
+          newObj[k] = el[k];
+        }
+      } else if ((typeof el[k] === 'object' && el[k] !== null) || Array.isArray(el[k])) {
+        newObj[k] = JSON.stringify(el[k]);
+      } else {
+        newObj[k] = el[k];
       }
     });
-    return el;
+    return newObj;
   });
   return ret;
 };
@@ -693,7 +704,13 @@ const refreshCollectionNavbar = async (projectId, type) => {
       </li>`;
       header += headerLi;
       const colNavbar = getCollectionTable(collectionId, projectId);
-      const crudButtons = getCrudButtons(collectionId, collectionLabel, collectionName, projectId);
+      const crudButtons = getCrudButtons(
+        collectionId,
+        collectionLabel,
+        collectionName,
+        projectId,
+        false
+      );
       const contentDiv = `
       <div role="tabpanel" class="tab-pane ${active}" searchtab="true" id="${collTabID}">
           ${crudButtons}
@@ -764,7 +781,7 @@ export const refreshAdminProjectNavbar = async () => {
     let crudButtons = '';
     if (tabs[i].id == 'all_projects') {
       colNavbar = getCollectionTable(projectId, projectId);
-      crudButtons = getCrudButtons(projectId, projectLabel, projectName, projectId);
+      crudButtons = getCrudButtons(projectId, projectLabel, projectName, projectId, false);
     } else {
       colNavbar = await refreshCollectionNavbar(projectId, 'return');
     }

@@ -6,20 +6,21 @@ const router = express.Router();
 
 router.use(authController.isLoggedIn);
 router.use(authController.requireLogin);
-router.use(authController.setDefPerms);
 
 // get all users belonging to a group
-router.route('/:id/user').get(groupController.setGroupFilter, groupController.getGroupUsers);
+router
+  .route('/:id/user')
+  .get(authController.setDefPerms, groupController.setGroupFilter, groupController.getGroupUsers);
 
 router
   .route('/')
   .get(groupController.getAllGroups)
-  .post(groupController.createGroup);
+  .post(authController.setDefPerms, groupController.createGroup);
 
 router
   .route('/:id')
   .get(groupController.getGroup)
-  .patch(groupController.updateGroup)
-  .delete(groupController.deleteGroup);
+  .patch(authController.setDefPerms, groupController.updateGroup)
+  .delete(authController.setDefPerms, groupController.deleteGroup);
 
 module.exports = router;

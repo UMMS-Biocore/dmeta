@@ -81,7 +81,7 @@ const prepPermsData = async (groups, permsObj) => {
               console.log(err);
             }
           }
-        } else if (type == 'group') {
+        } else if (type == 'group' && groups) {
           const groupData = groups.filter(f => f._id == id);
           if (groupData && groupData[0] && groupData[0].name) {
             permsData.push({

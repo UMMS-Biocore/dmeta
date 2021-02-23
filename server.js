@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const buildModels = require('./utils/buildModels');
+const updateDmeta = require('./utils/updateDmeta');
 
 dotenv.config({ path: './config.env' });
 
@@ -32,8 +34,12 @@ mongoose
     console.log('DB Connections Successful');
   });
 
-// Build Collections
-require('./utils/buildModels');
+(async () => {
+  // Build Collections
+  await buildModels.buildModels();
+  // Check updates
+  updateDmeta.update();
+})();
 
 process.on('uncaughtException', err => {
   console.log(err);

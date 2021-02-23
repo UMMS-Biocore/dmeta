@@ -2,6 +2,7 @@ const { get, post } = require('request');
 const { promisify } = require('util');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
+// const _ = require('lodash');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -9,6 +10,7 @@ const accessTokens = require('./../controllers/accessTokenController');
 const refreshTokens = require('./../controllers/refreshTokenController');
 const groupController = require('./../controllers/groupController');
 const collectionsController = require('./../controllers/collectionsController');
+const projectsController = require('./../controllers/projectsController');
 const { modelObj } = require('./../utils/buildModels');
 
 const [getAsync, postAsync] = [get, post].map(promisify);
@@ -49,6 +51,8 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
     // type options: "read", "write", "create"
     if (type === 'create') {
       if (!res.locals.user) return next(new AppError(`Please login to create document.`, 404));
+      const userId = res.locals.user.id;
+      const userRole = res.locals.user.role;
       // Creation Control of Data Models:(req.params.collectionName should be exist)
       // a) if parentCollectionID is set -> check parentCollectionID of collection
       // use parentCollectionID to learn parentDocument (`refId` in `parentColName`)
@@ -61,10 +65,13 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
       //    group:["d3ds..","46h5.."],
       //    role:["admin, "project-admin"]
       //  }
+
+      // ** For insertion of Data routes:
       if (req.params.collectionName) {
-        const userId = res.locals.user.id;
-        const userRole = res.locals.user.role;
-        const col = await collectionsController.getCollectionByName(req.params.collectionName);
+        const col = await collectionsController.getCollectionByName(
+          req.params.collectionName,
+          req.params.projectName
+        );
         // if parentCollectionID is found, check parentCollectionID for permissions
         if (col.parentCollectionID) {
           // fieldName: reference field name in the collection
@@ -100,12 +107,11 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
           // role: defines allowed roles for creating item in the collection
           // returns (Boolean) true when access is permitted
 
-          // inherit restrictTo permissions by updating req.body.perms
-          if (!req.body.perms) req.body.perms = { write: col.restrictTo };
+          // inherit collection permissions by updating req.body.perms
+          if (!req.body.perms && col.perms) req.body.perms = col.perms;
           const user = col.restrictTo.user;
           const group = col.restrictTo.group;
           const role = col.restrictTo.role;
-          if (['admin'].includes(userRole)) return true;
           if (user && user.constructor === Array && user.includes(userId)) return true;
           if (role && role.constructor === Array && role.includes(userRole)) return true;
           if (group && group.constructor === Array) {
@@ -114,9 +120,34 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
             const userGroups = await groupController.getUserGroupIds(userId);
             if (group.some(r => userGroups.includes(r))) return true;
           }
+          // if parentCollectionID and restrictTo not found, then allow insertion
+        } else if (!col.parentCollectionID && !col.restrictTo) {
+          // inherit collection permissions by updating req.body.perms
+          if (!req.body.perms && col.perms) req.body.perms = col.perms;
+          return true;
         }
+        if (['admin'].includes(userRole)) return true;
+        if (col.owner == userId) return true;
+        // ** For creating collections
+      } else if (req.body.projectID) {
+        const project = await projectsController.getProjectById(req.body.projectID);
+        if (!project) {
+          return next(new AppError(`projectID (${req.body.projectID}) is not valid.`, 403));
+        }
+        if (!req.body.perms && project.perms) req.body.perms = project.perms;
+        // field routes restrictedTo admin/project-admin
+        return true;
+        // ** For creating Fields
+      } else if (req.body.collectionID) {
+        const col = await collectionsController.getCollectionById(req.body.collectionID);
+        if (!col) {
+          return next(new AppError(`collectionID (${req.body.collectionID}) is not valid.`, 403));
+        }
+        if (!req.body.perms && col.perms) req.body.perms = col.perms;
+        // field routes restrictedTo admin/project-admin
+        return true;
       } else {
-        // collection and field routes restrictedTo admin
+        // collection and field routes restrictedTo admin/project-admin
         // everybody can create his group/usergroup \
         // everybody can signup and login
         return true;

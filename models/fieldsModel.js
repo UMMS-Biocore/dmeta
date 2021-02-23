@@ -32,7 +32,25 @@ const fieldsSchema = new mongoose.Schema(
     },
     label: {
       type: String,
-      required: [true, 'A field must have a label']
+      required: [true, 'A field must have a label'],
+      validate: {
+        validator: async function(v) {
+          let collectionID;
+          if (this.collectionID) {
+            // for createNewField
+            collectionID = this.collectionID;
+          } else if (this.r && this.r.collectionID) {
+            // for findByIdAndUpdate
+            collectionID = this.r.collectionID;
+          }
+          const docs = await mongoose.model('Fields').find({
+            label: v,
+            collectionID: collectionID
+          });
+          return docs.length === 0;
+        },
+        message: 'Field label already exists. It has to be unique in the collection!'
+      }
     },
     type: {
       type: String,

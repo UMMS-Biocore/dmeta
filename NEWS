@@ -1,3 +1,19 @@
+23.02.2021 Version 0.0.29
+Excel Import feature added into dashboard.
+Default permission setting algorithm upgraded. New collections will inherit project's permissions. Similarly, fields will inherit collection's permissions. For data routes, if parentCollectionID is not defined, then inherit collection's permissions.
+Ontology field validation added into database.
+When ontology field setting is set to create new values, it will save all the values entered by the users into include array. This will be used to initial filling of the dropdown. 
+Ontology field doesn't require url parameter. It could be used like enum field with custom value support.
+Permission of fields checked for data routes before sending data to user. ExcludeFields controller added which limits the access of certain field data.
+Label of fields are required to be unique in the collection.
+
+08.02.2021 Version 0.0.28
+Table view added into dashboard.
+Dmeta update module added. 
+Dolphin-ID (DID) column added to all data collections.
+Spaces replaced when project/collection name edited.
+Collection rename/deletion updates mongodb database and counter model.
+
 05.02.2021 Version 0.0.27
 RestrictTo field support added.
 Everyone option added to permission dropdown.

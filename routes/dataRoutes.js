@@ -8,12 +8,19 @@ const router = express.Router({ mergeParams: true });
 router.use(authController.setDefPerms);
 router.use(authController.isLoggedIn);
 
-router.route('/:collectionName/summary').get(dataController.getDataSummary);
-router.route('/:collectionName/detailed').get(dataController.getDataDetailed);
+router
+  .route('/:collectionName/summary')
+  .get(dataController.setExcludeFields, dataController.getDataSummary);
+router
+  .route('/:collectionName/detailed')
+  .get(dataController.setExcludeFields, dataController.getDataDetailed);
+router
+  .route('/:collectionName/populated')
+  .get(dataController.setExcludeFields, dataController.getDataPopulated);
 
 router
   .route('/:collectionName')
-  .get(dataController.setModel, dataController.getAllData)
+  .get(dataController.setExcludeFields, dataController.setModel, dataController.getAllData)
   .post(
     authController.requireLogin,
     dataController.setModel,
@@ -23,9 +30,10 @@ router
 
 router
   .route('/:collectionName/:id')
-  .get(dataController.setModel, dataController.getData)
+  .get(dataController.setExcludeFields, dataController.setModel, dataController.getData)
   .patch(
     authController.requireLogin,
+    dataController.setExcludeFields,
     dataController.setModel,
     eventController.setEvent,
     dataController.updateData

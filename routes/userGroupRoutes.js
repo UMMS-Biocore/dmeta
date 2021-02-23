@@ -8,10 +8,12 @@ router.use(authController.isLoggedIn);
 router.use(authController.requireLogin);
 router.use(authController.setDefPerms);
 
-router.route('/').post(groupController.createUserGroup);
 router
   .route('/')
-  .get(groupController.setUserFilter, groupController.getUserGroups) //all groups belong to user
+  .post(groupController.createUserGroup)
+  .get(groupController.setUserFilter, groupController.getUserGroups); //all groups belong to user
+router
+  .route('/:id')
   .patch(groupController.updateUserGroup)
   .delete(groupController.deleteUserGroup);
 

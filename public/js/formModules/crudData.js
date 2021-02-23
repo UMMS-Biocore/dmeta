@@ -103,7 +103,7 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData) => {
     console.log('refData', refData);
     const collDropdown = getDataDropdown(
       `ref-${ref}`,
-      'ref-control',
+      'ref-control select-text-opt',
       name,
       refData,
       def,
@@ -168,6 +168,15 @@ export const getParentCollection = collectionID => {
   return { parentCollLabel, parentCollName };
 };
 
+export const prepReferenceDropdown = (formId, data) => {
+  const formValues = $(formId).find('select.ref-control');
+  for (var k = 0; k < formValues.length; k++) {
+    const fieldID = $(formValues[k]).attr('fieldID');
+    const nameAttr = $(formValues[k]).attr('name');
+    console.log('fieldID', fieldID);
+    console.log('nameAttr', nameAttr);
+  }
+};
 export const prepOntologyDropdown = (formId, data) => {
   const formValues = $(formId).find('select.ontology');
   for (var k = 0; k < formValues.length; k++) {
@@ -187,11 +196,19 @@ export const prepOntologyDropdown = (formId, data) => {
     // { "url":"http://data.bioontology.org/search/?q=",
     //  "filter":"&ontologies=EFO&suggest=true"
     //  "authorization":"apikey token=39a74770-b709-4c1c-a69d-45d8e117e87a",
-    //  "include":["Test1-Seq","Test2-Seq"],
-    //  "exclude":["RNA-Seq"],
+    //  "include":["extra-keyword1","extra-keyword2"],
+    //  "exclude":["keyword-to-exclude"],
     //  "field":"collection.prefLabel",
     //  "create":true
     // }
+    // url-> url for selected APIs
+    // filter (optional)-> filtration parameters for results
+    // authorization (optional) -> if API requires token to access, you can set it here.
+    // include(optional)-> extra keywords to include in results
+    // exclude(optional)-> some keywords to exclude in results
+    // field-> location of the selected field in returned json data
+    // create(optional)-> allow addition of new keywords by the user. By default, it is false.
+
     //
     // ontologies: https://bioportal.bioontology.org/ontologies
     // EFO:Experimental Factor Ontology
@@ -205,88 +222,106 @@ export const prepOntologyDropdown = (formId, data) => {
     // e.g. for collection.prefLabel => valueField:prefLabel, treeField:collection
     let valueField = '';
     let treeField = '';
-    if (typeof settings === 'string') {
-      url = settings;
-    } else {
-      url = settings.url ? settings.url : '';
-      authorization = settings.authorization ? settings.authorization : '';
-      create = settings.create ? settings.create : false;
-      filter = settings.filter ? settings.filter : '';
-      exclude = settings.exclude ? settings.exclude : [];
-      include = settings.include ? settings.include : [];
-      if (settings.field) {
-        if (settings.field.match(/\./)) {
-          valueField = settings.field.substr(settings.field.lastIndexOf('.') + 1);
-          treeField = settings.field.substr(0, settings.field.lastIndexOf('.'));
-        } else {
-          valueField = settings.field;
-          treeField = '';
-        }
+    url = settings.url ? settings.url : '';
+    authorization = settings.authorization ? settings.authorization : '';
+    create = settings.create ? settings.create : false;
+    filter = settings.filter ? settings.filter : '';
+    exclude = settings.exclude ? settings.exclude : [];
+    include = settings.include ? settings.include : [];
+    if (settings.field) {
+      if (settings.field.match(/\./)) {
+        valueField = settings.field.substr(settings.field.lastIndexOf('.') + 1);
+        treeField = settings.field.substr(0, settings.field.lastIndexOf('.'));
+      } else {
+        valueField = settings.field;
+        treeField = '';
       }
     }
     console.log('valueField', valueField);
     console.log('treeField', treeField);
-    if (!url) continue;
-    const options = {
-      valueField: valueField,
-      labelField: valueField,
-      searchField: valueField,
-      preload: true,
-      create: create,
-      load: function(query, callback) {
-        if (!query.length) return callback();
-        try {
-          axios
-            .post('/api/v1/misc/remoteData', {
-              url: url + encodeURIComponent(query) + filter,
-              authorization: authorization
-            })
-            .then(res => {
-              console.log(res);
-              let prepedData = [];
-              let selData = [];
-              if (treeField && res.data.data[treeField]) {
-                selData = res.data.data[treeField];
-              } else {
-                selData = res.data.data;
-              }
-              for (var n = 0; n < selData.length; n++) {
-                if (selData[n][valueField] && !exclude.includes(selData[n][valueField])) {
-                  let obj = {};
-                  obj[valueField] = selData[n][valueField];
-                  prepedData.push(obj);
-                }
-              }
-              console.log(prepedData);
-              if (prepedData.length) {
-                callback(prepedData);
-              } else {
-                callback();
-              }
-            });
-        } catch (err) {
-          console.log(err);
-          callback();
-        }
-      },
-      onInitialize: function() {
-        var selectize = this;
-        // include extra options on start
-        if (include && include.length) {
-          for (var t = 0; t < include.length; t++) {
-            let opt = {};
-            opt[valueField] = include[t];
+    let options;
+    if (!url) {
+      options = {
+        create: create,
+        onInitialize: function() {
+          var selectize = this;
+          // include extra options on start
+          if (include && include.length) {
+            for (var t = 0; t < include.length; t++) {
+              let opt = { value: include[t], text: include[t] };
+              selectize.addOption([opt]);
+            }
+          }
+          if (data[nameAttr]) {
+            let opt = { value: data[nameAttr], text: data[nameAttr] };
             selectize.addOption([opt]);
+            selectize.setValue([data[nameAttr]]);
           }
         }
-        if (data[nameAttr]) {
-          let opt = {};
-          opt[valueField] = data[nameAttr];
-          selectize.addOption([opt]);
-          selectize.setValue([data[nameAttr]]);
+      };
+    } else {
+      options = {
+        valueField: valueField,
+        labelField: valueField,
+        searchField: valueField,
+        preload: true,
+        create: create,
+        load: function(query, callback) {
+          if (!query.length) return callback();
+          try {
+            axios
+              .post('/api/v1/misc/remoteData', {
+                url: url + encodeURIComponent(query) + filter,
+                authorization: authorization
+              })
+              .then(res => {
+                console.log(res);
+                let prepedData = [];
+                let selData = [];
+                if (treeField && res.data.data[treeField]) {
+                  selData = res.data.data[treeField];
+                } else {
+                  selData = res.data.data;
+                }
+                for (var n = 0; n < selData.length; n++) {
+                  if (selData[n][valueField] && !exclude.includes(selData[n][valueField])) {
+                    let obj = {};
+                    obj[valueField] = selData[n][valueField];
+                    prepedData.push(obj);
+                  }
+                }
+                console.log(prepedData);
+                if (prepedData.length) {
+                  callback(prepedData);
+                } else {
+                  callback();
+                }
+              });
+          } catch (err) {
+            console.log(err);
+            callback();
+          }
+        },
+        onInitialize: function() {
+          var selectize = this;
+          // include extra options on start
+          if (include && include.length) {
+            for (var t = 0; t < include.length; t++) {
+              let opt = {};
+              opt[valueField] = include[t];
+              selectize.addOption([opt]);
+            }
+          }
+          if (data[nameAttr]) {
+            let opt = {};
+            opt[valueField] = data[nameAttr];
+            selectize.addOption([opt]);
+            selectize.setValue([data[nameAttr]]);
+          }
         }
-      }
-    };
+      };
+    }
+
     $(formValues[k]).selectize(options);
   }
 };

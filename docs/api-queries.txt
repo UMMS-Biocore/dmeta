@@ -1,3 +1,12 @@
+POST {{URL}}/api/v1/collections
+{
+    "name": "exp_series",
+    "label": "Experiment Series",
+    "restrictTo": {"role":["admin"]},
+    "projectID": $projectId
+}
+
+----------------------------------------------------
 # add new field to sample collecion: 
 
 POST {{URL}}/api/v1/fields

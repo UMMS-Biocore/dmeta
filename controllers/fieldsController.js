@@ -28,7 +28,7 @@ exports.setAfter = async (req, res, next) => {
       if (field.collectionID) collectionID = field.collectionID;
     }
     if (collectionID) {
-      res.locals.After = () => buildModels.updateModel(collectionID);
+      res.locals.After = () => buildModels.updateModel(collectionID, null);
       return next();
     }
     return next(new AppError(`CollectionID or FieldID is not defined!`, 404));
@@ -37,6 +37,9 @@ exports.setAfter = async (req, res, next) => {
   }
 };
 
+exports.getFieldsByCollectionId = async collectionID => {
+  return await Fields.find({ collectionID: collectionID }).lean();
+};
 exports.getAllFields = factory.getAll(Fields);
 exports.getField = factory.getOne(Fields);
 exports.createField = factory.createOne(Fields);

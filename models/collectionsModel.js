@@ -130,12 +130,16 @@ collectionsSchema.pre(/^find/, function(next) {
 
 collectionsSchema.pre('save', function(next) {
   this.name = this.name.replace(/\s+/g, '_').toLowerCase();
-  this.slug = slugify(this.name, { lower: true });
+  if (!this.slug) this.slug = slugify(this.name, { lower: true });
   next();
 });
 
 collectionsSchema.pre(/^findOneAnd/, async function(next) {
   this.r = await this.findOne();
+  const update = this.getUpdate();
+  if (update && update['$set'] && update['$set'].name) {
+    update['$set'].name = update['$set'].name.replace(/\s+/g, '_').toLowerCase();
+  }
   next();
 });
 

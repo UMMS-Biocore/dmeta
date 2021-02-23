@@ -347,6 +347,9 @@ export const fillFormByName = (formId, find, data) => {
     const nameAttr = $(formValues[k]).attr('name');
     const radioCheck = $(formValues[k]).is(':radio');
     const checkboxCheck = $(formValues[k]).is(':checkbox');
+    // if select-text-opt class is found, select dropdown options based on text of the options
+    const isSelectTextOpt = $(formValues[k]).hasClass('select-text-opt');
+
     if (data[nameAttr]) {
       if (radioCheck) {
         if (data[nameAttr] == $(formValues[k]).val()) {
@@ -362,7 +365,17 @@ export const fillFormByName = (formId, find, data) => {
         if (data[nameAttr] === 'on') {
           $(formValues[k]).attr('checked', true);
         } else {
-          $(formValues[k]).val(data[nameAttr]);
+          if (isSelectTextOpt) {
+            const item = $(formValues[k])
+              .find('option')
+              .filter(function() {
+                return $(this).html() == data[nameAttr];
+              })
+              .val();
+            if (item) $(formValues[k]).val(item);
+          } else {
+            $(formValues[k]).val(data[nameAttr]);
+          }
         }
       }
     }

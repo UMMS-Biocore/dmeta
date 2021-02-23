@@ -27,12 +27,14 @@ router
   .patch(
     authController.requireLogin,
     authController.restrictTo('admin'),
+    collectionsController.setBefore,
     collectionsController.setAfter,
     collectionsController.updateCollection
   )
   .delete(
     authController.requireLogin,
     authController.restrictTo('admin'),
+    collectionsController.setBefore,
     collectionsController.setAfter,
     collectionsController.deleteCollection
   );

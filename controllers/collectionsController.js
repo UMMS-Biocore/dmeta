@@ -1,10 +1,19 @@
+const projectsController = require('../controllers/projectsController');
 const Collection = require('../models/collectionsModel');
 const factory = require('./handlerFactory');
 const AppError = require('./../utils/appError');
 const buildModels = require('./../utils/buildModels');
 
-exports.getCollectionByName = async name => {
-  return await Collection.findOne({ name }).lean();
+// projectName or projectId is required.
+exports.getCollectionByName = async (collectionName, projectName, projectId) => {
+  let query = { name: collectionName };
+  if (projectId) {
+    query.projectID = projectId;
+  } else if (projectName) {
+    const project = await projectsController.getProjectByName(projectName);
+    if (project && project._id) query.projectID = project._id;
+  }
+  return await Collection.findOne(query).lean();
 };
 exports.getCollectionById = async id => {
   return await Collection.findById(id).lean();
@@ -42,12 +51,14 @@ exports.getParentRefField = async parentCollectionID => {
 // set commands after query is completed
 exports.setAfter = async (req, res, next) => {
   // for createCollection
-  if (req.body.name) {
+  if (!req.params.id && req.body.name) {
     res.locals.After = async function() {
       try {
-        req.body.name = req.body.name.replace(/\s+/g, '_').toLowerCase();
-        const col = await exports.getCollectionByName(req.body.name);
-        buildModels.updateModel(col._id);
+        let projectID = '';
+        if (req.body.projectID) projectID = req.body.projectID;
+        const colName = req.body.name.replace(/\s+/g, '_').toLowerCase();
+        const col = await exports.getCollectionByName(colName, '', projectID);
+        buildModels.updateModel(col._id, null);
       } catch {
         return next(new AppError(`Collection Model couldn't be updated.`, 404));
       }
@@ -57,11 +68,25 @@ exports.setAfter = async (req, res, next) => {
   // for updateCollection and deleteCollection
   if (req.params.id) {
     res.locals.After = function() {
-      buildModels.updateModel(req.params.id);
+      const beforeQuery = res.locals.BeforeQuery;
+      buildModels.updateModel(req.params.id, beforeQuery);
     };
     return next();
   }
   return next(new AppError(`Collection couldn't created!`, 404));
+};
+
+// set commands before update/delete query is completed
+exports.setBefore = async (req, res, next) => {
+  // for updateCollection and deleteCollection
+  if (req.params.id) {
+    res.locals.Before = async function() {
+      const col = await exports.getCollectionById(req.params.id);
+      res.locals.BeforeQuery = col;
+    };
+    return next();
+  }
+  return next(new AppError(`Collection id not found!`, 404));
 };
 
 exports.getAllCollections = factory.getAll(Collection);

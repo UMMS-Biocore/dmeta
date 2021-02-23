@@ -63,6 +63,10 @@ projectsSchema.pre('save', function(next) {
 
 projectsSchema.pre(/^findOneAnd/, async function(next) {
   this.r = await this.findOne();
+  const update = this.getUpdate();
+  if (update && update['$set'] && update['$set'].name) {
+    update['$set'].name = update['$set'].name.replace(/\s+/g, '_').toLowerCase();
+  }
   next();
 });
 

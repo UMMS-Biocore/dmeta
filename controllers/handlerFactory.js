@@ -27,6 +27,7 @@ exports.deleteOne = Model =>
         return next(new AppError(`No document found with ${req.params.id}!`, 404));
       }
     }
+    if (res.locals.Before) res.locals.Before();
     const delDoc = await Model.findByIdAndDelete(req.params.id);
     if (!delDoc || (Array.isArray(delDoc) && delDoc.length === 0)) {
       return next(new AppError(`No document found with ${req.params.id}!`, 404));
@@ -46,10 +47,18 @@ exports.updateOne = Model =>
   catchAsync(async (req, res, next) => {
     if (res.locals.Model) Model = res.locals.Model;
     req.body.lastUpdatedUser = req.user.id;
+
+    let excludeFields = '';
+    let select = '';
+    if (res.locals.ExcludeFields) excludeFields = res.locals.ExcludeFields;
+    const excludeFieldsArr = excludeFields.split(' ').map(v => v.slice(1));
+    const defaultExcludedFields = ['owner', 'creationDate', 'lastUpdateDate', 'lastUpdatedUser'];
+    const allExcludeArr = excludeFieldsArr.concat(defaultExcludedFields);
     // don't allow to change internal parameters such as owner, creationDate etc.
-    ['owner', 'creationDate', 'lastUpdateDate', 'lastUpdatedUser'].forEach(function(key) {
-      delete req.body[key];
+    allExcludeArr.forEach(function(key) {
+      if (key) delete req.body[key];
     });
+    if (excludeFields) select = excludeFields;
 
     // find undefined fields to remove from document
     // prepare: { $set: setObj, $unset: unsetObj }
@@ -70,9 +79,10 @@ exports.updateOne = Model =>
       query.find(permFilter);
       const doc = await query;
       if (!doc || (Array.isArray(doc) && doc.length === 0)) {
-        return next(new AppError(`No document found with ${req.params.id}!`, 404));
+        return next(new AppError(`No permission to update document id:${req.params.id}!`, 404));
       }
     }
+    if (res.locals.Before) res.locals.Before();
 
     const doc = await Model.findByIdAndUpdate(
       req.params.id,
@@ -80,7 +90,8 @@ exports.updateOne = Model =>
       {
         new: true,
         runValidators: true,
-        context: 'query' //  lets you set `this` as a query object in model validators
+        context: 'query', //lets you set `this` as a query object in model validators
+        select: select // exclude list of fields that are not allowed to read
       }
     );
     if (!doc) {
@@ -134,8 +145,12 @@ exports.createOne = Model =>
 
 exports.getOne = (Model, popOptions) =>
   catchAsync(async (req, res, next) => {
+    let excludeFields;
+    if (res.locals.ExcludeFields) excludeFields = res.locals.ExcludeFields;
+
     if (res.locals.Model) Model = res.locals.Model;
     let query = Model.findById(req.params.id);
+    if (excludeFields) query.select(excludeFields);
     if (res.locals.Perms) {
       const permFilter = await res.locals.Perms('read');
       query.find(permFilter);
@@ -159,8 +174,12 @@ exports.getAll = Model =>
   catchAsync(async (req, res, next) => {
     if (res.locals.Model) Model = res.locals.Model;
     let filter = {};
+    let excludeFields;
     if (res.locals.Filter) filter = res.locals.Filter;
+    if (res.locals.ExcludeFields) excludeFields = res.locals.ExcludeFields;
+
     const query = Model.find(filter);
+    if (excludeFields) query.select(excludeFields);
     if (res.locals.Perms) {
       const permFilter = await res.locals.Perms('read');
       query.find(permFilter);

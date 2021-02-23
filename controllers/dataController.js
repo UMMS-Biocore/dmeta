@@ -1,5 +1,9 @@
 const _ = require('lodash');
+const mongoose = require('mongoose');
 const factory = require('./handlerFactory');
+const collectionsController = require('./collectionsController');
+const fieldsController = require('./fieldsController');
+const Fields = require('./../models/fieldsModel');
 const { modelObj } = require('./../utils/buildModels');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -22,6 +26,32 @@ exports.setModel = (req, res, next) => {
   return next(new AppError(`collectionName is not defined!`, 404));
 };
 
+// set fields of collection that are not available for user (has no read permissions)
+// {{URL}}/api/v1/projects/:projectName/data/:collectionName/:id
+exports.setExcludeFields = async (req, res, next) => {
+  const col = await collectionsController.getCollectionByName(
+    req.params.collectionName,
+    req.params.projectName
+  );
+  if (!col || !col._id) return next();
+  const allFields = await Fields.find({ collectionID: col._id }).exec();
+  const query = Fields.find({ collectionID: col._id });
+  if (res.locals.Perms) {
+    const permFilter = await res.locals.Perms('read');
+    query.find(permFilter);
+  } else {
+    console.log('*** res.locals.Perms has not been set for setSelectFields.');
+  }
+  const validFields = await query.exec();
+  const allFieldNames = allFields.map(f => f.name);
+  const validFieldNames = validFields.map(f => f.name);
+  let exclude = allFieldNames.filter(x => !validFieldNames.includes(x));
+  exclude = exclude.map(i => `-${i}`);
+  console.log('exclude', exclude);
+  res.locals.ExcludeFields = exclude.join(' ');
+  next();
+};
+
 exports.getAllData = factory.getAll();
 exports.getData = factory.getOne();
 exports.createData = factory.createOne();
@@ -42,7 +72,8 @@ exports.getDataSummarySchema = (collectionName, projectName, type) => {
   //    populate: 'experiments_id experiments_id.projects_id experiments_id.test_id'
   //   }
   // IMPORTANT NOTE: `_id` field is required for schemas (for events->insertRun function)
-  let schemas = { summary: {}, detailed: {} };
+  // IMPORTANT NOTE: schemas.detailed.run expects populated server_id
+  let schemas = { summary: {}, detailed: {}, populated: {} };
   schemas.summary.file = {
     collection: `${projectName}_file`,
     select: `_id 
@@ -174,7 +205,7 @@ exports.getDataSummarySchema = (collectionName, projectName, type) => {
   return null;
 };
 
-const parseSummarySchema = (collectionName, projectName, type) => {
+const parseSummarySchema = async (collectionName, projectName, type) => {
   // e.g. const schema = {
   //    collection: 'sample',
   //    select:'dir experiments_id.exp experiments_id.projects_id.name experiments_id.test_id.name',
@@ -190,7 +221,24 @@ const parseSummarySchema = (collectionName, projectName, type) => {
   if (!schema) {
     let modelName = collectionName;
     if (projectName) modelName = `${projectName}_${collectionName}`;
-    return { targetCollection: modelName, popObj: '', select: '-__v', rename: null };
+    let col = await collectionsController.getCollectionByName(collectionName, projectName);
+    let popObj = '';
+    if (col.parentCollectionID) {
+      const { fieldName, parentModelName } = await collectionsController.getParentRefField(
+        col.parentCollectionID
+      );
+      if (fieldName && mongoose.connection.models[parentModelName]) popObj = fieldName;
+    }
+    const fields = await fieldsController.getFieldsByCollectionId(col._id);
+    let refFields = [];
+    for (let i = 0; i < fields.length; i++) {
+      if (fields[i].ref && mongoose.connection.models[fields[i].ref]) {
+        refFields.push(fields[i].name);
+      }
+    }
+    refFields.push(popObj);
+    popObj = refFields.join(' ');
+    return { targetCollection: modelName, popObj: popObj, select: '-__v', rename: null };
   }
   const targetCollection = schema.collection;
   let select = schema.select;
@@ -249,7 +297,7 @@ const parseSummarySchema = (collectionName, projectName, type) => {
 
 exports.getDataSummaryDoc = async (type, req, res, next) => {
   try {
-    const { targetCollection, popObj, select, rename } = parseSummarySchema(
+    const { targetCollection, popObj, select, rename } = await parseSummarySchema(
       req.params.collectionName,
       req.params.projectName,
       type
@@ -301,6 +349,22 @@ exports.getDataDetailed = catchAsync(async (req, res, next) => {
     let [docIds] = await replaceAllDataIds(false, doc, req, res, next);
     if (docIds) doc = docIds;
   }
+  res.status(200).json({
+    status: 'success',
+    duration: duration,
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+});
+
+exports.getDataPopulated = catchAsync(async (req, res, next) => {
+  const start = Date.now();
+  const type = 'populated';
+  let doc = await exports.getDataSummaryDoc(type, req, res, next);
+  const duration = Date.now() - start;
+  if (doc === null) return next(new AppError(`No collection found!`, 404));
   res.status(200).json({
     status: 'success',
     duration: duration,
