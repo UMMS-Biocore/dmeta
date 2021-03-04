@@ -1,7 +1,7 @@
 const express = require('express');
 const dataController = require('../controllers/dataController');
 const authController = require('../controllers/authController');
-const eventController = require('../controllers/eventController');
+const eventLogController = require('../controllers/eventLogController');
 
 const router = express.Router({ mergeParams: true });
 
@@ -24,7 +24,7 @@ router
   .post(
     authController.requireLogin,
     dataController.setModel,
-    eventController.setEvent,
+    eventLogController.setEventLog,
     dataController.createData
   );
 
@@ -35,13 +35,13 @@ router
     authController.requireLogin,
     dataController.setExcludeFields,
     dataController.setModel,
-    eventController.setEvent,
+    eventLogController.setEventLog,
     dataController.updateData
   )
   .delete(
     authController.requireLogin,
     dataController.setModel,
-    eventController.setEvent,
+    eventLogController.setEventLog,
     dataController.deleteData
   );
 

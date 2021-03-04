@@ -30,10 +30,11 @@ export const getCollectionFieldData = async () => {
   $s.projects = projects;
 };
 
-const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID) => {
+const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID, attr) => {
   const idText = id ? `id="${id}"` : '';
+  const attrText = attr ? attr : '';
   const fieldIDText = fieldID ? `fieldID="${fieldID}"` : '';
-  let dropdown = `<select ${required} class="form-control ${el_class}" ${fieldIDText} ${idText} name="${el_name}">`;
+  let dropdown = `<select ${required} ${attrText} class="form-control ${el_class}" ${fieldIDText} ${idText} name="${el_name}">`;
   if (!required) dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
     const selected = def == i.id || def == i.name ? 'selected' : '';
@@ -102,13 +103,14 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData) => {
     }
     console.log('refData', refData);
     const collDropdown = getDataDropdown(
-      `ref-${ref}`,
-      'ref-control select-text-opt',
+      '',
+      'ref-control select-text-opt data-reference',
       name,
       refData,
       def,
       required,
-      ''
+      '',
+      `ref="${ref}"`
     );
     return collDropdown;
   } catch (err) {
@@ -129,9 +131,9 @@ export const getFormElement = async (field, projectData) => {
       const options = field.enum.map(i => {
         return { _id: i, name: i };
       });
-      ret = getDataDropdown('', '', field.name, options, def, required, fieldID);
+      ret = getDataDropdown('', '', field.name, options, def, required, fieldID, '');
     } else if (field.ontology) {
-      ret = getDataDropdown('', 'ontology', field.name, [], def, required, fieldID);
+      ret = getDataDropdown('', 'ontology', field.name, [], def, required, fieldID, '');
     } else {
       ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required} value="${def}"></input>`;
     }
@@ -173,16 +175,14 @@ export const prepReferenceDropdown = (formId, data) => {
   for (var k = 0; k < formValues.length; k++) {
     const fieldID = $(formValues[k]).attr('fieldID');
     const nameAttr = $(formValues[k]).attr('name');
-    console.log('fieldID', fieldID);
-    console.log('nameAttr', nameAttr);
   }
 };
-export const prepOntologyDropdown = (formId, data) => {
+export const prepOntologyDropdown = (formId, data, $scope) => {
   const formValues = $(formId).find('select.ontology');
   for (var k = 0; k < formValues.length; k++) {
     const fieldID = $(formValues[k]).attr('fieldID');
     const nameAttr = $(formValues[k]).attr('name');
-    const ontologyField = $s.fields.filter(field => field._id === fieldID);
+    const ontologyField = $scope.fields.filter(field => field._id === fieldID);
     const settings = ontologyField[0] && ontologyField[0].ontology ? ontologyField[0].ontology : '';
     console.log('settings', settings);
     if (!settings) continue;
@@ -322,7 +322,25 @@ export const prepOntologyDropdown = (formId, data) => {
       };
     }
 
-    $(formValues[k]).selectize(options);
+    // selectize already initialized then add option to select
+    if ($(formValues[k])[0].selectize) {
+      if (!url) {
+        if (data[nameAttr]) {
+          let opt = { value: data[nameAttr], text: data[nameAttr] };
+          $(formValues[k])[0].selectize.addOption([opt]);
+          $(formValues[k])[0].selectize.setValue([data[nameAttr]]);
+        }
+      } else {
+        if (data[nameAttr]) {
+          let opt = {};
+          opt[valueField] = data[nameAttr];
+          $(formValues[k])[0].selectize.addOption([opt]);
+          $(formValues[k])[0].selectize.setValue([data[nameAttr]]);
+        }
+      }
+    } else {
+      $(formValues[k]).selectize(options);
+    }
   }
 };
 
@@ -436,6 +454,7 @@ export const getInsertDataDiv = async () => {
     'collection-control',
     'collection',
     $s.collections,
+    '',
     '',
     ''
   );

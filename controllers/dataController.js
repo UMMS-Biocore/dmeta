@@ -8,7 +8,7 @@ const { modelObj } = require('./../utils/buildModels');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
-const { replaceAllDataIds } = require('./eventController');
+const { replaceAllDataIds } = require('./eventLogController');
 
 //if collectionName is set, then save that Model as a res.locals.Model
 exports.setModel = (req, res, next) => {

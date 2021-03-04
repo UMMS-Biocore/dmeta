@@ -223,11 +223,24 @@ export const getUpdatedFields = (beforeUpdate, formObj) => {
   return formObj;
 };
 
+export const hideFormError = formValues => {
+  for (var i = 0; i < formValues.length; i++) {
+    $(formValues[i]).removeClass('is-invalid');
+    if ($(formValues[i]).next('div.invalid-feedback').length > 0) {
+      $(formValues[i])
+        .next('div.invalid-feedback')
+        .remove();
+    }
+  }
+};
+
 export const showFormError = (formValues, errorFields, warn) => {
+  let showSuccess = false;
   if (errorFields) {
     for (var i = 0; i < formValues.length; i++) {
       var name = $(formValues[i]).attr('name');
       if (name in errorFields) {
+        showSuccess = true;
         $(formValues[i]).addClass('is-invalid');
         if (errorFields[name]['message'] && warn) {
           const errorText = errorFields[name]['message'];
@@ -243,6 +256,7 @@ export const showFormError = (formValues, errorFields, warn) => {
       }
     }
   }
+  return showSuccess;
 };
 
 export const showInfoModal = text => {
@@ -297,7 +311,9 @@ export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
 
 export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
   const formValues = $(formId).find(find);
-  $(formBodyId).prepend('<p> Please click to boxes below to set fields.</p>');
+  if (formBodyId) {
+    $(formBodyId).prepend('<p> Please click to boxes below to set fields.</p>');
+  }
   for (var k = 0; k < formValues.length; k++) {
     const isRequired = $(formValues[k]).attr('required');
     const nameAttr = $(formValues[k]).attr('name');
@@ -392,4 +408,17 @@ export const showInfoInDiv = (textID, text) => {
     newText = text;
   }
   $(textID).html(newText);
+};
+
+//e.g. const groupByYear = groupArrayOfObj("year"); groupByyear(albums);
+// returns function that groups based on selected key.
+export const groupArrayOfObj = key => {
+  return function group(array) {
+    return array.reduce((acc, obj) => {
+      const property = obj[key];
+      acc[property] = acc[property] || [];
+      acc[property].push(obj);
+      return acc;
+    }, {});
+  };
 };

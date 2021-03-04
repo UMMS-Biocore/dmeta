@@ -1,3 +1,11 @@
+02.03.2021 Version 0.0.30
+Event route renamed as eventlogs.
+Event route upgraded to support event forms.
+All events tab added to Admin page.
+Event groups added which supports insert/update/multiple checkboxes.
+Event forms upgraded to sync reference dropdowns and hide the ones that are already exist in the form. 
+
+
 23.02.2021 Version 0.0.29
 Excel Import feature added into dashboard.
 Default permission setting algorithm upgraded. New collections will inherit project's permissions. Similarly, fields will inherit collection's permissions. For data routes, if parentCollectionID is not defined, then inherit collection's permissions.

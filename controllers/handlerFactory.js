@@ -33,7 +33,7 @@ exports.deleteOne = Model =>
       return next(new AppError(`No document found with ${req.params.id}!`, 404));
     }
     if (res.locals.After) res.locals.After();
-    if (res.locals.Event) res.locals.Event('delete', Model.collection.collectionName, doc);
+    if (res.locals.EventLog) res.locals.EventLog('delete', Model.collection.collectionName, doc);
 
     res.status(200).json({
       status: 'success',
@@ -98,7 +98,7 @@ exports.updateOne = Model =>
       return next(new AppError(`No document found with ${req.params.id}!`, 404));
     }
     if (res.locals.After) res.locals.After();
-    if (res.locals.Event) res.locals.Event('update', Model.collection.collectionName, doc);
+    if (res.locals.EventLog) res.locals.EventLog('update', Model.collection.collectionName, doc);
 
     res.status(200).json({
       status: 'success',
@@ -128,8 +128,8 @@ exports.createOne = Model =>
 
     const doc = await Model.create(req.body);
     if (res.locals.After) res.locals.After();
-    if (res.locals.Event) {
-      const eventRet = await res.locals.Event('insert', Model.collection.collectionName, doc);
+    if (res.locals.EventLog) {
+      const eventRet = await res.locals.EventLog('insert', Model.collection.collectionName, doc);
       if (eventRet && eventRet.status == 'error') {
         return next(new AppError(`${eventRet.message} ${eventRet.error}`, 404));
       }
