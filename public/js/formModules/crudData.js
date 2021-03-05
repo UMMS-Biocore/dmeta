@@ -67,7 +67,7 @@ const getFieldsOfCollection = collectionID => {
   return $s.fields.filter(field => field.collectionID === collectionID);
 };
 
-const getRefFieldDropdown = async (ref, name, required, def, projectData) => {
+const getRefFieldDropdown = async (ref, name, required, def, projectData, collectionID) => {
   try {
     let refData = [];
     let rawRefData = [];
@@ -110,7 +110,7 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData) => {
       def,
       required,
       '',
-      `ref="${ref}"`
+      `ref="${ref}" collectionID="${collectionID}"`
     );
     return collDropdown;
   } catch (err) {
@@ -146,7 +146,7 @@ export const getFormElement = async (field, projectData) => {
     ret = `<input ${dbType} class="form-control ${className}" type="text" name="${field.name}" ${required} value="${def}"></input>`;
   } else if (type == 'mongoose.Schema.ObjectId') {
     if (field.ref) {
-      ret = await getRefFieldDropdown(field.ref, field.name, required, def, projectData);
+      ret = await getRefFieldDropdown(field.ref, field.name, required, def, projectData, '');
     }
   } else if (type == 'boolean') {
     const checked = def == true ? 'checked' : '';
@@ -157,24 +157,92 @@ export const getFormElement = async (field, projectData) => {
 };
 
 export const getParentCollection = collectionID => {
-  let parentCollID = '';
+  let parentCollectionID = '';
   let parentCollLabel = '';
   let parentCollName = '';
   const col = $s.collections.filter(col => col.id === collectionID);
   if (col[0] && col[0].parentCollectionID) {
-    parentCollID = col[0].parentCollectionID;
-    const parentColl = $s.collections.filter(col => col.id === parentCollID);
+    parentCollectionID = col[0].parentCollectionID;
+    const parentColl = $s.collections.filter(col => col.id === parentCollectionID);
     if (parentColl[0] && parentColl[0].name) parentCollName = parentColl[0].name;
     parentCollLabel = parentColl[0] && parentColl[0].label ? parentColl[0].label : parentCollName;
   }
-  return { parentCollLabel, parentCollName };
+  return { parentCollLabel, parentCollName, parentCollectionID };
 };
 
-export const prepReferenceDropdown = (formId, data) => {
+export const createSelectizeMultiField = (el, data) => {
+  if (data && data[0]) {
+    const allFields = Object.keys(data[0]);
+    const excludeFields = [
+      'DID',
+      'perms',
+      '_id',
+      'DID',
+      'creationDate',
+      'lastUpdateDate',
+      'lastUpdatedUser',
+      'owner'
+    ];
+    let showFields = allFields.filter(
+      el =>
+        !(
+          excludeFields.includes(el) ||
+          !data[0][el] ||
+          data[0][el] === null ||
+          typeof data[0][el] === 'object' ||
+          typeof data[0][el] === 'boolean'
+        )
+    );
+
+    if (showFields.includes('name')) {
+      showFields = showFields.filter(item => item !== 'name');
+      showFields.unshift('name');
+    }
+    const showFieldsSum = showFields.slice(0, 3);
+
+    $(el).selectize({
+      valueField: '_id',
+      searchField: showFieldsSum,
+      options: data,
+      render: {
+        option: function(data, escape) {
+          let ret = `<div class="option">`;
+          showFields.forEach((i, idx) => {
+            if (idx < 3 && data[i]) {
+              if (i == 'name') {
+                ret += `<span class="title"> ${escape(data[i])} </span>`;
+              } else {
+                ret += `<span class="url"> ${i}: ${escape(data[i])} </span>`;
+              }
+            }
+          });
+          ret += `</div>`;
+          return ret;
+        },
+        item: function(data, escape) {
+          let ret = `<div class="item" data-value="${escape(data._id)} ">`;
+          ret += `<i>`;
+
+          showFields.forEach((i, idx) => {
+            if (idx < 1) ret += `${escape(data[i])}`;
+          });
+          ret += `</i>`;
+          ret += `</div>`;
+          return ret;
+        }
+      }
+    });
+  }
+};
+
+export const prepReferenceDropdown = (formId, $scope) => {
   const formValues = $(formId).find('select.ref-control');
   for (var k = 0; k < formValues.length; k++) {
-    const fieldID = $(formValues[k]).attr('fieldID');
-    const nameAttr = $(formValues[k]).attr('name');
+    const collectionID = $(formValues[k]).attr('collectionID');
+    console.log(collectionID);
+    if ($scope.collections && $scope.collections[collectionID]) {
+      createSelectizeMultiField($(formValues[k])[0], $scope.collections[collectionID]);
+    }
   }
 };
 export const prepOntologyDropdown = (formId, data, $scope) => {
@@ -349,7 +417,7 @@ export const getFieldsDiv = async (collectionID, projectData) => {
   await getCollectionFieldData();
   let ret = '';
   // 1. if parent collection id is defined, insert as a new field
-  const { parentCollLabel, parentCollName } = getParentCollection(collectionID);
+  const { parentCollLabel, parentCollName, parentCollectionID } = getParentCollection(collectionID);
   if (parentCollLabel && parentCollName) {
     const ref =
       projectData && projectData.name ? `${projectData.name}_${parentCollName}` : parentCollName;
@@ -357,7 +425,8 @@ export const getFieldsDiv = async (collectionID, projectData) => {
       ref: ref,
       name: `${parentCollName}_id`,
       type: 'mongoose.Schema.ObjectId',
-      required: true
+      required: true,
+      collectionID: parentCollectionID
     };
     const element = await getFormElement(parentField, projectData);
     ret += getFormRow(element, parentCollLabel, parentField);

@@ -1,3 +1,8 @@
+04.03.2021 Version 0.0.31
+Bug in admin event tab fixed.
+Boolean support added to datatable operations.
+Drill down feature added to event tab.
+
 02.03.2021 Version 0.0.30
 Event route renamed as eventlogs.
 Event route upgraded to support event forms.

@@ -355,7 +355,11 @@ const prepareDataForSingleColumn = async (tableID, projectID) => {
         } else {
           newObj[k] = el[k];
         }
-      } else if ((typeof el[k] === 'object' && el[k] !== null) || Array.isArray(el[k])) {
+      } else if (
+        (typeof el[k] === 'object' && el[k] !== null) ||
+        Array.isArray(el[k]) ||
+        typeof el[k] === 'boolean'
+      ) {
         newObj[k] = JSON.stringify(el[k]);
       } else {
         newObj[k] = el[k];
@@ -503,7 +507,7 @@ const refreshEventWorkflow = (projectID, eventID, type) => {
         const update = data[i].update;
         const multiple = data[i].multiple;
         if (!prevCollID || (prevCollID && prevCollID != collID)) {
-          lastRow = insertNewEventRow(projectID, type);
+          lastRow = insertNewEventRow(projectID, type, field);
           if (collID) {
             lastRow
               .find('.select-collection')
@@ -531,7 +535,7 @@ const refreshEventWorkflow = (projectID, eventID, type) => {
       }
     }
   } else {
-    insertNewEventRow(projectID, type);
+    insertNewEventRow(projectID, type, true);
   }
 };
 
@@ -608,7 +612,7 @@ const insertNewField = (projectID, divToAppend, type, counter) => {
   // $('[data-toggle="tooltip"]').tooltip();
 };
 
-const insertNewEventRow = (projectID, type) => {
+const insertNewEventRow = (projectID, type, newField) => {
   let hide = '';
   let disabled = '';
   if (type == 'disabled') {
@@ -621,7 +625,7 @@ const insertNewEventRow = (projectID, type) => {
 
   const newRow = $(`
     <div class="list-group collection"  style="padding-right:0px;">
-      <div class="list-group-item" style="padding-right:7px; padding-left:7px; padding-bottom:25px; padding-top:25px;">
+      <div class="list-group-item collection" style="padding-right:7px; padding-left:7px; padding-bottom:25px; padding-top:25px;">
         <div class="container" style="margin-bottom:15px; margin-right:5px; margin-left:5px; max-width:7000px;">
           <div class="row">
             <div class="col-auto" style="padding-top:7px;">
@@ -659,8 +663,11 @@ const insertNewEventRow = (projectID, type) => {
     </div>`);
   $(`#event-schema-${projectID}`).append(newRow);
   createSortable(newRow[0], projectID, type, 'collection');
-  //insertNewField
-  newRow.find('.insert-event-field').trigger('click');
+  if (newField) {
+    //insertNewField
+    newRow.find('.insert-event-field').trigger('click');
+  }
+
   // $('[data-toggle="tooltip"]').tooltip();
 
   return newRow;
@@ -722,7 +729,7 @@ const showHideButtons = (el, hideClasses, showClasses) => {
 
 const getEventSchema = projectID => {
   let ret = [];
-  const collectionGroups = $(`#event-schema-${projectID}`).find('.list-group.collection');
+  const collectionGroups = $(`#event-schema-${projectID}`).find('.list-group-item.collection');
   for (let k = 0; k < collectionGroups.length; k++) {
     const collID = $(collectionGroups[k])
       .find('.select-collection')
@@ -738,10 +745,10 @@ const getEventSchema = projectID => {
       .is(':checked');
 
     const fields = $(collectionGroups[k]).find('.select-field');
-    for (let f = 0; f < fields.length; f++) {
-      let obj = {};
-      let field = $(fields[f]).val();
-      if (field && collID) {
+    if (fields.length > 0) {
+      for (let f = 0; f < fields.length; f++) {
+        let obj = {};
+        let field = $(fields[f]).val();
         obj.collectionID = collID;
         obj.field = field;
         obj.insert = insert;
@@ -749,8 +756,17 @@ const getEventSchema = projectID => {
         obj.multiple = multiple;
         ret.push(obj);
       }
+    } else {
+      let obj = {};
+      obj.collectionID = collID;
+      obj.field = '';
+      obj.insert = insert;
+      obj.update = update;
+      obj.multiple = multiple;
+      ret.push(obj);
     }
   }
+  console.log(ret);
   return ret;
 };
 
@@ -793,7 +809,7 @@ const bindEventHandlers = () => {
   $(document).on('click', `button.insert-event-row`, function(e) {
     e.preventDefault();
     const projectID = $(this).attr('projectID');
-    insertNewEventRow(projectID, 'new');
+    insertNewEventRow(projectID, 'new', true);
   });
   $(document).on('click', `button.save-event`, async function(e) {
     const projectID = $(this).attr('projectID');

@@ -88,6 +88,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
     const isSelectized = $(formValues[i]).hasClass('selectized');
     const isDataPerms = $(formValues[i]).hasClass('data-perms');
     const isDataRestrictTo = $(formValues[i]).hasClass('data-restrictTo');
+    const isSetExist = $(formValues[i]).siblings('.multi-value').length;
     const isSet =
       $(formValues[i]).siblings('.multi-value').length &&
       $(formValues[i])
@@ -185,6 +186,8 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         continue;
       }
     }
+    // for event form update
+    if (!isSetExist && visible == 'undefined') val = $(formValues[i]).val();
     if (name) formObj[name] = val;
   }
   return [formObj, stop];
@@ -197,7 +200,10 @@ export const convertFormObj = formObj => {
       if (
         formObj[key] &&
         typeof formObj[key] === 'string' &&
-        (formObj[key].charAt(0) == '{' || formObj[key].charAt(0) == '[')
+        (formObj[key].charAt(0) == '{' ||
+          formObj[key].charAt(0) == '[' ||
+          formObj[key] === 'false' ||
+          formObj[key] === 'true')
       ) {
         let val = JSON5.parse(formObj[key]);
         formObj[key] = val;

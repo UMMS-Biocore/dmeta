@@ -22,7 +22,8 @@ import {
   prepOntologyDropdown,
   prepReferenceDropdown,
   getFormElement,
-  getFormRow
+  getFormRow,
+  createSelectizeMultiField
 } from './formModules/crudData';
 import { prepDataPerms } from './formModules/dataPerms';
 import Handsontable from 'handsontable';
@@ -414,15 +415,15 @@ const excelCrudCall = async (method, url, data, tableID, rowIdx) => {
   }
 };
 
-const getCollDropdown = (projectID, projectName, collectionID, collectionName) => {
+const getCollDropdown = (projectID, projectName, collectionID, collectionName, insert, update) => {
   const collRef = projectName ? `${projectName}_${collectionName}` : collectionName;
-  const data = $s.data[collectionID];
-  let collDropdown = `<select class="form-control form-event-collection data-reference" projectID="${projectID}" collectionID="${collectionID}" collectionName="${collectionName}" ref="${collRef}">`;
-  collDropdown += `<option value="" >  --- Choose to Update Item ---  </option>`;
-  if (data) {
-    data.forEach(i => {
-      collDropdown += `<option  value="${i._id}">${i.name}</option>`;
-    });
+  let skip = '';
+  if (!insert && !update) skip = `skip="skip"`;
+  let collDropdown = `<select ${skip} class="form-control form-event-collection data-reference" projectID="${projectID}" collectionID="${collectionID}" collectionName="${collectionName}" ref="${collRef}">`;
+  if (insert || update) {
+    collDropdown += `<option value="" >  --- Choose to Update Item ---  </option>`;
+  } else {
+    collDropdown += `<option value="" >  --- Select ---  </option>`;
   }
   collDropdown += `</select>`;
   return { collDropdown, collRef };
@@ -444,10 +445,17 @@ const getEventFormGroupDiv = (
   collLabel,
   collDropdown,
   showCollectionDropdown,
-  multiple
+  multiple,
+  fieldCheck
 ) => {
   let ret = '';
   let multipleButton = '';
+  let fieldsetClass = 'scheduler-border';
+  let legendMargin = 'margin-bottom:30px;';
+  if (!fieldCheck) {
+    fieldsetClass = 'scheduler-border-top';
+    legendMargin = '';
+  }
   if (multiple) {
     multipleButton = `<button style="margin-left:5px;" class="btn btn-sm btn-pill btn-primary multiple-event-form" type="button">
     <i class="cil-plus"> </i>
@@ -456,8 +464,8 @@ const getEventFormGroupDiv = (
   if (showCollectionDropdown) {
     ret = `
       <form class="form-horizontal" id="${formID}">
-        <fieldset class="scheduler-border">
-          <legend class="scheduler-border" style="width:70%; margin-bottom:30px;">  
+        <fieldset class="${fieldsetClass}">
+          <legend class="scheduler-border" style="width:70%; ${legendMargin}">  
           <div class="row">
             <label class="col-md-4 col-form-label">${collLabel}</label>
             <div class="col-md-8">
@@ -468,8 +476,8 @@ const getEventFormGroupDiv = (
   } else {
     ret = `
       <form class="form-horizontal" id="${formID}">
-        <fieldset class="scheduler-border">
-          <legend class="scheduler-border" style="width:auto; margin-bottom:30px;">  
+        <fieldset class="${fieldsetClass}">
+          <legend class="scheduler-border" style="width:auto; ${legendMargin}">  
           <div>
             ${collLabel}
             <div style="display:none;" class="col-md-8">
@@ -501,21 +509,26 @@ const refreshEventForm = async (projectID, eventID) => {
       const collLabel = col[0].label;
       const collectionName = col[0].name;
       const projectName = projectData[0].name ? projectData[0].name : '';
-      const { collDropdown, collRef } = getCollDropdown(
-        projectID,
-        projectName,
-        collectionID,
-        collectionName
-      );
-      const formID = `form-event-${projectID}-${collectionID}-${k}`;
-      const errorDiv = `<p style="background-color:#e211112b;" class="crudError" id="crudModalError-${projectID}-${collectionID}"></p>`;
 
       let insert = false;
       let update = false;
       let multiple = false;
+      let fieldCheck = false;
       if (group[0].insert) insert = true;
       if (group[0].update) update = true;
       if (group[0].multiple) multiple = true;
+      if (group[0].field) fieldCheck = true;
+
+      const { collDropdown, collRef } = getCollDropdown(
+        projectID,
+        projectName,
+        collectionID,
+        collectionName,
+        insert,
+        update
+      );
+      const formID = `form-event-${projectID}-${collectionID}-${k}`;
+      const errorDiv = `<p style="background-color:#e211112b;" class="crudError" id="crudModalError-${projectID}-${collectionID}"></p>`;
       let showCollectionDropdown = update || (!insert && !update);
       if (allDataRefs.includes(collRef)) showCollectionDropdown = false;
       allDataRefs.push(collRef);
@@ -525,46 +538,51 @@ const refreshEventForm = async (projectID, eventID) => {
         collLabel,
         collDropdown,
         showCollectionDropdown,
-        multiple
+        multiple,
+        fieldCheck
       );
 
       for (let i = 0; i < group.length; i++) {
         let field = {};
         let label = '';
         const fieldId = group[i].field;
-        if (fieldId == 'parentCollectionID') {
-          const collectionID = group[i].collectionID;
-          if (collectionID) {
-            const { parentCollName, parentCollLabel } = getParentCollection(collectionID);
-            const ref = projectData[0].name
-              ? `${projectData[0].name}_${parentCollName}`
-              : parentCollName;
-            field = {
-              ref: ref,
-              name: `${parentCollName}_id`,
-              type: 'mongoose.Schema.ObjectId',
-              required: true
-            };
-            if (allDataRefs.includes(ref)) field.hide = true;
-            allDataRefs.push(ref);
-
-            label = parentCollLabel;
+        if (fieldId) {
+          if (fieldId == 'parentCollectionID') {
+            const collectionID = group[i].collectionID;
+            if (collectionID) {
+              const { parentCollName, parentCollLabel, parentCollectionID } = getParentCollection(
+                collectionID
+              );
+              const ref = projectData[0].name
+                ? `${projectData[0].name}_${parentCollName}`
+                : parentCollName;
+              field = {
+                ref: ref,
+                name: `${parentCollName}_id`,
+                type: 'mongoose.Schema.ObjectId',
+                required: true,
+                collectionID: parentCollectionID
+              };
+              label = parentCollLabel;
+            }
+          } else {
+            const fieldData = $s.fields.filter(f => f._id === fieldId);
+            field = fieldData[0];
+            label = field.label;
           }
-        } else {
-          const fieldData = $s.fields.filter(f => f._id === fieldId);
-          field = fieldData[0];
-          label = field.label;
+          const element = await getFormElement(field, projectData[0]);
+          const refField = $(element).attr('ref');
+          let copiedField = $.extend(true, {}, field);
+          if (allDataRefs.includes(refField)) copiedField.hide = true;
+          if (refField) allDataRefs.push(refField);
+          div += getFormRow(element, label, copiedField);
         }
-        const element = await getFormElement(field, projectData[0]);
-        const refField = $(element).attr('ref');
-        let copiedField = $.extend(true, {}, field);
-        if (allDataRefs.includes(refField)) copiedField.hide = true;
-        if (refField) allDataRefs.push(refField);
-        div += getFormRow(element, label, copiedField);
       }
       div += `</fieldset></form>`;
       $(`#event-form-${projectID}`).append(errorDiv);
       $(`#event-form-${projectID}`).append(div);
+      const dropdownElement = $(`#${formID}`).find('.form-event-collection')[0];
+      createSelectizeMultiField(dropdownElement, $s.data[collectionID]);
       prepOntologyDropdown(`#${formID}`, {}, $s);
       prepareClickToActivateModal(`#${formID}`, '', 'input, select', {});
       activateAllForm(`#${formID}`, 'input, select');
@@ -589,7 +607,7 @@ const saveDataEventForm = async (type, formID, collID, collName, projectID, oldD
   } else if (type === 'insert') {
     method = 'POST';
     id = '';
-    [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+    [formObj, stop] = createFormObj(formValues, requiredFields, true, false);
     formObj = convertFormObj(formObj);
   }
 
@@ -629,12 +647,57 @@ const bindEventHandlers = () => {
   // sync .data-reference dropdowns on change for event forms
   $(document).on('change', 'select.data-reference', function(e) {
     const ref = $(this).attr('ref');
+    const projectID = $(this).attr('projectID');
+    const collectionName = $(this).attr('collectionName');
+    const collectionID = $(this).attr('collectionID');
+    const selValue = this.value;
     console.log(`changed to ${this.value}`, this);
     const allDataRefs = $(`select.data-reference[ref="${ref}"]`)
       .not(this)
-      .val(this.value);
+      .val(selValue);
     for (let i = 0; i < allDataRefs.length; i++) {
       if ($(allDataRefs[i]).hasClass('form-event-collection')) $(allDataRefs[i]).trigger('change');
+    }
+
+    // filter data-reference rows based in parent/child relationships.
+    // Later get data from api/v1/tree/${project}
+    console.log(collectionID);
+    if (collectionID) {
+      const projectName = $s.projects.filter(p => p._id === projectID)[0].name;
+      let childCollections = $s.collections.filter(c => c.parentCollectionID == collectionID);
+      const refFields = $s.fields.filter(f => f.ref == `${projectName}_${collectionName}`);
+      for (let i = 0; i < refFields.length; i++) {
+        childCollections.push({ _id: refFields[i].collectionID });
+      }
+      console.log(`childCollections for ${collectionID}`, childCollections);
+      console.log(`refFields for ${collectionID}`, refFields);
+      for (let i = 0; i < childCollections.length; i++) {
+        const childCollectionID = childCollections[i]._id;
+        console.log(`ref:${ref} childCollectionID:${childCollectionID}`);
+        const allChildDataRefs = $(`select.data-reference[collectionID="${childCollectionID}"]`);
+        console.log(allChildDataRefs);
+        const oldData = $s.data[childCollectionID];
+        if (oldData) {
+          const newData = oldData.filter(
+            o => o[`${collectionName}_id`] && o[`${collectionName}_id`]['_id'] == selValue
+          );
+          console.log(oldData);
+          console.log(newData);
+          for (let k = 0; k < allChildDataRefs.length; k++) {
+            console.log('allChildDataRefs', allChildDataRefs[k]);
+            if (allChildDataRefs[k].selectize) {
+              var selectize = allChildDataRefs[k].selectize;
+              var oldSelectizeVal = selectize.getValue();
+              selectize.clear();
+              selectize.clearOptions();
+              selectize.load(function(callback) {
+                callback(newData);
+              });
+              selectize.setValue(oldSelectizeVal, true);
+            }
+          }
+        }
+      }
     }
   });
   $(document).on('change', `select.form-event-collection`, async function(e) {
@@ -699,6 +762,8 @@ const bindEventHandlers = () => {
       const formID = $(allForms[i]).attr('id');
       const collDropdown = $(allForms[i]).find('select.form-event-collection');
       const selData = collDropdown.val();
+      const skip = collDropdown.attr('skip');
+      if (skip) continue;
       const collID = collDropdown.attr('collectionID');
       const collName = collDropdown.attr('collectionName');
       $(`#crudModalError-${projectID}-${collID}`).empty();
@@ -764,7 +829,7 @@ const bindEventHandlers = () => {
     const tableData = table.rows().data();
     const rows_selected = table.column(0).checkboxes.selected();
     const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
-
+    console.log('selectedData', selectedData);
     $('#crudModal').on('show.coreui.modal', async function(e) {
       fillFormByName('#crudModal', 'input, select', selectedData[0]);
       prepReferenceDropdown('#crudModal', selectedData[0]);
@@ -1451,7 +1516,11 @@ const prepareDataForSingleColumn = async (collName, projectID, collectionID, col
           if (el[k] && el[k].name) newObj[k] = el[k].name;
         } else if (refFields.includes(k) && el[k] && el[k].name) {
           if (el[k] && el[k].name) newObj[k] = el[k].name;
-        } else if ((typeof el[k] === 'object' && el[k] !== null) || Array.isArray(el[k])) {
+        } else if (
+          (typeof el[k] === 'object' && el[k] !== null) ||
+          Array.isArray(el[k]) ||
+          typeof el[k] === 'boolean'
+        ) {
           newObj[k] = JSON.stringify(el[k]);
         } else {
           newObj[k] = el[k];
@@ -1465,17 +1534,17 @@ const prepareDataForSingleColumn = async (collName, projectID, collectionID, col
 };
 
 const getParentCollection = collectionID => {
-  let parentCollID = '';
+  let parentCollectionID = '';
   let parentCollLabel = '';
   let parentCollName = '';
   const col = $s.collections.filter(col => col.id === collectionID);
   if (col[0] && col[0].parentCollectionID) {
-    parentCollID = col[0].parentCollectionID;
-    const parentColl = $s.collections.filter(col => col.id === parentCollID);
+    parentCollectionID = col[0].parentCollectionID;
+    const parentColl = $s.collections.filter(col => col.id === parentCollectionID);
     if (parentColl[0] && parentColl[0].name) parentCollName = parentColl[0].name;
     parentCollLabel = parentColl[0] && parentColl[0].label ? parentColl[0].label : parentCollName;
   }
-  return { parentCollLabel, parentCollName };
+  return { parentCollLabel, parentCollName, parentCollectionID };
 };
 
 const refreshDataTables = async (TableID, collName, projectID) => {
