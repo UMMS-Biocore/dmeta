@@ -4,6 +4,7 @@ const projectsController = require('../controllers/projectsController');
 const factory = require('./handlerFactory');
 const AppError = require('./../utils/appError');
 const buildModels = require('./../utils/buildModels');
+const dbbackup = require('./../utils/dbbackup');
 
 // for post/patch requests
 exports.setCollectionId = (req, res, next) => {
@@ -75,6 +76,8 @@ exports.transfer = async (req, res, next) => {
   try {
     // 0. Stop server
     // 1. Backup database
+    const backupSuccess = dbbackup.dbAutoBackUp();
+    if (!backupSuccess) return next(new AppError('Backup Failed.', 404));
     // 2. Check if two collection is connected with field
     let connectedField = false;
     // 2a. Check if target parentCollectionID is source collectionID.
