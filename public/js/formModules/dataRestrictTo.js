@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { createFormObj, ajaxCall, showInfoInDiv, fillFormByName } from './../jsfuncs';
+import { createFormObj, ajaxCall, showInfoInDiv } from './../jsfuncs';
 import { getFormRow } from './crudData';
 const JSON5 = require('json5');
 

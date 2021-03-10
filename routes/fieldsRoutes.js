@@ -9,6 +9,10 @@ router.use(authController.isLoggedIn);
 router.use(authController.setDefPerms);
 
 router
+  .route('/transfer')
+  .post(authController.requireLogin, authController.restrictTo('admin'), fieldsController.transfer);
+
+router
   .route('/')
   .get(fieldsController.getAllFields)
   .post(

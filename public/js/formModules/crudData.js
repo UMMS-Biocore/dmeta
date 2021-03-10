@@ -1,6 +1,6 @@
 /* eslint-disable */
 import axios from 'axios';
-import { createFormObj, convertFormObj } from './../jsfuncs';
+import { createFormObj, convertFormObj, getDropdownFields } from './../jsfuncs';
 
 // GLOBAL SCOPE
 let $s = { data: {}, collections: {}, fields: {}, projects: {} };
@@ -30,15 +30,21 @@ export const getCollectionFieldData = async () => {
   $s.projects = projects;
 };
 
-const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID, attr) => {
+const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID, attr, dataField) => {
   const idText = id ? `id="${id}"` : '';
   const attrText = attr ? attr : '';
   const fieldIDText = fieldID ? `fieldID="${fieldID}"` : '';
   let dropdown = `<select ${required} ${attrText} class="form-control ${el_class}" ${fieldIDText} ${idText} name="${el_name}">`;
-  if (!required) dropdown += `<option value="" >--- Select ---</option>`;
+  dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
-    const selected = def == i.id || def == i.name ? 'selected' : '';
-    dropdown += `<option ${selected} value="${i._id}">${i.name}</option>`;
+    if (dataField) {
+      console.log('dataField', dataField);
+      const selected = def == i[dataField] ? 'selected' : '';
+      dropdown += `<option ${selected} value="${i._id}">${i[dataField]}</option>`;
+    } else {
+      const selected = def == i.id || def == i.name ? 'selected' : '';
+      dropdown += `<option ${selected} value="${i._id}">${i.name}</option>`;
+    }
   });
   dropdown += `</select>`;
   return dropdown;
@@ -67,15 +73,24 @@ const getFieldsOfCollection = collectionID => {
   return $s.fields.filter(field => field.collectionID === collectionID);
 };
 
-const getRefFieldDropdown = async (ref, name, required, def, projectData, collectionID) => {
+const getRefFieldDropdown = async (ref, name, required, def, projectData, $scope) => {
   try {
+    let collectionID = '';
+    let collName = '';
+    let projectID = projectData && projectData._id ? projectData._id : '';
     let refData = [];
     let rawRefData = [];
     var re = projectData.name ? new RegExp(projectData.name + '_(.*)') : '';
     if (re && ref.match(re)) {
-      const coll = ref.match(re)[1];
-      console.log(coll);
-      refData = await ajaxCall('GET', `/api/v1/projects/${projectData.name}/data/${coll}`);
+      collName = ref.match(re)[1];
+      refData = await ajaxCall('GET', `/api/v1/projects/${projectData.name}/data/${collName}`);
+      console.log($scope.collections);
+      if ($scope.collections && $scope.collections[0]) {
+        const collection = $scope.collections.filter(
+          c => c.name == collName && c.projectID == projectID
+        );
+        if (collection && collection[0] && collection[0]._id) collectionID = collection[0]._id;
+      }
     } else {
       rawRefData = await ajaxCall('GET', `/api/v1/${ref}`);
       console.log(rawRefData);
@@ -102,6 +117,9 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, collec
       }
     }
     console.log('refData', refData);
+    const fieldsOfCollection = $scope.fields.filter(f => f.collectionID === collectionID);
+    const showFields = getDropdownFields(refData[0], fieldsOfCollection);
+    const dataField = showFields && showFields[0] ? showFields[0] : '';
     const collDropdown = getDataDropdown(
       '',
       'ref-control select-text-opt data-reference',
@@ -110,7 +128,8 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, collec
       def,
       required,
       '',
-      `ref="${ref}" collectionID="${collectionID}"`
+      `ref="${ref}" collectionID="${collectionID}" projectID="${projectID}" collectionName="${collName}"`,
+      dataField
     );
     return collDropdown;
   } catch (err) {
@@ -119,7 +138,7 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, collec
   }
 };
 
-export const getFormElement = async (field, projectData) => {
+export const getFormElement = async (field, projectData, $scope) => {
   let ret = '';
   const type = field.type;
   const required = field.required ? 'required' : '';
@@ -131,9 +150,9 @@ export const getFormElement = async (field, projectData) => {
       const options = field.enum.map(i => {
         return { _id: i, name: i };
       });
-      ret = getDataDropdown('', '', field.name, options, def, required, fieldID, '');
+      ret = getDataDropdown('', '', field.name, options, def, required, fieldID, '', '');
     } else if (field.ontology) {
-      ret = getDataDropdown('', 'ontology', field.name, [], def, required, fieldID, '');
+      ret = getDataDropdown('', 'ontology', field.name, [], def, required, fieldID, '', '');
     } else {
       ret = `<input ${dbType} class="form-control" type="text" name="${field.name}" ${required} value="${def}"></input>`;
     }
@@ -146,7 +165,7 @@ export const getFormElement = async (field, projectData) => {
     ret = `<input ${dbType} class="form-control ${className}" type="text" name="${field.name}" ${required} value="${def}"></input>`;
   } else if (type == 'mongoose.Schema.ObjectId') {
     if (field.ref) {
-      ret = await getRefFieldDropdown(field.ref, field.name, required, def, projectData, '');
+      ret = await getRefFieldDropdown(field.ref, field.name, required, def, projectData, $scope);
     }
   } else if (type == 'boolean') {
     const checked = def == true ? 'checked' : '';
@@ -170,37 +189,13 @@ export const getParentCollection = collectionID => {
   return { parentCollLabel, parentCollName, parentCollectionID };
 };
 
-export const createSelectizeMultiField = (el, data) => {
+export const createSelectizeMultiField = (el, data, fieldsOfCollection) => {
   if (data && data[0]) {
-    const allFields = Object.keys(data[0]);
-    const excludeFields = [
-      'DID',
-      'perms',
-      '_id',
-      'DID',
-      'creationDate',
-      'lastUpdateDate',
-      'lastUpdatedUser',
-      'owner'
-    ];
-    let showFields = allFields.filter(
-      el =>
-        !(
-          excludeFields.includes(el) ||
-          !data[0][el] ||
-          data[0][el] === null ||
-          typeof data[0][el] === 'object' ||
-          typeof data[0][el] === 'boolean'
-        )
-    );
-
-    if (showFields.includes('name')) {
-      showFields = showFields.filter(item => item !== 'name');
-      showFields.unshift('name');
-    }
+    const showFields = getDropdownFields(data[0], fieldsOfCollection);
     const showFieldsSum = showFields.slice(0, 3);
 
     $(el).selectize({
+      // allowEmptyOption: true,
       valueField: '_id',
       searchField: showFieldsSum,
       options: data,
@@ -237,11 +232,12 @@ export const createSelectizeMultiField = (el, data) => {
 
 export const prepReferenceDropdown = (formId, $scope) => {
   const formValues = $(formId).find('select.ref-control');
+  console.log('formValues', formValues);
   for (var k = 0; k < formValues.length; k++) {
     const collectionID = $(formValues[k]).attr('collectionID');
-    console.log(collectionID);
-    if ($scope.collections && $scope.collections[collectionID]) {
-      createSelectizeMultiField($(formValues[k])[0], $scope.collections[collectionID]);
+    if (collectionID && $scope.data && $scope.data[collectionID]) {
+      const fieldsOfCollection = $scope.fields.filter(f => f.collectionID === collectionID);
+      createSelectizeMultiField($(formValues[k])[0], $scope.data[collectionID], fieldsOfCollection);
     }
   }
 };
@@ -428,20 +424,20 @@ export const getFieldsDiv = async (collectionID, projectData) => {
       required: true,
       collectionID: parentCollectionID
     };
-    const element = await getFormElement(parentField, projectData);
+    const element = await getFormElement(parentField, projectData, $s);
     ret += getFormRow(element, parentCollLabel, parentField);
   }
   // 2. get all fields of collection
   const fields = getFieldsOfCollection(collectionID);
   for (var k = 0; k < fields.length; k++) {
     const label = fields[k].label;
-    const element = await getFormElement(fields[k], projectData);
+    const element = await getFormElement(fields[k], projectData, $s);
     ret += getFormRow(element, label, fields[k]);
   }
   // 3. Additional fields: e.g. perms
   const label = 'Permissions';
   const permsField = { name: 'perms', label: 'Permissions', type: 'Mixed' };
-  const element = await getFormElement(permsField, projectData);
+  const element = await getFormElement(permsField, projectData, $s);
   ret += getFormRow(element, label, permsField);
   return ret;
 };
@@ -523,6 +519,7 @@ export const getInsertDataDiv = async () => {
     'collection-control',
     'collection',
     $s.collections,
+    '',
     '',
     '',
     ''

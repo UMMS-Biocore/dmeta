@@ -1,3 +1,9 @@
+10.03.2021 Version 0.0.33
+Transfer field data feature added.
+
+08.03.2021 Version 0.0.32
+Header field added to fields model to support collections that have no name field.
+
 04.03.2021 Version 0.0.31
 Bug in admin event tab fixed.
 Boolean support added to datatable operations.

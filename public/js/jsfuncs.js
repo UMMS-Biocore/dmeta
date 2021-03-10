@@ -121,7 +121,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
       val = $(formValues[i]).val();
     }
     if (requiredFields.includes(name)) {
-      if (val != '') {
+      if (val != '' && val !== null) {
         $(formValues[i]).removeClass('is-invalid');
         if (warn && $(formValues[i]).next('div.invalid-feedback').length == 1) {
           $(formValues[i])
@@ -238,6 +238,45 @@ export const hideFormError = formValues => {
         .remove();
     }
   }
+};
+
+export const getDropdownFields = (data, fieldsOfCollection) => {
+  let header = [];
+  if (fieldsOfCollection) {
+    const headerFields = fieldsOfCollection.filter(f => f.header === true);
+    if (headerFields) {
+      header = headerFields.map(field => field.name);
+    }
+  }
+  const allFields = Object.keys(data);
+  const excludeFields = [
+    'DID',
+    'perms',
+    '_id',
+    'DID',
+    'creationDate',
+    'lastUpdateDate',
+    'lastUpdatedUser',
+    'owner'
+  ];
+  let showFields = allFields.filter(
+    el =>
+      !(
+        excludeFields.includes(el) ||
+        !data[el] ||
+        data[el] === null ||
+        typeof data[el] === 'object' ||
+        typeof data[el] === 'boolean'
+      )
+  );
+  if (header[0] && showFields.includes(header[0])) {
+    showFields = showFields.filter(item => item !== header[0]);
+    showFields.unshift(header[0]);
+  } else if (showFields.includes('name')) {
+    showFields = showFields.filter(item => item !== 'name');
+    showFields.unshift('name');
+  }
+  return showFields;
 };
 
 export const showFormError = (formValues, errorFields, warn) => {
@@ -363,7 +402,8 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
 };
 
 //use name attr to fill form
-export const fillFormByName = (formId, find, data) => {
+export const fillFormByName = (formId, find, data, reset) => {
+  if (reset && $(formId)[0] && $(formId)[0].reset) $(formId)[0].reset();
   const formValues = $(formId).find(find);
   for (var k = 0; k < formValues.length; k++) {
     const nameAttr = $(formValues[k]).attr('name');
@@ -371,6 +411,8 @@ export const fillFormByName = (formId, find, data) => {
     const checkboxCheck = $(formValues[k]).is(':checkbox');
     // if select-text-opt class is found, select dropdown options based on text of the options
     const isSelectTextOpt = $(formValues[k]).hasClass('select-text-opt');
+    // if selectized
+    const isSelectized = $(formValues[k]).hasClass('selectized');
 
     if (data[nameAttr]) {
       if (radioCheck) {
@@ -378,7 +420,11 @@ export const fillFormByName = (formId, find, data) => {
           $(formValues[k]).attr('checked', true);
         }
       } else if (checkboxCheck) {
-        if (data[nameAttr] == $(formValues[k]).val() || data[nameAttr] === true) {
+        if (
+          data[nameAttr] == $(formValues[k]).val() ||
+          data[nameAttr] === true ||
+          data[nameAttr] === 'true'
+        ) {
           $(formValues[k]).attr('checked', true);
         } else {
           $(formValues[k]).attr('checked', false);
@@ -395,6 +441,8 @@ export const fillFormByName = (formId, find, data) => {
               })
               .val();
             if (item) $(formValues[k]).val(item);
+          } else if (isSelectized) {
+            $(formValues[k])[0].selectize.setValue(data[nameAttr], false);
           } else {
             $(formValues[k]).val(data[nameAttr]);
           }

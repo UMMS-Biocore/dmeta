@@ -344,7 +344,7 @@ const bindGlobalEventHandlers = () => {
 
     $('#crudModal2').off();
     $('#crudModal2').on('show.coreui.modal', async function(e) {
-      fillFormByName('#crudModal2', 'input, select', rowData);
+      fillFormByName('#crudModal2', 'input, select', rowData, false);
     });
 
     $('#crudModal2').on('click', '#crudModalYes2', async function(e) {

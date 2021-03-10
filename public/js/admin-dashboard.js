@@ -36,6 +36,7 @@ $s.AdminCollectionFields = [
   'minlength',
   'maxlength',
   'trim',
+  'header',
   'ref',
   'perms',
   'collectionID',
@@ -254,6 +255,11 @@ const fieldsOfFieldsModel = {
   trim: {
     name: 'trim',
     label: 'Trim',
+    type: 'boolean'
+  },
+  header: {
+    name: 'header',
+    label: 'Header',
     type: 'boolean'
   },
   minlength: {
@@ -770,6 +776,40 @@ const getEventSchema = projectID => {
   return ret;
 };
 
+const getCollectionDropdown = (projectID, name) => {
+  let dropdown = `<select class="form-control" name="${name}">`;
+  dropdown += `<option value="" >--- Select Collection ---</option>`;
+  if ($s.collections) {
+    const projectCollections = $s.collections.filter(e => e.projectID == projectID);
+    projectCollections.forEach(i => {
+      dropdown += `<option  value="${i._id}">${i.name}</option>`;
+    });
+  }
+  dropdown += `</select>`;
+  return dropdown;
+};
+
+const getSimpleDropdown = (options, name) => {
+  let dropdown = `<select class="form-control" name="${name}" >`;
+  options.forEach(i => {
+    dropdown += `<option  value="${i._id}">${i.name}</option>`;
+  });
+  dropdown += `</select>`;
+  return dropdown;
+};
+
+const getEditFieldDiv = projectID => {
+  let ret = `<p> Please choose target collection and operation type to transfer your data of fields into target collection. </p>`;
+  ret += getFormRow(getCollectionDropdown(projectID, 'targetCollection'), 'Target Collection', {});
+  const operationTypeDropdown = getSimpleDropdown(
+    [{ _id: 'move-ref', name: 'Move and Keep Reference' }],
+    'type'
+  );
+  ret += getFormRow(operationTypeDropdown, 'Operation Type', {});
+
+  return ret;
+};
+
 const bindEventHandlers = () => {
   // ================= EVENTS  =================
   $(document).on('change', `select.select-event`, function(e) {
@@ -960,6 +1000,64 @@ const bindEventHandlers = () => {
     }
   });
 
+  //
+  $(document).on('click', `button.edit-field-data`, async function(e) {
+    const collID = $(this).attr('collID');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const editFieldDiv = await getEditFieldDiv(projectID);
+    $('#crudModalYes').text('Transfer');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(editFieldDiv);
+    $('#crudModal').off();
+    $('#crudModalTitle').text(`Transfer Field Data`);
+    const table = $(`#${collID}`).DataTable();
+    const tableData = table.rows().data();
+    const rows_selected = table.column(0).checkboxes.selected();
+    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+    let sourceFields = [];
+    for (let i = 0; i < selectedData.length; i++) {
+      sourceFields.push(selectedData[i]._id);
+    }
+
+    $('#crudModal').on('click', '#crudModalYes', async function(e) {
+      e.preventDefault();
+      $('#crudModalError').empty();
+      const formValues = $('#crudModal').find('input,select');
+      const requiredFields = ['type', 'targetCollection'];
+      let [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+      if (stop === false) {
+        formObj.sourceCollection = collID;
+        formObj.sourceFields = sourceFields;
+        console.log('formObj', formObj);
+        try {
+          const res = await axios({
+            method: 'POST',
+            url: 'api/v1/fields/transfer',
+            data: formObj
+          });
+          if (res.data.status == 'success') {
+            console.log(res.data);
+            $('#crudModal').modal('hide');
+          }
+        } catch (err) {
+          if (err.response && err.response.data && err.response.data.message) {
+            showInfoModal(JSON.stringify(err.response.data.message));
+          } else {
+            showInfoModal(err);
+          }
+        }
+      }
+    });
+
+    if (rows_selected.length === 0) {
+      showInfoModal('Please click checkboxes to transfer fields of data.');
+    } else if (rows_selected.length > 0) {
+      $('#crudModal').modal('show');
+    }
+  });
+
   // ================= EDIT BUTTON =================
   $(document).on('click', `button.edit-data`, async function(e) {
     const collID = $(this).attr('collID');
@@ -992,7 +1090,7 @@ const bindEventHandlers = () => {
     const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
 
     $('#crudModal').on('show.coreui.modal', async function(e) {
-      fillFormByName('#crudModal', 'input, select', selectedData[0]);
+      fillFormByName('#crudModal', 'input, select', selectedData[0], true);
       await prepDataPerms('#crudModal', selectedData[0]);
       await prepDataRestrictTo('#crudModal', selectedData[0]);
       if (rows_selected.length > 1) {
@@ -1298,14 +1396,13 @@ const refreshCollectionNavbar = async (projectId, type) => {
       if (tabs[i].id == `all_events_${projectId}`) {
         colNavbar = getEventTab(projectId);
       } else {
+        let dbEditor = true;
+        if (tabs[i].id == `all_collections_${projectId}`) dbEditor = false;
         colNavbar = getCollectionTable(collectionId, projectId);
-        crudButtons = getCrudButtons(
-          collectionId,
-          collectionLabel,
-          collectionName,
-          projectId,
-          false
-        );
+        crudButtons = getCrudButtons(collectionId, collectionLabel, collectionName, projectId, {
+          excel: false,
+          dbEditor: dbEditor
+        });
       }
 
       const contentDiv = `
@@ -1384,7 +1481,9 @@ export const refreshAdminProjectNavbar = async () => {
     let crudButtons = '';
     if (tabs[i].id == 'all_projects') {
       colNavbar = getCollectionTable(projectId, projectId);
-      crudButtons = getCrudButtons(projectId, projectLabel, projectName, projectId, false);
+      crudButtons = getCrudButtons(projectId, projectLabel, projectName, projectId, {
+        excel: false
+      });
     } else {
       colNavbar = await refreshCollectionNavbar(projectId, 'return');
     }
@@ -1430,7 +1529,7 @@ const getFieldsOfFieldsDiv = async (collName, projectID) => {
       fieldsOfFieldsModel[name].default = collName;
     }
     const label = fieldsOfFieldsModel[name].label;
-    const element = await getFormElement(fieldsOfFieldsModel[name], getProjectData(projectID));
+    const element = await getFormElement(fieldsOfFieldsModel[name], getProjectData(projectID), $s);
     ret += getFormRow(element, label, fieldsOfFieldsModel[name]);
   }
   return ret;
@@ -1445,7 +1544,11 @@ const getFieldsOfCollectionDiv = async (collName, projectID) => {
       fieldsOfCollectionsModel[name].default = projectID;
     }
     const label = fieldsOfCollectionsModel[name].label;
-    const element = await getFormElement(fieldsOfCollectionsModel[name], getProjectData(projectID));
+    const element = await getFormElement(
+      fieldsOfCollectionsModel[name],
+      getProjectData(projectID),
+      $s
+    );
     ret += getFormRow(element, label, fieldsOfCollectionsModel[name]);
   }
   return ret;
@@ -1457,7 +1560,7 @@ const getFieldsOfProjectDiv = async () => {
   for (var k = 0; k < fields.length; k++) {
     const name = fields[k];
     const label = fieldsOfProjectModel[name].label;
-    const element = await getFormElement(fieldsOfProjectModel[name], '');
+    const element = await getFormElement(fieldsOfProjectModel[name], '', $s);
     ret += getFormRow(element, label, fieldsOfProjectModel[name]);
   }
   return ret;
