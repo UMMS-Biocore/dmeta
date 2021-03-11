@@ -1,0 +1,11 @@
+{
+  "script": "./server.js",
+  "watch": true,
+  "ignore_watch": ["node_modules", "tmp"],
+  "watch_options": {
+    "followSymlinks": false
+  },
+  "name": "dmeta-skin",
+  "log": "./../dmeta-skin_server.log",
+  "cwd": "./"
+}
