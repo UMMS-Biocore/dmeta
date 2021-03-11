@@ -354,10 +354,17 @@ const prepareDataForSingleColumn = async (tableID, projectID) => {
     let newObj = {};
     $.each(el, function(k) {
       // custom view for all_collections tab -> parentCollectionID field (show name of the collection)
-      if (tableID == `all_collections_${projectID}` && `parentCollectionID` === k && el[k]) {
+      if (tableID == `all_collections_${projectID}` && k === `parentCollectionID` && el[k]) {
         const parentColl = $s.collections.filter(col => col._id == el[k]);
         if (parentColl[0].name) {
           newObj[k] = parentColl[0].name;
+        } else {
+          newObj[k] = el[k];
+        }
+      } else if (tableID == `all_collections_${projectID}` && k === `projectID` && el[k]) {
+        const projectData = $s.projects.filter(p => p._id == el[k]);
+        if (projectData[0] && projectData[0].name) {
+          newObj[k] = projectData[0].name;
         } else {
           newObj[k] = el[k];
         }
@@ -544,9 +551,6 @@ const refreshEventWorkflow = async (projectID, eventID, type) => {
         }
         if (field) {
           const allFieldSelects = lastRow.find('.select-field');
-          console.log(allFieldSelects);
-          console.log($(allFieldSelects[allFieldSelects.length - 1]));
-          console.log(field);
           $(allFieldSelects[allFieldSelects.length - 1]).val(field);
         }
         prevCollID = collID;

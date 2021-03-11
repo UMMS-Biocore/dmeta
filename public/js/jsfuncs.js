@@ -414,7 +414,6 @@ export const fillFormByName = (formId, find, data, reset) => {
     const isSelectTextOpt = $(formValues[k]).hasClass('select-text-opt');
     // if selectized
     const isSelectized = $(formValues[k]).hasClass('selectized');
-
     if (data[nameAttr]) {
       if (radioCheck) {
         if (data[nameAttr] == $(formValues[k]).val()) {

@@ -14,6 +14,21 @@ exports.setGroupFilter = (req, res, next) => {
   if (req.params.id) res.locals.Filter = { group_id: req.params.id };
   next();
 };
+exports.setGroupLimiter = async (req, res, next) => {
+  if (!res.locals.Perms) return next(new AppError(`Please define permission module.`, 404));
+  if (req.body.group_id) {
+    try {
+      const permFilter = await res.locals.Perms('write');
+      const groups = await Group.find(permFilter).exec();
+      const permCheck = groups.filter(g => g._id == req.body.group_id);
+      if (permCheck[0]) return next();
+      return next(new AppError(`You don't have permission to write into this group.`, 404));
+    } catch {
+      return next(new AppError(`You don't have permission to write into this group.`, 404));
+    }
+  }
+  return next(new AppError(`group_id not defined in body.`, 404));
+};
 
 // get list of group_ids belong to user -> return as an array
 exports.getUserGroupIds = async userId => {

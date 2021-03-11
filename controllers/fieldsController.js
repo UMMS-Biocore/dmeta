@@ -122,7 +122,7 @@ exports.transfer = async (req, res, next) => {
           perms: sourceCollData.perms
         };
         await Fields.create(sourceRefFieldObj);
-        buildModels.updateModel(sourceCollection, null);
+        await buildModels.updateModel(sourceCollection, null);
       }
     }
     // 4. Create Target Fields
@@ -151,7 +151,8 @@ exports.transfer = async (req, res, next) => {
           // insert new field
           // eslint-disable-next-line no-await-in-loop
           await Fields.create(sourceField);
-          buildModels.updateModel(targetCollection, null);
+          // eslint-disable-next-line no-await-in-loop
+          await buildModels.updateModel(targetCollection, null);
         }
       }
     }

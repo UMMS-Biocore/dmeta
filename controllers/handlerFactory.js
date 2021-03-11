@@ -17,15 +17,22 @@ exports.deleteOne = Model =>
   catchAsync(async (req, res, next) => {
     let doc;
     if (res.locals.Model) Model = res.locals.Model;
+    let query = Model.findById(req.params.id);
+
+    let filter = {};
+    if (res.locals.Filter) {
+      filter = res.locals.Filter;
+      query.find(filter);
+    }
+
     // Check if deletion is allowed
     if (res.locals.Perms) {
-      let query = Model.findById(req.params.id);
       const permFilter = await res.locals.Perms('write');
       query.find(permFilter);
-      doc = await query;
-      if (!doc || (Array.isArray(doc) && doc.length === 0)) {
-        return next(new AppError(`No document found with ${req.params.id}!`, 404));
-      }
+    }
+    doc = await query;
+    if (!doc || (Array.isArray(doc) && doc.length === 0)) {
+      return next(new AppError(`No document found with ${req.params.id}!`, 404));
     }
     if (res.locals.Before) res.locals.Before();
     const delDoc = await Model.findByIdAndDelete(req.params.id);
