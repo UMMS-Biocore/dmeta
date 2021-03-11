@@ -162,7 +162,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
       }
     }
 
-    if ((isSelectized || isDataPerms || isDataRestrictTo) && visible && !isSet) {
+    if ((isSelectized || isDataPerms || isDataRestrictTo) && visible && !isSet && isSetExist) {
       if (visible == 'undefined') {
         val = 'undefined';
       } else {
@@ -171,6 +171,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
     }
 
     if (
+      isSetExist &&
       !isDataPerms &&
       !isSelectized &&
       !isDataRestrictTo &&
@@ -187,7 +188,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
       }
     }
     // for event form update
-    if (!isSetExist && visible == 'undefined') val = $(formValues[i]).val();
+    // if (!isSetExist && visible == 'undefined') val = $(formValues[i]).val();
     if (name) formObj[name] = val;
   }
   return [formObj, stop];

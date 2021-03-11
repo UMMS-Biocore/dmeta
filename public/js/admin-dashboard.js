@@ -463,13 +463,17 @@ const updateNavbarTables = async (collID, projectID) => {
   }
 };
 
-const getEventWorkflow = (projectID, type) => {
+const getEventWorkflow = async (projectID, type) => {
   let disabled = '';
   let hide = '';
   if (type == 'disabled') {
     disabled = 'disabled';
     hide = `style="display:none;"`;
   }
+  const permsField = { name: 'perms', label: 'Permissions', type: 'Mixed' };
+  const element = await getFormElement(permsField, getProjectData(projectID), $s);
+  const permsDiv = getFormRow(element, permsField.label, permsField);
+
   const ret = `
   <div class="col-sm-10">
     <div class="form-group row">
@@ -488,14 +492,20 @@ const getEventWorkflow = (projectID, type) => {
   <div class="col-sm-2">
     <button ${hide} class="btn btn-primary insert-event-row" type="button" projectid="${projectID}"> Insert Group </button>
   </div>
+  <div class="col-sm-10">
+    <form class="form-horizontal" id="event-perms-${projectID}" style="margin-top:40px;">
+      ${permsDiv}
+    </div>
+  </div>
+  <div class="col-sm-2"></div>
   `;
   return ret;
 };
 
 // insert empty event workflow
 // if eventID is set, then fill the row
-const refreshEventWorkflow = (projectID, eventID, type) => {
-  const workflow = getEventWorkflow(projectID, type);
+const refreshEventWorkflow = async (projectID, eventID, type) => {
+  const workflow = await getEventWorkflow(projectID, type);
   $(`#event-workflow-${projectID}`).empty();
   $(`#event-workflow-${projectID}`).append(workflow);
   if (eventID && $s.events) {
@@ -503,9 +513,11 @@ const refreshEventWorkflow = (projectID, eventID, type) => {
     if (events[0].name) $(`#event-name-${projectID}`).val(events[0].name);
     if (events[0].fields) {
       const data = events[0].fields;
+      const perms = JSON.stringify(events[0].perms);
       let prevCollID = '';
       let lastRow = '';
       console.log('data', data);
+      await prepDataPerms(`#event-perms-${projectID}`, { perms: perms });
       for (let i = 0; i < data.length; i++) {
         const collID = data[i].collectionID;
         const field = data[i].field;
@@ -542,6 +554,7 @@ const refreshEventWorkflow = (projectID, eventID, type) => {
     }
   } else {
     insertNewEventRow(projectID, type, true);
+    await prepDataPerms(`#event-perms-${projectID}`, {});
   }
 };
 
@@ -812,11 +825,11 @@ const getEditFieldDiv = projectID => {
 
 const bindEventHandlers = () => {
   // ================= EVENTS  =================
-  $(document).on('change', `select.select-event`, function(e) {
+  $(document).on('change', `select.select-event`, async function(e) {
     const projectID = $(this).attr('projectID');
     const eventID = $(this).val();
     if (eventID) {
-      refreshEventWorkflow(projectID, eventID, 'disabled');
+      await refreshEventWorkflow(projectID, eventID, 'disabled');
     } else {
       $(`#event-workflow-${projectID}`).empty();
     }
@@ -862,6 +875,10 @@ const bindEventHandlers = () => {
       data.name = name;
       data.fields = eventSchema;
       data.projectID = projectID;
+      // get perms data
+      const formValues = $(`#event-perms-${projectID}`).find('input');
+      const [formObj, stop] = createFormObj(formValues, [], true, 'undefined');
+      data.perms = formObj.perms;
       try {
         const res = await axios({
           method: 'POST',
@@ -900,14 +917,14 @@ const bindEventHandlers = () => {
       ['insert-event', 'edit-event', 'delete-event']
     );
   });
-  $(document).on('click', `button.insert-event`, function(e) {
+  $(document).on('click', `button.insert-event`, async function(e) {
     const projectID = $(this).attr('projectID');
     showHideButtons(
       this,
       ['insert-event', 'edit-event', 'delete-event', 'update-event'],
       ['cancel-event', 'save-event']
     );
-    refreshEventWorkflow(projectID, '', 'new');
+    await refreshEventWorkflow(projectID, '', 'new');
   });
   $(document).on('click', `button.edit-event`, async function(e) {
     showHideButtons(
@@ -917,7 +934,7 @@ const bindEventHandlers = () => {
     );
     const projectID = $(this).attr('projectID');
     const eventID = $(`#select-event-${projectID}`).val();
-    refreshEventWorkflow(projectID, eventID, 'new');
+    await refreshEventWorkflow(projectID, eventID, 'new');
   });
   $(document).on('click', `button.update-event`, async function(e) {
     const projectID = $(this).attr('projectID');
@@ -933,6 +950,10 @@ const bindEventHandlers = () => {
       data.name = name;
       data.fields = eventSchema;
       data.projectID = projectID;
+      // get perms data
+      const formValues = $(`#event-perms-${projectID}`).find('input');
+      const [formObj, stop] = createFormObj(formValues, [], true, 'undefined');
+      data.perms = formObj.perms;
       try {
         const res = await axios({
           method: 'PATCH',
