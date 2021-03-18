@@ -227,18 +227,20 @@ const syncTableData = async (tableID, collid, collName, projectid) => {
     let updatedObj = {};
     let insertObj = {};
     const rowData = data[i];
-    const rowProperties = hot.getCellMetaAtRow(i);
+
     let updtCheck = false;
-    for (let k = 0; k < rowProperties.length; k++) {
+    for (let k = 0; k < header.length; k++) {
       if (k == 0 || k == 1) continue; // Skip Update status and update log columns
       const cleanHeader = header[k].replace(`${collName}.`, '');
       const { key, value } = getKeyValueExcel(cleanHeader, rowData[k]);
       if (key != '_id' && key != 'DID' && value) insertObj[key] = value;
+      const rowProperties = hot.getCellMeta(i, k);
+
       if (
         key != '_id' &&
         key != 'DID' &&
-        rowProperties[k].className &&
-        rowProperties[k].className == 'bg-yellow'
+        rowProperties.className &&
+        rowProperties.className == 'bg-yellow'
       ) {
         updtCheck = true;
         updatedObj[key] = value;
@@ -569,14 +571,16 @@ const refreshEventForm = async (projectID, eventID) => {
           } else {
             const fieldData = $s.fields.filter(f => f._id === fieldId);
             field = fieldData[0];
-            label = field.label;
+            if (field) label = field.label;
           }
-          const element = await getFormElement(field, projectData[0], $s);
-          const refField = $(element).attr('ref');
-          let copiedField = $.extend(true, {}, field);
-          if (allDataRefs.includes(refField)) copiedField.hide = true;
-          if (refField) allDataRefs.push(refField);
-          div += getFormRow(element, label, copiedField);
+          if (field && label) {
+            const element = await getFormElement(field, projectData[0], $s);
+            const refField = $(element).attr('ref');
+            let copiedField = $.extend(true, {}, field);
+            if (allDataRefs.includes(refField)) copiedField.hide = true;
+            if (refField) allDataRefs.push(refField);
+            div += getFormRow(element, label, copiedField);
+          }
         }
       }
       div += `</fieldset></form>`;
@@ -753,11 +757,21 @@ const bindEventHandlers = () => {
     }
   });
 
+  $(document).on('click', `button.event-new-btn`, async function(e) {
+    $(this).css('display', 'none');
+    $(this)
+      .siblings('button.event-save-btn')
+      .css('display', 'block');
+    $(this)
+      .siblings('button.event-reset-btn')
+      .trigger('click');
+  });
   $(document).on('click', `button.event-save-btn`, async function(e) {
     console.log('save');
+    spinnerButton(this, 'loading');
     const projectID = $(this).attr('projectID');
     const allForms = $(`#event-form-${projectID}`).find('form');
-
+    let errorExist = false;
     for (let i = 0; i < allForms.length; i++) {
       const isFormSuccess = $(allForms[i])
         .find('fieldset.scheduler-border')
@@ -794,10 +808,18 @@ const bindEventHandlers = () => {
           .removeClass('error')
           .addClass('success');
       } else {
+        errorExist = true;
         $(allForms[i])
           .find('fieldset.scheduler-border')
           .addClass('error');
       }
+    }
+    spinnerButton(this, 'reset');
+    if (!errorExist) {
+      $(this).css('display', 'none');
+      $(this)
+        .siblings('button.event-new-btn')
+        .css('display', 'block');
     }
   });
 
@@ -1365,7 +1387,7 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
       <i class="cil-view-module"> </i>
     </button>
     <button style="display:none;" class="btn btn-primary cancel-excel-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Show Table Format" ${data}>
-      <i class="cil-reload"> </i>
+      <i class="cil-arrow-thick-left"> </i>
     </button>
     <button style="display:none;" class="btn btn-primary save-excel-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Save Changes in Spreadsheet Format" ${data}>
       <i class="cil-save"> </i>
@@ -1684,11 +1706,26 @@ const getEventTab = projectID => {
       <div class="modal-footer">
         <button class="btn btn-secondary event-reset-btn" projectID="${projectID}" type="button" >Reset</button>
         <button class="btn btn-primary event-save-btn" projectID="${projectID}" type="button">Save</button>
+        <button style="display:none;" class="btn btn-success event-new-btn" projectID="${projectID}" type="button">New Data</button>
       </div>
     </div>
   </div>
   `;
   return ret;
+};
+
+const spinnerButton = (button, mode) => {
+  if (mode == 'loading') {
+    $(button).prop('disabled', true);
+    $(button).prepend(
+      `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> `
+    );
+  } else if (mode == 'reset') {
+    $(button).prop('disabled', false);
+    $(button)
+      .find('span')
+      .remove();
+  }
 };
 
 const getCollectionNavbar = async projectId => {
