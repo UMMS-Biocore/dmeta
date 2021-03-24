@@ -1,4 +1,5 @@
 const path = require('path');
+const exec = require('child_process').exec;
 const execSync = require('child_process').execSync;
 // Concatenate root directory path with our backup folder.
 const backupDirPath = path.join(__dirname, './../tmp/dbbackup/');
@@ -9,7 +10,7 @@ const dbOptions = {
   database: 'dmeta-skin',
   autoBackup: true,
   removeOldBackup: false,
-  keepLastDaysBackup: 2,
+  keepHowManyBackup: 20,
   autoBackupPath: backupDirPath
 };
 
@@ -54,7 +55,8 @@ const getNewBackupDir = () => {
 };
 
 // Auto backup function
-exports.dbAutoBackUp = () => {
+// mode options: "sync", "async"
+exports.dbAutoBackUp = mode => {
   // check for auto backup is enabled or disabled
   if (dbOptions.autoBackup == true) {
     let newBackupDir = getNewBackupDir();
@@ -63,9 +65,16 @@ exports.dbAutoBackUp = () => {
     let cmd = `mongodump --host ${dbOptions.host} --port ${dbOptions.port} --db ${dbOptions.database} --out ${newBackupPath}`;
     console.log(cmd);
     try {
-      execSync(cmd);
-      console.log('backup successful');
-      return true;
+      if (mode == 'sync') {
+        execSync(cmd);
+        console.log('backup successful');
+        return true;
+      }
+      exec(cmd, error => {
+        if (this.empty(error)) {
+          console.log('backup successful');
+        }
+      });
     } catch (err) {
       console.log('backup failed: ', err);
       return false;

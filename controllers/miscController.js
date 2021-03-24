@@ -58,6 +58,46 @@ exports.fileUpload = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getDnextData = catchAsync(async (req, res, next) => {
+  try {
+    let accessToken = '';
+    let url = '';
+    let method = '';
+    let body = {};
+    if (req.cookies['jwt-dmeta']) accessToken = req.cookies['jwt-dmeta'];
+    console.log(body);
+
+    if (req.body.url) url = req.body.url;
+    if (req.body.body) body = req.body.body;
+    if (req.body.method) method = req.body.method;
+    let received = '';
+    if (method == 'GET') {
+      console.log(url);
+      console.log(body);
+      let { data } = await axios.get(`${url}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
+        data: body
+      });
+      received = data;
+    }
+
+    if (!received) return next(new AppError(`No document found!`, 404));
+    const doc = received.data.data;
+
+    res.status(200).json({
+      status: 'success',
+      reqeustedAt: req.requestTime,
+      data: {
+        data: doc
+      }
+    });
+  } catch (err) {
+    next(new AppError(`Error occured!`, 404));
+  }
+});
+
 exports.getRemoteData = catchAsync(async (req, res, next) => {
   let headers = {};
   if (req.body.authorization) {

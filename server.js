@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const buildModels = require('./utils/buildModels');
 const updateDmeta = require('./utils/updateDmeta');
+global.CronJob = require('./utils/cron');
 
 dotenv.config({ path: './config.env' });
 

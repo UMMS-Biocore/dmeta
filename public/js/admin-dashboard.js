@@ -8,7 +8,8 @@ import {
   fillFormByName,
   getUpdatedFields,
   prepareMultiUpdateModal,
-  prepareClickToActivateModal
+  prepareClickToActivateModal,
+  getSimpleDropdown
 } from './jsfuncs';
 import Sortable from 'sortablejs';
 import { getCrudButtons, crudAjaxRequest } from './dashboard';
@@ -806,21 +807,12 @@ const getCollectionDropdown = (projectID, name) => {
   return dropdown;
 };
 
-const getSimpleDropdown = (options, name) => {
-  let dropdown = `<select class="form-control" name="${name}" >`;
-  options.forEach(i => {
-    dropdown += `<option  value="${i._id}">${i.name}</option>`;
-  });
-  dropdown += `</select>`;
-  return dropdown;
-};
-
 const getEditFieldDiv = projectID => {
   let ret = `<p> Please choose target collection and operation type to transfer your data of fields into target collection. </p>`;
   ret += getFormRow(getCollectionDropdown(projectID, 'targetCollection'), 'Target Collection', {});
   const operationTypeDropdown = getSimpleDropdown(
     [{ _id: 'move-ref', name: 'Move and Keep Reference' }],
-    'type'
+    { name: 'type' }
   );
   ret += getFormRow(operationTypeDropdown, 'Operation Type', {});
 

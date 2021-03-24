@@ -15,5 +15,6 @@ router.use(authController.requireLogin);
 
 router.route('/fileUpload').post(upload.single('file'), miscController.fileUpload);
 router.route('/readExcelUpload').post(miscController.readExcelUpload);
+router.route('/getDnextData').post(miscController.getDnextData);
 
 module.exports = router;

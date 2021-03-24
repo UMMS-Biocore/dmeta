@@ -1,9 +1,10 @@
 /* eslint-disable */
 import axios from 'axios';
-import { createFormObj, convertFormObj, getDropdownFields } from './../jsfuncs';
+import { createFormObj, convertFormObj, getDropdownFields, getSimpleDropdown } from './../jsfuncs';
+import { createDynamicFields, insertDynamicFields } from './dynamicFields';
 
 // GLOBAL SCOPE
-let $s = { data: {}, collections: {}, fields: {}, projects: {} };
+let $s = { data: {}, collections: {}, fields: {}, projects: {}, server: {} };
 
 const ajaxCall = async (method, url) => {
   try {
@@ -175,14 +176,15 @@ export const getFormElement = async (field, projectData, $scope) => {
   return ret;
 };
 
-export const getParentCollection = collectionID => {
+export const getParentCollection = (collectionID, $scope) => {
+  if (!$scope) $scope = $s;
   let parentCollectionID = '';
   let parentCollLabel = '';
   let parentCollName = '';
-  const col = $s.collections.filter(col => col.id === collectionID);
+  const col = $scope.collections.filter(col => col.id === collectionID);
   if (col[0] && col[0].parentCollectionID) {
     parentCollectionID = col[0].parentCollectionID;
-    const parentColl = $s.collections.filter(col => col.id === parentCollectionID);
+    const parentColl = $scope.collections.filter(col => col.id === parentCollectionID);
     if (parentColl[0] && parentColl[0].name) parentCollName = parentColl[0].name;
     parentCollLabel = parentColl[0] && parentColl[0].label ? parentColl[0].label : parentCollName;
   }
@@ -195,7 +197,7 @@ export const createSelectizeMultiField = (el, data, fieldsOfCollection) => {
     const showFieldsSum = showFields.slice(0, 3);
 
     $(el).selectize({
-      // allowEmptyOption: true,
+      create: true,
       valueField: '_id',
       searchField: showFieldsSum,
       options: data,
@@ -228,6 +230,247 @@ export const createSelectizeMultiField = (el, data, fieldsOfCollection) => {
       }
     });
   }
+};
+
+const selectizeRunTemplate = (el, data, dynamicInputEl, dynamicOutputEl) => {
+  $(el).selectize({
+    create: function(input) {
+      console.log('input', input);
+      return { _id: input, name: input };
+    },
+    placeholder: 'Type or Choose Run ID',
+    valueField: '_id',
+    searchField: ['_id', 'name'],
+    options: data,
+    onChange: function(value) {
+      const runID = value;
+      if (runID && $s.server) {
+        const url_server = $s.server.url_server;
+        console.log('url_server', url_server);
+        let body = {};
+        const method = 'GET'; // method for Dnext query
+        const url = `${url_server}/api/service.php?data=getRun&id=${runID}`;
+        axios
+          .post('/api/v1/misc/getDnextData', {
+            body,
+            method,
+            url
+          })
+          .then(res => {
+            console.log(res);
+            if (
+              res &&
+              res.data &&
+              res.data.data &&
+              res.data.data.data &&
+              res.data.data.data.dmetaOutput
+            ) {
+              const dmetaOutputs = res.data.data.data.dmetaOutput;
+              const inputs = res.data.data.data.inputs;
+              const uniqueOutputs = [...new Set(dmetaOutputs.map(item => item.target))];
+              let outData = [];
+              for (var k = 0; k < uniqueOutputs.length; k++) {
+                let outDataObj = {};
+                outDataObj.key = uniqueOutputs[k];
+                outDataObj.value = false;
+                outDataObj.valueType = 'checkbox';
+                outData.push(outDataObj);
+              }
+              const filteredInputs = inputs.filter(i => i.type == 'collection' || i.name == 'mate');
+              let inData = [];
+              for (var k = 0; k < filteredInputs.length; k++) {
+                let dataObj = {};
+                if (filteredInputs[k].type == 'collection') {
+                  dataObj.key = filteredInputs[k].name;
+                  dataObj.value = '';
+                  dataObj.valueType = 'collection';
+                } else {
+                  dataObj.key = filteredInputs[k].name;
+                  dataObj.value = filteredInputs[k].val;
+                  dataObj.valueType = 'input';
+                }
+                dataObj.valueEdit = true;
+                inData.push(dataObj);
+              }
+              insertDynamicFields(dynamicOutputEl, { clean: true, data: outData });
+              insertDynamicFields(dynamicInputEl, { clean: true, data: inData });
+            }
+            //
+          });
+      }
+    },
+    render: {
+      option: function(data, escape) {
+        let ret = `<div class="option">`;
+        if (data['name'] && data['name'] != data['_id']) {
+          ret += `<span class="title"> ${escape(data['name'])} </span>`;
+        }
+        ret += `<span class="url"> RUN ID: ${escape(data['_id'])} </span>`;
+        ret += `</div>`;
+        return ret;
+      },
+      item: function(data, escape) {
+        let ret = `<div class="item" data-value="${escape(data._id)} ">`;
+        ret += `<i>`;
+        ret += `${escape(data['_id'])}`;
+        ret += `</i>`;
+        ret += `</div>`;
+        return ret;
+      }
+    }
+  });
+};
+
+const updateSelectizeOptions = (el, data) => {
+  for (var k = 0; k < data.length; k++) {
+    if (data[k]['_id'] && data[k]['name']) {
+      let opt = { _id: data[k]['_id'], name: data[k]['name'] };
+      el[0].selectize.addOption([opt]);
+    }
+  }
+};
+
+const updateDropdownOptions = (dropdown, data) => {
+  dropdown.empty();
+  for (var k = 0; k < data.length; k++) {
+    if (data[k]['_id'] && data[k]['name']) {
+      dropdown.append(
+        $('<option></option>')
+          .val(data[k]['_id'])
+          .html(data[k]['name'])
+      );
+    }
+  }
+};
+
+export const prepRunForm = (formId, data, $scope, projectID) => {
+  console.log('prepRunForm');
+  const serverIDField = $(formId).find(`[name*='server_id']`);
+  const runEnvField = $(formId).find(`[name*='run_env']`);
+  const templateRunField = $(formId).find(`[name*='tmplt_id']`);
+  const inputField = $(formId).find(`[name*='in']`);
+  const outputField = $(formId).find(`[name*='out']`);
+
+  let runEnvDropdownEl = '';
+  let templateRunDropdownEl = '';
+  let dynamicOutputEl = '';
+  let dynamicInputEl = '';
+  if (serverIDField[0]) {
+    if (runEnvField[0]) {
+      if (!$(runEnvField[0]).hasClass('customize')) {
+        // remove actual runEnvField
+        const runEnvDropdown = getSimpleDropdown([], {
+          name: 'run_env',
+          class: 'customize'
+        });
+        runEnvDropdownEl = $(runEnvDropdown);
+        $(runEnvField[0]).after(runEnvDropdownEl);
+        $(runEnvField[0]).remove();
+      }
+    }
+    if (outputField[0]) {
+      if (!$(outputField[0]).hasClass('customized')) {
+        dynamicOutputEl = createDynamicFields(outputField[0], {
+          name: 'out',
+          class: 'customize',
+          insert: false,
+          delete: false,
+          projectID: projectID
+        });
+      }
+    }
+    if (inputField[0]) {
+      if (!$(inputField[0]).hasClass('customized')) {
+        dynamicInputEl = createDynamicFields(inputField[0], {
+          name: 'in',
+          class: 'customize',
+          insert: true,
+          delete: true,
+          projectID: projectID
+        });
+      }
+    }
+    if (templateRunField[0]) {
+      if (!$(templateRunField[0]).hasClass('customize')) {
+        // hide actual runEnvField
+        const templateRunDropdown = getSimpleDropdown([], {
+          name: 'tmplt_id',
+          class: 'customize'
+        });
+        templateRunDropdownEl = $(templateRunDropdown);
+        $(templateRunField[0]).after(templateRunDropdownEl);
+        // 3. make template run_id selectize and on change update inputs/outputs dropdown
+        selectizeRunTemplate(templateRunDropdownEl, [], dynamicInputEl, dynamicOutputEl);
+        $(templateRunField[0]).remove();
+      }
+    }
+    // 1. get all run environments of user from dnext on change of serverid
+    $(serverIDField[0]).on('change', async function(e) {
+      const serverId = $(this).val();
+      console.log(serverId);
+      if (serverId) {
+        try {
+          const res = await axios({
+            method: 'GET',
+            url: `/api/v1/server/${serverId}`
+          });
+          console.log(res);
+          if (
+            res &&
+            res.data &&
+            res.data.status === 'success' &&
+            res.data.data &&
+            res.data.data.data &&
+            res.data.data.data[0]
+          ) {
+            $s.server = res.data.data.data[0];
+            const url_server = res.data.data.data[0].url_server;
+            console.log(url_server, 'url_server');
+            if (url_server && runEnvDropdownEl) {
+              let body = {};
+              const method = 'GET'; // method for Dnext query
+              const url = `${url_server}/api/service.php?data=getRunEnv`;
+              const runEnvData = await axios({
+                method: 'POST',
+                url: `/api/v1/misc/getDnextData`,
+                data: { body, method, url }
+              });
+              console.log('runEnvData', runEnvData);
+              if (runEnvData && runEnvData.data && runEnvData.data.data) {
+                updateDropdownOptions(runEnvDropdownEl, runEnvData.data.data.data);
+              }
+            }
+            if (url_server && templateRunDropdownEl) {
+              let body = {};
+              const method = 'GET'; // method for Dnext query
+              const url = `${url_server}/api/service.php?data=getRuns`;
+              const runsData = await axios({
+                method: 'POST',
+                url: `/api/v1/misc/getDnextData`,
+                data: { body, method, url }
+              });
+              console.log('runsData', runsData);
+              if (runsData && runsData.data && runsData.data.data) {
+                updateSelectizeOptions(templateRunDropdownEl, runsData.data.data.data);
+              }
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      } else {
+        // empty dropdowns
+        updateDropdownOptions(runEnvDropdownEl, []);
+      }
+    });
+    if (!data || !data.server_id) {
+      $(serverIDField[0])
+        .prop('selectedIndex', 1)
+        .trigger('change');
+    }
+  }
+  // 3. add extra dropdown for mode: [single,batch]
+  // if batch mode is selected: use name and work directory as prefix
 };
 
 export const prepReferenceDropdown = (formId, $scope) => {
@@ -413,7 +656,10 @@ export const getFieldsDiv = async (collectionID, projectData) => {
   await getCollectionFieldData();
   let ret = '';
   // 1. if parent collection id is defined, insert as a new field
-  const { parentCollLabel, parentCollName, parentCollectionID } = getParentCollection(collectionID);
+  const { parentCollLabel, parentCollName, parentCollectionID } = getParentCollection(
+    collectionID,
+    $s
+  );
   if (parentCollLabel && parentCollName) {
     const ref =
       projectData && projectData.name ? `${projectData.name}_${parentCollName}` : parentCollName;
@@ -493,6 +739,7 @@ const bindEventHandlers = () => {
           data: formObj
         });
         console.log(res);
+
         if (res && res.data && res.data.status === 'success') {
           console.log('success');
           $('#insert-data-coll-log').html('success');

@@ -76,7 +76,7 @@ exports.transfer = async (req, res, next) => {
   try {
     // 0. Stop server
     // 1. Backup database
-    const backupSuccess = dbbackup.dbAutoBackUp();
+    const backupSuccess = dbbackup.dbAutoBackUp('sync');
     if (!backupSuccess) return next(new AppError('Backup Failed.', 404));
     // 2. Check if two collection is connected with field
     let connectedField = false;

@@ -114,3 +114,10 @@ legend.scheduler-border {
   display: block;
   color: #a0a0a0;
 }
+
+/*editable-click for key/value tables */
+a.editable-click-input,
+a.editable-click-collection {
+  text-decoration: none;
+  border-bottom: dashed 1px #0088cc;
+}

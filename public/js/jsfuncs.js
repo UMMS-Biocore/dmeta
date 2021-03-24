@@ -1,6 +1,7 @@
 /* eslint-disable */
 import axios from 'axios';
 const JSON5 = require('json5');
+import { getDynamicFieldsData } from './formModules/dynamicFields';
 
 export const ajaxCall = async (method, url) => {
   try {
@@ -21,10 +22,11 @@ export const globalEventBinders = () => {
   $(document).on('click', `.multi-value`, function(e) {
     $(this).css('display', 'none');
     const field = $(this).next();
+    const isCustomized = field.hasClass('customized');
     const isSelectized = field.hasClass('selectized');
     const isDataPerms = field.hasClass('data-perms');
     const isDataRestrictTo = field.hasClass('data-restrictTo');
-    if (isSelectized || isDataPerms || isDataRestrictTo) {
+    if (isSelectized || isDataPerms || isDataRestrictTo || isCustomized) {
       field.css('display', 'none');
       field.next().css('display', 'block');
     } else {
@@ -42,12 +44,14 @@ export const globalEventBinders = () => {
       .next();
     const isSelectized = field.hasClass('selectized');
     const isDataPerms = field.hasClass('data-perms');
+    const isCustomized = field.hasClass('customized');
     const isDataRestrictTo = field.hasClass('data-restrictTo');
     $(this)
       .siblings('.multi-value')
       .css('display', 'block');
     field.css('display', 'none');
-    if (isSelectized || isDataPerms || isDataRestrictTo) field.next().css('display', 'none');
+    if (isSelectized || isDataPerms || isDataRestrictTo || isCustomized)
+      field.next().css('display', 'none');
   });
 };
 
@@ -85,9 +89,13 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
   for (var i = 0; i < formValues.length; i++) {
     var name = $(formValues[i]).attr('name');
     var type = $(formValues[i]).attr('type');
+    const isCustomized = $(formValues[i]).hasClass('customized');
     const isSelectized = $(formValues[i]).hasClass('selectized');
     const isDataPerms = $(formValues[i]).hasClass('data-perms');
     const isDataRestrictTo = $(formValues[i]).hasClass('data-restrictTo');
+    const isDynamicFields = $(formValues[i]).hasClass('dynamicFields');
+    if (isDynamicFields) continue;
+
     const isSetExist = $(formValues[i]).siblings('.multi-value').length;
     const isSet =
       $(formValues[i]).siblings('.multi-value').length &&
@@ -138,6 +146,16 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
         stop = true;
       }
     }
+
+    if (
+      isCustomized &&
+      $(formValues[i])
+        .next()
+        .hasClass('dynamicFields')
+    ) {
+      val = getDynamicFieldsData($(formValues[i]).next());
+    }
+
     if (isDataPerms || isDataRestrictTo) {
       const table = $(formValues[i])
         .next()
@@ -192,6 +210,22 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
     if (name) formObj[name] = val;
   }
   return [formObj, stop];
+};
+
+export const getSimpleDropdown = (options, settings) => {
+  let nameAttr = '';
+  let classAttr = '';
+  if (settings.name) nameAttr = settings.name;
+  if (settings.class) classAttr = settings.class;
+  let dropdown = `<select class="form-control ${classAttr}" name="${nameAttr}" >`;
+  if (settings.placeholder) {
+    dropdown += `<option value="" >${settings.placeholder}</option>`;
+  }
+  options.forEach(i => {
+    dropdown += `<option  value="${i._id}">${i.name}</option>`;
+  });
+  dropdown += `</select>`;
+  return dropdown;
 };
 
 // convert string fields to array/object
@@ -334,12 +368,13 @@ export const prepareMultiUpdateModal = (formId, formBodyId, find) => {
     const isSelectized = $(formValues[k]).hasClass('selectized');
     const isDataPerms = $(formValues[k]).hasClass('data-perms');
     const isDataRestrictTo = $(formValues[k]).hasClass('data-restrictTo');
+    const isCustomized = $(formValues[k]).hasClass('customized');
 
     const nameAttr = $(formValues[k]).attr('name');
     if (nameAttr) {
       $(formValues[k]).before(`<div class="multi-value" > Multiple Values</div>`);
       $(formValues[k]).css('display', 'none');
-      if (isSelectized || isDataPerms || isDataRestrictTo) {
+      if (isSelectized || isDataPerms || isDataRestrictTo || isCustomized) {
         $(formValues[k])
           .next()
           .css('display', 'none');
@@ -364,14 +399,16 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
     const isRequired = $(formValues[k]).attr('required');
     const nameAttr = $(formValues[k]).attr('name');
     const isSelectized = $(formValues[k]).hasClass('selectized');
+    const isCustomized = $(formValues[k]).hasClass('customized');
+    const isNoSet = $(formValues[k]).hasClass('no-set');
     const isDataPerms = $(formValues[k]).hasClass('data-perms');
     const isDataRestrictTo = $(formValues[k]).hasClass('data-restrictTo');
 
-    if (!isRequired && nameAttr) {
+    if (!isRequired && nameAttr && !isNoSet) {
       // value not filled
       if (!(nameAttr in data) || data[nameAttr] === null) {
         $(formValues[k]).before(`<div class="multi-value" > Click to Set Field </div>`);
-        if (isSelectized || isDataPerms || isDataRestrictTo) {
+        if (isSelectized || isDataPerms || isDataRestrictTo || isCustomized) {
           $(formValues[k])
             .next()
             .after(`<div class="multi-restore" style="display:none;"> Unset Field</div>`);
@@ -390,7 +427,7 @@ export const prepareClickToActivateModal = (formId, formBodyId, find, data) => {
         $(formValues[k]).before(
           `<div class="multi-value" style="display:none;"> Click to Set Field </div>`
         );
-        if (isSelectized || isDataPerms || isDataRestrictTo) {
+        if (isSelectized || isDataPerms || isDataRestrictTo || isCustomized) {
           $(formValues[k])
             .next()
             .after(`<div class="multi-restore" > Unset Field</div>`);
