@@ -1,0 +1,1468 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API v1 &mdash; Dmeta v0.0.38 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Dmeta v0.0.38 documentation" href="../index.html"/>
+        <link rel="next" title="Project Guide" href="projects.html"/>
+        <link rel="prev" title="Data Guide" href="data.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Dmeta
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.0.38
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Short Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API v1</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#authentication-and-authorization">Authentication and authorization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#user-login">User Login</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#projects">Projects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-all-projects">Get All Projects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-a-project">Get a Project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-project">Create a Project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-a-project">Update a Project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delete-a-project">Delete a Project</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#collections">Collections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-all-collections">Get All Collections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-a-collection">Get a Collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-collection">Create a Collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-a-collection">Update a Collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delete-a-collection">Delete a Collection</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fields">Fields</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-all-fields">Get All Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-a-field">Get a Field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-field">Create a Field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-a-field">Update a Field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delete-a-field">Delete a Field</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data">Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-all-data-of-the-collection-in-a-project">Get All Data of the Collection in a Project</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-a-data">Get a Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-data">Create a Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-a-data">Update a Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delete-a-data">Delete a Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Project Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Pipeline Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fields.html">Process Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administrator Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin_quick.html">Introduction</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dmeta</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>API v1</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dmeta/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-v1">
+<h1>API v1<a class="headerlink" href="#api-v1" title="Permalink to this headline">¶</a></h1>
+<p>Dmeta API uses <abbr title="Representational State Transfer">REST</abbr>.
+JSON is returned by all API responses including errors
+and HTTP response status codes are to designate success and failure.</p>
+<div class="contents local topic" id="table-of-contents">
+<p class="topic-title first">Table of contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#authentication-and-authorization" id="id1">Authentication and authorization</a><ul>
+<li><a class="reference internal" href="#user-login" id="id2">User Login</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#projects" id="id3">Projects</a><ul>
+<li><a class="reference internal" href="#get-all-projects" id="id4">Get All Projects</a></li>
+<li><a class="reference internal" href="#get-a-project" id="id5">Get a Project</a></li>
+<li><a class="reference internal" href="#create-a-project" id="id6">Create a Project</a></li>
+<li><a class="reference internal" href="#update-a-project" id="id7">Update a Project</a></li>
+<li><a class="reference internal" href="#delete-a-project" id="id8">Delete a Project</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#collections" id="id9">Collections</a><ul>
+<li><a class="reference internal" href="#get-all-collections" id="id10">Get All Collections</a></li>
+<li><a class="reference internal" href="#get-a-collection" id="id11">Get a Collection</a></li>
+<li><a class="reference internal" href="#create-a-collection" id="id12">Create a Collection</a></li>
+<li><a class="reference internal" href="#update-a-collection" id="id13">Update a Collection</a></li>
+<li><a class="reference internal" href="#delete-a-collection" id="id14">Delete a Collection</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fields" id="id15">Fields</a><ul>
+<li><a class="reference internal" href="#get-all-fields" id="id16">Get All Fields</a></li>
+<li><a class="reference internal" href="#get-a-field" id="id17">Get a Field</a></li>
+<li><a class="reference internal" href="#create-a-field" id="id18">Create a Field</a></li>
+<li><a class="reference internal" href="#update-a-field" id="id19">Update a Field</a></li>
+<li><a class="reference internal" href="#delete-a-field" id="id20">Delete a Field</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#data" id="id21">Data</a><ul>
+<li><a class="reference internal" href="#get-all-data-of-the-collection-in-a-project" id="id22">Get All Data of the Collection in a Project</a></li>
+<li><a class="reference internal" href="#get-a-data" id="id23">Get a Data</a></li>
+<li><a class="reference internal" href="#create-a-data" id="id24">Create a Data</a></li>
+<li><a class="reference internal" href="#update-a-data" id="id25">Update a Data</a></li>
+<li><a class="reference internal" href="#delete-a-data" id="id26">Delete a Data</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="authentication-and-authorization">
+<h2>Authentication and authorization<a class="headerlink" href="#authentication-and-authorization" title="Permalink to this headline">¶</a></h2>
+<p>Requests to the Dmeta API are for public and private information. All endpoints require authentication.</p>
+<div class="section" id="user-login">
+<h3>User Login<a class="headerlink" href="#user-login" title="Permalink to this headline">¶</a></h3>
+<p>After getting the access token, users can make a request to the Dmeta API with the <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> HTTP header. It can be specified with <code class="docutils literal notranslate"><span class="pre">Bearer</span> <span class="pre">&lt;your-access-token&gt;</span></code>
+to authenticate as a user and have the same permissions that the user itself.</p>
+<dl class="post">
+<dt id="post-URL-api-v1-users-login">
+<code class="descname">POST </code><code class="descname">{{URL}}/api/v1/users/login</code><a class="headerlink" href="#post-URL-api-v1-users-login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve an access token for the current logged in user.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X POST <span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/users/login&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Content-Type: application/json&#39;</span> <span class="se">\</span>
+-d <span class="s1">&#39;</span>
+<span class="s1">    {</span>
+<span class="s1">        &quot;email&quot;:&quot;your-email@mail.com&quot;,</span>
+<span class="s1">        &quot;password&quot;:&quot;your-password&quot;</span>
+<span class="s1">    }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;eyJhbGciOiJSUz....&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;user&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;b6c9a200168a225f39add38d&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;your-email@mail.com&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test user&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;yukseleo&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="projects">
+<h2>Projects<a class="headerlink" href="#projects" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-all-projects">
+<h3>Get All Projects<a class="headerlink" href="#get-all-projects" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get-URL-api-v1-projects">
+<code class="descname">GET </code><code class="descname">{{URL}}/api/v1/projects</code><a class="headerlink" href="#get-URL-api-v1-projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a list of all the projects for the current logged in user.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-11-17T19:36:49.048Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-11-17T19:36:49.048Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;admin&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Vitiligo&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="get-a-project">
+<h3>Get a Project<a class="headerlink" href="#get-a-project" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get--api-v1-projects-(string-project_id)">
+<code class="descname">GET </code><code class="descname">/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_id</em><span class="sig-paren">)</span><a class="headerlink" href="#get--api-v1-projects-(string-project_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve details of a single project.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects/5fb2b395c8c1e577fcb8ce6c&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-11-17T19:36:49.048Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-11-17T19:36:49.048Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;admin&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Vitiligo&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="create-a-project">
+<h3>Create a Project<a class="headerlink" href="#create-a-project" title="Permalink to this headline">¶</a></h3>
+<dl class="post">
+<dt id="post--api-v1-projects-">
+<code class="descname">POST </code><code class="descname">/api/v1/projects/</code><a class="headerlink" href="#post--api-v1-projects-" title="Permalink to this definition">¶</a></dt>
+<dd><p>This post request is only allowed for the admin role.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X POST <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Content-Type: application/json&#39;</span> <span class="se">\</span>
+-d <span class="s1">&#39;</span>
+<span class="s1">    {</span>
+<span class="s1">        &quot;name&quot;: &quot;vitiligo&quot;,</span>
+<span class="s1">        &quot;label&quot;: &quot;Vitiligo&quot;</span>
+<span class="s1">    }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:04:27.474Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:04:27.474Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;6063dbcfa50bb5fa9eb9cfba&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Vitiligo&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="update-a-project">
+<h3>Update a Project<a class="headerlink" href="#update-a-project" title="Permalink to this headline">¶</a></h3>
+<dl class="patch">
+<dt id="patch--api-v1-projects-(string-project_id)">
+<code class="descname">PATCH </code><code class="descname">/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_id</em><span class="sig-paren">)</span><a class="headerlink" href="#patch--api-v1-projects-(string-project_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an existing project.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X PATCH <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/projects/5fb2b395c8c1e577fcb8ce6c <span class="se">\</span>
+  -H <span class="s2">&quot;Content-Type: application/json&quot;</span> <span class="se">\</span>
+  -d <span class="s1">&#39;</span>
+<span class="s1">      {</span>
+<span class="s1">        &quot;slug&quot;: &quot;vit&quot;</span>
+<span class="s1">      }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-11-17T19:36:49.048Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-11-17T19:36:49.048Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;role&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;admin&quot;</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;vitiligo&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Vitiligo&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;vit&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="delete-a-project">
+<h3>Delete a Project<a class="headerlink" href="#delete-a-project" title="Permalink to this headline">¶</a></h3>
+<dl class="delete">
+<dt id="delete--api-v1-projects-(string-project_id)">
+<code class="descname">DELETE </code><code class="descname">/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_id</em><span class="sig-paren">)</span><a class="headerlink" href="#delete--api-v1-projects-(string-project_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deleting an existing project.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X DELETE <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/projects/5fb2b395c8c1e577fcb8ce6c
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;doc&quot;</span><span class="p">:</span> <span class="s2">&quot;Deleted!&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="collections">
+<h2>Collections<a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-all-collections">
+<h3>Get All Collections<a class="headerlink" href="#get-all-collections" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get-URL-api-v1-collections">
+<code class="descname">GET </code><code class="descname">{{URL}}/api/v1/collections</code><a class="headerlink" href="#get-URL-api-v1-collections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a list of all the collections for the current logged in user.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/collections&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;parentCollectionID&quot;</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.301Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.301Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;exp_series&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment Series&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;exp_series&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;projectID&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;parentCollectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.301Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.301Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffe635db5980ba020ff4&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiments&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;projectID&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffe635db5980ba020ff4&quot;</span>
+            <span class="p">}]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="get-a-collection">
+<h3>Get a Collection<a class="headerlink" href="#get-a-collection" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get--api-v1-collections-(string-collection_id)">
+<code class="descname">GET </code><code class="descname">/api/v1/collections/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_id</em><span class="sig-paren">)</span><a class="headerlink" href="#get--api-v1-collections-(string-collection_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve details of a single collection.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/collections/5f57ffe635db5980ba020ff4&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;parentCollectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.301Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.301Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffe635db5980ba020ff4&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiments&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;exp&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;projectID&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="create-a-collection">
+<h3>Create a Collection<a class="headerlink" href="#create-a-collection" title="Permalink to this headline">¶</a></h3>
+<dl class="post">
+<dt id="post--api-v1-collections-">
+<code class="descname">POST </code><code class="descname">/api/v1/collections/</code><a class="headerlink" href="#post--api-v1-collections-" title="Permalink to this definition">¶</a></dt>
+<dd><p>This post request is only allowed for the project-admin role.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X POST <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/collections&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Content-Type: application/json&#39;</span> <span class="se">\</span>
+-d <span class="s1">&#39;</span>
+<span class="s1">    {</span>
+<span class="s1">        &quot;name&quot;: &quot;analysis&quot;,</span>
+<span class="s1">        &quot;label&quot;: &quot;Analysis&quot;,</span>
+<span class="s1">        &quot;slug&quot;: &quot;analysis&quot;,</span>
+<span class="s1">        &quot;projectID&quot;:&quot;5fb2b395c8c1e577fcb8ce6c&quot;,</span>
+<span class="s1">        &quot;restrictTo&quot;: {&quot;group&quot;:[&quot;5fb45793aa5adff6f407f2d2&quot;]},</span>
+<span class="s1">        &quot;parentCollectionID&quot;:&quot;5f74a0e05443973d2bfd870c&quot;</span>
+<span class="s1">    }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;parentCollectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f74a0e05443973d2bfd870c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:26:17.087Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:26:17.087Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;6063e3a33c195afbe6d5e036&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;analysis&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Analysis&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;analysis&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;projectID&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="update-a-collection">
+<h3>Update a Collection<a class="headerlink" href="#update-a-collection" title="Permalink to this headline">¶</a></h3>
+<dl class="patch">
+<dt id="patch--api-v1-collections-(string-collection_id)">
+<code class="descname">PATCH </code><code class="descname">/api/v1/collections/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_id</em><span class="sig-paren">)</span><a class="headerlink" href="#patch--api-v1-collections-(string-collection_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an existing collection.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X PATCH <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;your-access-token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/collections/6063e3a33c195afbe6d5e036 <span class="se">\</span>
+  -H <span class="s2">&quot;Content-Type: application/json&quot;</span> <span class="se">\</span>
+  -d <span class="s1">&#39;</span>
+<span class="s1">      {</span>
+<span class="s1">        &quot;slug&quot;: &quot;anlys&quot;</span>
+<span class="s1">      }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;parentCollectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f74a0e05443973d2bfd870c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:26:17.087Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:26:17.087Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;6063e3a33c195afbe6d5e036&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;analysis&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Analysis&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;slug&quot;</span><span class="p">:</span> <span class="s2">&quot;anlys&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;restrictTo&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;projectID&quot;</span><span class="p">:</span> <span class="s2">&quot;5fb2b395c8c1e577fcb8ce6c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="delete-a-collection">
+<h3>Delete a Collection<a class="headerlink" href="#delete-a-collection" title="Permalink to this headline">¶</a></h3>
+<dl class="delete">
+<dt id="delete--api-v1-collections-(string-collection_id)">
+<code class="descname">DELETE </code><code class="descname">/api/v1/collections/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_id</em><span class="sig-paren">)</span><a class="headerlink" href="#delete--api-v1-collections-(string-collection_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deleting an existing collection.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X DELETE <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;your-access-token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/collections/6063e3a33c195afbe6d5e036
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;doc&quot;</span><span class="p">:</span> <span class="s2">&quot;Deleted!&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-all-fields">
+<h3>Get All Fields<a class="headerlink" href="#get-all-fields" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get-URL-api-v1-fields">
+<code class="descname">GET </code><code class="descname">{{URL}}/api/v1/fields</code><a class="headerlink" href="#get-URL-api-v1-fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a list of fields for the current logged in user.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/fields&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.406Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.406Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f58518835db5980ba020ff7&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;collectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;unique&quot;</span><span class="p">:</span> <span class="kc">true</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.406Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.406Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f58559f35db5980ba020ff8&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;design&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Design&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;collectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="get-a-field">
+<h3>Get a Field<a class="headerlink" href="#get-a-field" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get--api-v1-fields-(string-field_id)">
+<code class="descname">GET </code><code class="descname">/api/v1/fields/</code><span class="sig-paren">(</span><em class="property">string: </em><em>field_id</em><span class="sig-paren">)</span><a class="headerlink" href="#get--api-v1-fields-(string-field_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve details of a single field.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/fields/5f58559f35db5980ba020ff8&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.406Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-09-08T21:56:35.406Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5f58559f35db5980ba020ff8&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;design&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Design&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;collectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f57ffba35db5980ba020ff3&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="create-a-field">
+<h3>Create a Field<a class="headerlink" href="#create-a-field" title="Permalink to this headline">¶</a></h3>
+<dl class="post">
+<dt id="post--api-v1-fields-">
+<code class="descname">POST </code><code class="descname">/api/v1/fields/</code><a class="headerlink" href="#post--api-v1-fields-" title="Permalink to this definition">¶</a></dt>
+<dd><p>This post request is only allowed for the project-admin role.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X POST <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/fields&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Content-Type: application/json&#39;</span> <span class="se">\</span>
+-d <span class="s1">&#39;</span>
+<span class="s1">    {</span>
+<span class="s1">        &quot;name&quot;: &quot;clin_pheno&quot;,</span>
+<span class="s1">        &quot;label&quot;: &quot;Clinical Phenotype&quot;,</span>
+<span class="s1">        &quot;type&quot;: &quot;String&quot;,</span>
+<span class="s1">        &quot;collectionID&quot;:&quot;5f74a0e05443973d2bfd870c&quot;</span>
+<span class="s1">    }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:57:02.771Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:57:02.771Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;6063e7c91bfc89fd1960ae5b&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;clin_pheno&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Clinical Phenotype&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;collectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f74a0e05443973d2bfd870c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;6063e7c91bfc89fd1960ae5b&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="update-a-field">
+<h3>Update a Field<a class="headerlink" href="#update-a-field" title="Permalink to this headline">¶</a></h3>
+<dl class="patch">
+<dt id="patch--api-v1-fields-(string-field_id)">
+<code class="descname">PATCH </code><code class="descname">/api/v1/fields/</code><span class="sig-paren">(</span><em class="property">string: </em><em>field_id</em><span class="sig-paren">)</span><a class="headerlink" href="#patch--api-v1-fields-(string-field_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an existing field.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X PATCH <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;your-access-token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/fields/6063e7c91bfc89fd1960ae5b <span class="se">\</span>
+  -H <span class="s2">&quot;Content-Type: application/json&quot;</span> <span class="se">\</span>
+  -d <span class="s1">&#39;</span>
+<span class="s1">      {</span>
+<span class="s1">        &quot;ontology&quot;: {</span>
+<span class="s1">            &quot;create&quot;: true,</span>
+<span class="s1">            &quot;include&quot;: [</span>
+<span class="s1">                &quot;Dermatomyositis&quot;,</span>
+<span class="s1">                &quot;GVHD&quot;,</span>
+<span class="s1">                &quot;Healthy Control&quot;,</span>
+<span class="s1">                &quot;Lupus&quot;,</span>
+<span class="s1">                &quot;Psoriasis&quot;,</span>
+<span class="s1">                &quot;Vitiligo&quot;</span>
+<span class="s1">            ]</span>
+<span class="s1">        }</span>
+<span class="s1">      }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;required&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:57:02.771Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T02:57:02.771Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;6063e7c91bfc89fd1960ae5b&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;clin_pheno&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Clinical Phenotype&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;collectionID&quot;</span><span class="p">:</span> <span class="s2">&quot;5f74a0e05443973d2bfd870c&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;ontology&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;create&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                <span class="nt">&quot;include&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;Dermatomyositis&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;GVHD&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Healthy Control&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Lupus&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Psoriasis&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Vitiligo&quot;</span>
+                    <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="delete-a-field">
+<h3>Delete a Field<a class="headerlink" href="#delete-a-field" title="Permalink to this headline">¶</a></h3>
+<dl class="delete">
+<dt id="delete--api-v1-fields-(string-field_id)">
+<code class="descname">DELETE </code><code class="descname">/api/v1/fields/</code><span class="sig-paren">(</span><em class="property">string: </em><em>field_id</em><span class="sig-paren">)</span><a class="headerlink" href="#delete--api-v1-fields-(string-field_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deleting an existing field.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X DELETE <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;your-access-token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/fields/6063e7c91bfc89fd1960ae5b
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;doc&quot;</span><span class="p">:</span> <span class="s2">&quot;Deleted!&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="data">
+<h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-all-data-of-the-collection-in-a-project">
+<h3>Get All Data of the Collection in a Project<a class="headerlink" href="#get-all-data-of-the-collection-in-a-project" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)">
+<code class="descname">GET </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><a class="headerlink" href="#get-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve all data of the collection in a project for the current logged in user.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects/vitiligo/data/sample&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-12-17T16:42:06.252Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-12-17T16:42:06.252Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8c6ad6330eb80d503fe2&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL067_L2_V1_Bst_sc_iD&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;technology&quot;</span><span class="p">:</span> <span class="s2">&quot;inDrop&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;Processed&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;contract&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;bead_occup&quot;</span><span class="p">:</span> <span class="s2">&quot;65-70%&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;biosamp_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a31&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f92529b89c7d0b3bf31ac27&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f92529b89c7d0b3bf31ac27&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;DID&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-12-17T16:42:06.252Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-12-17T16:42:06.252Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8c6ad6330eb80d503fe4&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;VB071_L1_V1_Bst_sc_iD&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;technology&quot;</span><span class="p">:</span> <span class="s2">&quot;inDrop&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;Processed&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;contract&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;bead_occup&quot;</span><span class="p">:</span> <span class="s2">&quot;33/50 (~65%)&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;biosamp_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a33&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f92529b89c7d0b3bf31ac27&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f92529b89c7d0b3bf31ac27&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;DID&quot;</span><span class="p">:</span> <span class="mi">2</span>
+            <span class="p">}]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="get-a-data">
+<h3>Get a Data<a class="headerlink" href="#get-a-data" title="Permalink to this headline">¶</a></h3>
+<dl class="get">
+<dt id="get-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)">
+<code class="descname">GET </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>data_id</em><span class="sig-paren">)</span><a class="headerlink" href="#get-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve details of a single data.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X GET <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects/vitiligo/data/sample/5fdb8c6ad6330eb80d503fe2&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-12-17T16:42:06.252Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-12-17T16:42:06.252Z&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8c6ad6330eb80d503fe2&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL067_L2_V1_Bst_sc_iD&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;technology&quot;</span><span class="p">:</span> <span class="s2">&quot;inDrop&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;Processed&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;contract&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;bead_occup&quot;</span><span class="p">:</span> <span class="s2">&quot;65-70%&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;biosamp_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a31&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f92529b89c7d0b3bf31ac27&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f92529b89c7d0b3bf31ac27&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">},</span>
+                    <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                        <span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;DID&quot;</span><span class="p">:</span> <span class="mi">1</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="create-a-data">
+<h3>Create a Data<a class="headerlink" href="#create-a-data" title="Permalink to this headline">¶</a></h3>
+<dl class="post">
+<dt id="post-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)">
+<code class="descname">POST </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>data_id</em><span class="sig-paren">)</span><a class="headerlink" href="#post-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>This post request is only allowed for the project-admin role.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X POST <span class="se">\</span>
+<span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects/vitiligo/data/sample&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Authorization: Bearer &lt;your-access-token&gt;&#39;</span> <span class="se">\</span>
+-H <span class="s1">&#39;Content-Type: application/json&#39;</span> <span class="se">\</span>
+-d <span class="s1">&#39;</span>
+<span class="s1">    {</span>
+<span class="s1">        &quot;name&quot;: &quot;CL070_L2_V1_Bst_sc_iD&quot;,</span>
+<span class="s1">        &quot;sample_type&quot;: &quot;scRNAseq&quot;,</span>
+<span class="s1">        &quot;technology&quot;: &quot;inDrop&quot;,</span>
+<span class="s1">        &quot;status&quot;: &quot;Sequenced&quot;,</span>
+<span class="s1">        &quot;contract&quot;: &quot;scRNAseq&quot;,</span>
+<span class="s1">        &quot;bead_occup&quot;: &quot;65-70%&quot;,</span>
+<span class="s1">        &quot;biosamp_id&quot;:&quot;5fdb8820d6330eb80d503a31&quot;</span>
+<span class="s1">    }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T03:16:58.503Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T03:16:58.503Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;606453c0cb44bcfdbb84c6a2&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL070_L2_V1_Bst_sc_iD&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;technology&quot;</span><span class="p">:</span> <span class="s2">&quot;inDrop&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;Sequenced&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;contract&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;bead_occup&quot;</span><span class="p">:</span> <span class="s2">&quot;65-70%&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;biosamp_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a31&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;DID&quot;</span><span class="p">:</span> <span class="mi">135</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="update-a-data">
+<h3>Update a Data<a class="headerlink" href="#update-a-data" title="Permalink to this headline">¶</a></h3>
+<dl class="patch">
+<dt id="patch-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)">
+<code class="descname">PATCH </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>data_id</em><span class="sig-paren">)</span><a class="headerlink" href="#patch-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an existing field.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X PATCH <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;your-access-token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/projects/vitiligo/data/sample/606453c0cb44bcfdbb84c6a2 <span class="se">\</span>
+  -H <span class="s2">&quot;Content-Type: application/json&quot;</span> <span class="se">\</span>
+  -d <span class="s1">&#39;</span>
+<span class="s1">      {</span>
+<span class="s1">        &quot;status&quot;:&quot;Processed&quot;</span>
+<span class="s1">      }&#39;</span>
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T03:16:58.503Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdateDate&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-03-31T03:16:58.503Z&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;606453c0cb44bcfdbb84c6a2&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL070_L2_V1_Bst_sc_iD&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;technology&quot;</span><span class="p">:</span> <span class="s2">&quot;inDrop&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;Processed&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;contract&quot;</span><span class="p">:</span> <span class="s2">&quot;scRNAseq&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;bead_occup&quot;</span><span class="p">:</span> <span class="s2">&quot;65-70%&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;biosamp_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a31&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;lastUpdatedUser&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;5f39add38db6c9a200168a22&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;perms&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb4575faa5adff6f407f2d1&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+                <span class="nt">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s2">&quot;5fb45793aa5adff6f407f2d2&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">&quot;DID&quot;</span><span class="p">:</span> <span class="mi">135</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="delete-a-data">
+<h3>Delete a Data<a class="headerlink" href="#delete-a-data" title="Permalink to this headline">¶</a></h3>
+<dl class="delete">
+<dt id="delete-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)">
+<code class="descname">DELETE </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>data_id</em><span class="sig-paren">)</span><a class="headerlink" href="#delete-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deleting an existing data.</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl <span class="se">\</span>
+  -X DELETE <span class="se">\</span>
+  -H <span class="s2">&quot;Authorization: Bearer &lt;your-access-token&gt;&quot;</span> <span class="se">\</span>
+  https://dmeta-skin.dolphinnext.com/api/v1/projects/vitiligo/data/sample/606453c0cb44bcfdbb84c6a2
+</pre></div>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;doc&quot;</span><span class="p">:</span> <span class="s2">&quot;Deleted!&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="projects.html" class="btn btn-neutral float-right" title="Project Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="data.html" class="btn btn-neutral" title="Data Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alper Kucukural, Artur Manukyan, Onur Yukselen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v0.0.38',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

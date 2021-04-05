@@ -72,7 +72,6 @@ const collectionsSchema = new mongoose.Schema(
       required: [true, 'A collection must have a version'],
       default: '1'
     },
-    required: { type: 'boolean', default: false },
     active: { type: 'boolean', default: true },
     creationDate: {
       type: Date,

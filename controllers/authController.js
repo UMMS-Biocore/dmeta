@@ -195,9 +195,11 @@ exports.restrictTo = (...roles) => {
 };
 
 const signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+  const numDays = `${process.env.JWT_EXPIRES_IN}d`;
+  const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: numDays
   });
+  return token;
 };
 
 const createSendToken = (user, statusCode, req, res) => {
@@ -350,6 +352,8 @@ exports.logout = async (req, res) => {
   });
   if (process.env.SSO_LOGIN === 'true') {
     res.redirect(`${process.env.SSO_URL}/api/v1/users/logout?redirect_uri=${process.env.BASE_URL}`);
+  } else {
+    res.redirect('/');
   }
 };
 
@@ -391,8 +395,12 @@ exports.isLoggedIn = async (req, res, next) => {
       currentUser = await User.findOne({ sso_id: tokenInfo.userId });
     }
   } else {
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    currentUser = await User.findById(decoded.id);
+    try {
+      const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+      currentUser = await User.findById(decoded.id);
+    } catch {
+      return next();
+    }
   }
 
   if (!currentUser) {

@@ -1,7 +1,7 @@
 /* eslint-disable */
 import '@babel/polyfill';
 import axios from 'axios';
-import { login, logout } from './login';
+import { loadLoginDiv, login, logout } from './login';
 import { getProjectNavbar } from './dashboard.js';
 import { refreshAdminProjectNavbar } from './admin-dashboard.js';
 import { getImportPageNavBar } from './importpage.js';
@@ -40,7 +40,7 @@ const ssologin =
 const logOutBtn = document.querySelector('.nav__el--logout');
 const logInBtn = document.querySelector('.nav__el--login');
 const afterSsoClose = document.querySelector('.after-sso-close');
-const loginForm = document.querySelector('.form--login');
+const loginForm = document.querySelector('#loginOuterDiv');
 const allProjectNav = document.querySelector('#allProjectNav');
 const adminAllProjectNav = document.querySelector('#admin-allProjectNav');
 const dmetaVersionBut = document.querySelector('#dmetaVersionBut');
@@ -92,13 +92,60 @@ if (afterSsoClose) {
   window.close();
 }
 
-if (loginForm)
-  loginForm.addEventListener('submit', e => {
+if (loginForm) {
+  loadLoginDiv('loginDiv');
+  $('#loginOuterDiv').on('click', '#loginBtn', function(e) {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    const usernameoremail = document.getElementById('usernameoremail').value;
     const password = document.getElementById('password').value;
-    login(email, password);
+    login(usernameoremail, password);
   });
+  $('#loginOuterDiv').on('click', '#signupBtn', function(e) {
+    e.preventDefault();
+    loadLoginDiv('registerDiv');
+  });
+  $('#loginOuterDiv').on('click', '.signInBackBtn', function(e) {
+    e.preventDefault();
+    loadLoginDiv('loginDiv');
+  });
+  $('#loginOuterDiv').on('click', '#registerBtn', async function(e) {
+    e.preventDefault();
+    var formValues = $('#loginOuterDiv').find('input');
+    var requiredFields = [
+      'firstname',
+      'lastname',
+      'username',
+      'email',
+      'institute',
+      'lab',
+      'password',
+      'passwordConfirm'
+    ];
+    const [formObj, stop] = createFormObj(formValues, requiredFields, true);
+    console.log(formObj);
+    console.log(stop);
+    if (stop === false) {
+      try {
+        const res = await axios({
+          method: 'POST',
+          url: '/api/v1/users/signup',
+          data: formObj
+        });
+
+        if (res && res.data && res.data.status === 'success') {
+          console.log('success');
+          loadLoginDiv('successSignUpDiv');
+        }
+      } catch (e) {
+        console.log(e.response);
+        if (e.response && e.response.data && e.response.data.error) {
+          const errors = e.response.data.error.errors;
+          showFormError(formValues, errors, true);
+        }
+      }
+    }
+  });
+}
 
 (async () => {
   if (allProjectNav) {

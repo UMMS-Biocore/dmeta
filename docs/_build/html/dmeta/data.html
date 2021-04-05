@@ -1,0 +1,339 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Guide &mdash; Dmeta v0.0.38 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Dmeta v0.0.38 documentation" href="../index.html"/>
+        <link rel="next" title="API v1" href="api.html"/>
+        <link rel="prev" title="Support" href="support.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Dmeta
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.0.38
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Short Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basics">Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#all-events">All Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#all-collections">All Collections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#insert">Insert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#edit">Edit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#single-data-edit">Single Data Edit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiple-data-edit">Multiple Data Edit</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#delete">Delete</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#edit-in-spreadsheet">Edit in Spreadsheet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-as-excel-file">Download as Excel File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#import-excel-file">Import Excel File</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API v1</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Project Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Pipeline Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fields.html">Process Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administrator Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin_quick.html">Introduction</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dmeta</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Data Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dmeta/data.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-guide">
+<h1>Data Guide<a class="headerlink" href="#data-guide" title="Permalink to this headline">¶</a></h1>
+<p>In this section, we will investigate the data tables and how you can insert, update and delete data in the collections.</p>
+<div class="section" id="basics">
+<h2>Basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h2>
+<p>At the top of the page, you will notice the <strong>All Events</strong> and <strong>All Collections</strong> tabs. You can insert/update/delete data from collections using <strong>All Collections</strong> tab, whereas the <strong>All Events</strong> tab is used for inserting new or updating existing data in a simplified and structured way.</p>
+</div>
+<div class="section" id="all-events">
+<h2>All Events<a class="headerlink" href="#all-events" title="Permalink to this headline">¶</a></h2>
+<p>All Events are listed in the initial dropdown. Please see the example below:</p>
+<a class="reference internal image-reference" href="../_images/allevents.png"><img alt="../_images/allevents.png" class="align-center" src="../_images/allevents.png" style="width: 99%;" /></a>
+<p>Here you can simply select the action you want to perform. As an example, <strong>Update Patient Visit</strong> is selected and form fields are loaded as below:</p>
+<a class="reference internal image-reference" href="../_images/events_patient_visit.png"><img alt="../_images/events_patient_visit.png" class="align-center" src="../_images/events_patient_visit.png" style="width: 99%;" /></a>
+<p>You can either choose or type patient name to select patient from dropdown:</p>
+<a class="reference internal image-reference" href="../_images/events_select_patient.png"><img alt="../_images/events_select_patient.png" class="align-center" src="../_images/events_select_patient.png" style="width: 99%;" /></a>
+<p>After choosing a patient, the patient visit dropdown will be filtered and only shows the visits that belong to the selected patient. Now you can simply select the patient visit to update:</p>
+<a class="reference internal image-reference" href="../_images/events_select_patient_visit.png"><img alt="../_images/events_select_patient_visit.png" class="align-center" src="../_images/events_select_patient_visit.png" style="width: 99%;" /></a>
+<p>As soon as a patient visit is selected, form fields are loaded with selected visit data. After making changes, you can click the save button to submit changes.</p>
+<a class="reference internal image-reference" href="../_images/events_update_patient_visit.png"><img alt="../_images/events_update_patient_visit.png" class="align-center" src="../_images/events_update_patient_visit.png" style="width: 99%;" /></a>
+</div>
+<div class="section" id="all-collections">
+<h2>All Collections<a class="headerlink" href="#all-collections" title="Permalink to this headline">¶</a></h2>
+<p>All Collections are listed in the initial dropdown. Here you can simply select the collection you want to view. As an example, <strong>Biosamples</strong> collection is selected as below:</p>
+<a class="reference internal image-reference" href="../_images/allcollections_biosamples.png"><img alt="../_images/allcollections_biosamples.png" class="align-center" src="../_images/allcollections_biosamples.png" style="width: 99%;" /></a>
+<p>At the top of the table, action buttons are located. Please see their details at below:</p>
+<a class="reference internal image-reference" href="../_images/allcollections_buttons.png"><img alt="../_images/allcollections_buttons.png" class="align-center" src="../_images/allcollections_buttons.png" style="width: 50%;" /></a>
+<div class="section" id="insert">
+<h3>Insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h3>
+<p>You can insert data into the collection by using the insert button. It will open the form window for data submission. Please check the example below.</p>
+<a class="reference internal image-reference" href="../_images/allcollections_biosamples_insert.png"><img alt="../_images/allcollections_biosamples_insert.png" class="align-center" src="../_images/allcollections_biosamples_insert.png" style="width: 90%;" /></a>
+</div>
+<div class="section" id="edit">
+<h3>Edit<a class="headerlink" href="#edit" title="Permalink to this headline">¶</a></h3>
+<p>After clicking one of the checkboxes, you can start editing by clicking the edit button. A similar form window will open for editing. If you choose multiple items at the same time, it will allow you to update certain fields of the selected data and keep the rest as it is. Please check the example below:</p>
+<div class="section" id="single-data-edit">
+<h4>Single Data Edit<a class="headerlink" href="#single-data-edit" title="Permalink to this headline">¶</a></h4>
+<a class="reference internal image-reference" href="../_images/allcollections_biosamples_edit_one.png"><img alt="../_images/allcollections_biosamples_edit_one.png" class="align-center" src="../_images/allcollections_biosamples_edit_one.png" style="width: 99%;" /></a>
+</div>
+<div class="section" id="multiple-data-edit">
+<h4>Multiple Data Edit<a class="headerlink" href="#multiple-data-edit" title="Permalink to this headline">¶</a></h4>
+<a class="reference internal image-reference" href="../_images/allcollections_biosamples_edit_multiple.png"><img alt="../_images/allcollections_biosamples_edit_multiple.png" class="align-center" src="../_images/allcollections_biosamples_edit_multiple.png" style="width: 99%;" /></a>
+</div>
+</div>
+<div class="section" id="delete">
+<h3>Delete<a class="headerlink" href="#delete" title="Permalink to this headline">¶</a></h3>
+<p>In order to remove data from collections, you can select one or multiple items with checkboxes and click the delete button.</p>
+</div>
+<div class="section" id="edit-in-spreadsheet">
+<h3>Edit in Spreadsheet<a class="headerlink" href="#edit-in-spreadsheet" title="Permalink to this headline">¶</a></h3>
+<p>Another way to edit multiple items is using spreadsheet view. After clicking the <strong>Edit in Spreadsheet</strong> button, the spreadsheet format will be visualized.</p>
+<p>Table View:</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_spreadsheet0.png"><img alt="../_images/allcollections_visit_spreadsheet0.png" class="align-center" src="../_images/allcollections_visit_spreadsheet0.png" style="width: 70%;" /></a>
+<p>Spreadsheet View:</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_spreadsheet1.png"><img alt="../_images/allcollections_visit_spreadsheet1.png" class="align-center" src="../_images/allcollections_visit_spreadsheet1.png" style="width: 99%;" /></a>
+<p>Now, you can copy and paste into multiple fields as in the Excel file. As an example, the <strong>1st visit</strong> value is filled into four cells by copy and paste below. Updated cells are highlighted.</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_spreadsheet2.png"><img alt="../_images/allcollections_visit_spreadsheet2.png" class="align-center" src="../_images/allcollections_visit_spreadsheet2.png" style="width: 99%;" /></a>
+<p>After clicking <strong>Save Changes</strong> button at the top, highlighted cells are synchronized with database and status of update is shown as below:</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_spreadsheet3.png"><img alt="../_images/allcollections_visit_spreadsheet3.png" class="align-center" src="../_images/allcollections_visit_spreadsheet3.png" style="width: 99%;" /></a>
+<p>Table view:</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_spreadsheet4.png"><img alt="../_images/allcollections_visit_spreadsheet4.png" class="align-center" src="../_images/allcollections_visit_spreadsheet4.png" style="width: 71%;" /></a>
+</div>
+<div class="section" id="download-as-excel-file">
+<h3>Download as Excel File<a class="headerlink" href="#download-as-excel-file" title="Permalink to this headline">¶</a></h3>
+<p>You can download all collection data by clicking the <strong>Download as Excel File</strong> button.</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_excel_download.png"><img alt="../_images/allcollections_visit_excel_download.png" class="align-center" src="../_images/allcollections_visit_excel_download.png" style="width: 71%;" /></a>
+</div>
+<div class="section" id="import-excel-file">
+<h3>Import Excel File<a class="headerlink" href="#import-excel-file" title="Permalink to this headline">¶</a></h3>
+<p>After you edit your data in Excel, you can import changes by clicking the <strong>Import Excel File</strong> button.</p>
+<a class="reference internal image-reference" href="../_images/allcollections_visit_excel_import.png"><img alt="../_images/allcollections_visit_excel_import.png" class="align-center" src="../_images/allcollections_visit_excel_import.png" style="width: 99%;" /></a>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API v1" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="support.html" class="btn btn-neutral" title="Support" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alper Kucukural, Artur Manukyan, Onur Yukselen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v0.0.38',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

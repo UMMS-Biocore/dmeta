@@ -1,15 +1,7 @@
-extends _layout/pages
+extends /_layout/pages
 
 block view
-  main.main
-    .login-form
-      h2.heading-secondary.ma-bt-lg Log into your account
-      form.form.form--login
-        .form__group
-          label.form__label(for='email') Email address or Username
-          input#email.form__input(required)
-        .form__group.ma-bt-md
-          label.form__label(for='password') Password
-          input#password.form__input(type='password', required, minlength='6')
-        .form__group
-          button.btn.btn--green Login
+  .container
+    .row.justify-content-center
+      .col-md-6
+        .card.mx-4#loginOuterDiv(style='min-height:350px')

@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; Dmeta v0.0.38 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Dmeta v0.0.38 documentation" href="../index.html"/>
+        <link rel="prev" title="Fields Guide" href="fields.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Dmeta
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.0.38
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Short Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API v1</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Project Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collection Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fields.html">Fields Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administrator Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initial-setup">Initial Setup:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-of-the-config-env-file">Configuration of the config.env file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#base-settings">Base settings:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#jwt-tokens-session-and-cookies">JWT Tokens, Session and Cookies:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#certificates">Certificates:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-sso-authorization-server">The SSO Authorization server:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dmeta</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Introduction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dmeta/admin_quick.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Dmeta could be run as a standalone application using npm and nodejs.</p>
+<div class="section" id="initial-setup">
+<h2>Initial Setup:<a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Clone Dmeta repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">UMMS</span><span class="o">-</span><span class="n">Biocore</span><span class="o">/</span><span class="n">dmeta</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">dmeta</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create certificate for HTTPS protocol by running following commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="n">certs</span>
+<span class="n">openssl</span> <span class="n">genrsa</span> <span class="o">-</span><span class="n">out</span> <span class="n">certs</span><span class="o">/</span><span class="n">privatekey</span><span class="o">.</span><span class="n">pem</span> <span class="mi">2048</span>
+<span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="n">new</span> <span class="o">-</span><span class="n">key</span> <span class="n">certs</span><span class="o">/</span><span class="n">privatekey</span><span class="o">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">out</span> <span class="n">certs</span><span class="o">/</span><span class="n">certrequest</span><span class="o">.</span><span class="n">csr</span>
+<span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">req</span> <span class="o">-</span><span class="ow">in</span> <span class="n">certs</span><span class="o">/</span><span class="n">certrequest</span><span class="o">.</span><span class="n">csr</span> <span class="o">-</span><span class="n">signkey</span> <span class="n">certs</span><span class="o">/</span><span class="n">privatekey</span><span class="o">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">out</span> <span class="n">certs</span><span class="o">/</span><span class="n">certificate</span><span class="o">.</span><span class="n">pem</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Copy <cite>docs/templates/template.config.env</cite> to parent directory as <cite>config.env</cite> and adjust its parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="n">docs</span><span class="o">/</span><span class="n">templates</span><span class="o">/</span><span class="n">template</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">env</span> <span class="n">config</span><span class="o">.</span><span class="n">env</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Insert initial database. Test user credentials will be: <code class="docutils literal notranslate"><span class="pre">username:test</span></code> and <code class="docutils literal notranslate"><span class="pre">password:secret</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mongorestore</span> <span class="o">-</span><span class="n">d</span> <span class="n">dmeta</span><span class="o">-</span><span class="n">skin</span> <span class="n">db</span><span class="o">/</span><span class="n">dmeta</span><span class="o">-</span><span class="n">skin</span><span class="o">/</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install node modules using npm:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">install</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Starting MongoDB and Node.js Server:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mongod</span>
+<span class="n">npm</span> <span class="n">run</span> <span class="n">start</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Now, you can open your browser to access Dmeta using the url below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">4000</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<div class="section" id="configuration-of-the-config-env-file">
+<h3>Configuration of the config.env file<a class="headerlink" href="#configuration-of-the-config-env-file" title="Permalink to this headline">¶</a></h3>
+<p>This is the main configuration file and contains the following configuration directives:</p>
+<div class="section" id="base-settings">
+<h4>Base settings:<a class="headerlink" href="#base-settings" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><strong>NODE_ENV:</strong> Valid options:<code class="docutils literal notranslate"><span class="pre">development</span></code> or <code class="docutils literal notranslate"><span class="pre">production</span></code></li>
+<li><strong>PROTOCOL:</strong> Valid options:<code class="docutils literal notranslate"><span class="pre">http</span></code> or <code class="docutils literal notranslate"><span class="pre">https</span></code>. If you enable SSO_LOGIN, PROTOCOL must be set to https.</li>
+<li><strong>PORT:</strong> Port for BASE_URL (e.g. <code class="docutils literal notranslate"><span class="pre">3000</span></code>)</li>
+<li><strong>BASE_URL:</strong> Long version of the base URL (e.g. <code class="docutils literal notranslate"><span class="pre">https://localhost:4000</span></code>)</li>
+<li><strong>DATABASE_LOCAL:</strong> Database URI for connection (e.g <code class="docutils literal notranslate"><span class="pre">mongodb://localhost:27017/dmeta-skin</span></code>)</li>
+</ul>
+</div>
+<div class="section" id="jwt-tokens-session-and-cookies">
+<h4>JWT Tokens, Session and Cookies:<a class="headerlink" href="#jwt-tokens-session-and-cookies" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><strong>SESSION_SECRET:</strong> my-ultra-secure-password</li>
+<li><strong>JWT_SECRET:</strong> my-ultra-secure-and-ultra-long-secret</li>
+<li><strong>JWT_EXPIRES_IN:</strong> The allowed time in days for expiration of token. (e.g. 90)</li>
+<li><strong>JWT_COOKIE_EXPIRES_IN:</strong> The allowed time in days for expiration of token. (e.g. 90)</li>
+<li><strong>TIME_TO_CHECK_EXPIRED_TOKENS:</strong> The time in seconds to check the database for expired tokens (e.g. 3600)</li>
+</ul>
+</div>
+<div class="section" id="certificates">
+<h4>Certificates:<a class="headerlink" href="#certificates" title="Permalink to this headline">¶</a></h4>
+<p>If you enable SSO_LOGIN, or set https as PROTOCOL then certificate and private key should be defined.</p>
+<ul class="simple">
+<li><strong>CERTS_PRIVATE_KEY:</strong> certificate private key path (e.g. <code class="docutils literal notranslate"><span class="pre">certs/privatekey.pem</span></code>)</li>
+<li><strong>CERTS_CERTIFICATE:</strong> certificate path (e.g. <code class="docutils literal notranslate"><span class="pre">certs/certificate.pem</span></code>)</li>
+</ul>
+</div>
+<div class="section" id="the-sso-authorization-server">
+<h4>The SSO Authorization server:<a class="headerlink" href="#the-sso-authorization-server" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><strong>SSO_LOGIN:</strong> Valid options:<code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code></li>
+<li><strong>SSO_URL:</strong> If SSO_LOGIN is enabled, the URL of SSO server. (e.g. <code class="docutils literal notranslate"><span class="pre">https://localhost:3000</span></code>)</li>
+<li><strong>SSO_REDIRECT_URL:</strong> If SSO_LOGIN is enabled, redirect url after successful SSO login. (e.g. <code class="docutils literal notranslate"><span class="pre">https://localhost:4000/receivetoken</span></code>)</li>
+<li><strong>SSO_USER_INFO_URL:</strong> SSO token info end point: (e.g. <code class="docutils literal notranslate"><span class="pre">https://localhost:3000/api/v1/users/info</span></code>)</li>
+<li><strong>CLIENT_ID:</strong> If SSO_LOGIN is enabled, client id should be taken from SSO server. (e.g. <code class="docutils literal notranslate"><span class="pre">dmeta-d3211ddg</span></code>)</li>
+<li><strong>CLIENT_SECRET:</strong> If SSO_LOGIN is enabled, client secret should be taken from SSO server. (e.g. <code class="docutils literal notranslate"><span class="pre">dmeta-facas3xffcxc0ad3</span></code>)</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="fields.html" class="btn btn-neutral" title="Fields Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alper Kucukural, Artur Manukyan, Onur Yukselen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v0.0.38',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

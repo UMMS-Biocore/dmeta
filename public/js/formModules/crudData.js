@@ -149,6 +149,9 @@ export const getFormElement = async (field, projectData, $scope) => {
   if (type == 'String' || type == 'Number') {
     if (field.enum) {
       const options = field.enum.map(i => {
+        if (i == 'mongoose.Schema.ObjectId') {
+          return { _id: 'mongoose.Schema.ObjectId', name: 'ObjectId' };
+        }
         return { _id: i, name: i };
       });
       ret = getDataDropdown('', '', field.name, options, def, required, fieldID, '', '');

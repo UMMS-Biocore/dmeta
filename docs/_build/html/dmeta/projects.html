@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Project Guide &mdash; Dmeta v0.0.38 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Dmeta v0.0.38 documentation" href="../index.html"/>
+        <link rel="next" title="Collection Guide" href="collections.html"/>
+        <link rel="prev" title="API v1" href="api.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Dmeta
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.0.38
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Short Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API v1</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Project Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#insert-project">Insert Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-project">Edit Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delete-project">Delete Project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collection Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fields.html">Fields Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administrator Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin_quick.html">Introduction</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dmeta</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Project Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dmeta/projects.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="project-guide">
+<h1>Project Guide<a class="headerlink" href="#project-guide" title="Permalink to this headline">¶</a></h1>
+<p>Projects are platforms to keep all of your collection and field data. At the top, there are three action buttons to manage projects: <strong>insert</strong>, <strong>edit</strong> and <strong>delete</strong>.</p>
+<div class="section" id="insert-project">
+<h2>Insert Project<a class="headerlink" href="#insert-project" title="Permalink to this headline">¶</a></h2>
+<p>In order to insert a new project, you need to click on the insert button which will open new project form. Here you can enter following fields:</p>
+<ul class="simple">
+<li><strong>Name:</strong> Project name is entered in this field.</li>
+<li><strong>Slug:</strong> Short version of the project name is entered for API requests.</li>
+<li><strong>Label:</strong> Long version of the project name is entered in this field.</li>
+<li><strong>RestrictTo:</strong> User or groups are selected who are allowed to <strong>insert a new collection into project</strong>. You may add new user/groups by clicking <strong>insert</strong> button. Afterwards, you may choose user/group/role to insert permission. If you want to remove the permission, please click <strong>options -&gt; delete</strong> button.</li>
+<li><strong>Permissions:</strong> User or groups are selected who are allowed to <strong>view or edit the project</strong>. You may add new user/groups by clicking <strong>share</strong> button. Afterwards, please choose user/group and read/write permission and click <strong>save</strong> button. If you want to edit/remove the permission, please click <strong>options</strong> button.</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/projects_insert.png"><img alt="../_images/projects_insert.png" class="align-center" src="../_images/projects_insert.png" style="width: 99%;" /></a>
+</div>
+<div class="section" id="edit-project">
+<h2>Edit Project<a class="headerlink" href="#edit-project" title="Permalink to this headline">¶</a></h2>
+<p>After clicking one of the checkboxes, you can start editing by clicking the edit button. A similar form window will open for editing.</p>
+<a class="reference internal image-reference" href="../_images/projects_edit.png"><img alt="../_images/projects_edit.png" class="align-center" src="../_images/projects_edit.png" style="width: 99%;" /></a>
+</div>
+<div class="section" id="delete-project">
+<h2>Delete Project<a class="headerlink" href="#delete-project" title="Permalink to this headline">¶</a></h2>
+<p>In order to remove project, you can select one or multiple items with checkboxes and click the delete button.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="collections.html" class="btn btn-neutral float-right" title="Collection Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api.html" class="btn btn-neutral" title="API v1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alper Kucukural, Artur Manukyan, Onur Yukselen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v0.0.38',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

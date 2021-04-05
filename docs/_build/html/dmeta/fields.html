@@ -1,0 +1,394 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fields Guide &mdash; Dmeta v0.0.38 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Dmeta v0.0.38 documentation" href="../index.html"/>
+        <link rel="next" title="Introduction" href="admin_quick.html"/>
+        <link rel="prev" title="Collection Guide" href="collections.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Dmeta
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.0.38
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Short Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API v1</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="projects.html">Project Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collection Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fields Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#insert-fields">Insert Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#edit-fields">Edit Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delete-fields">Delete Fields</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Administrator Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin_quick.html">Introduction</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Dmeta</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Fields Guide</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/dmeta/fields.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fields-guide">
+<h1>Fields Guide<a class="headerlink" href="#fields-guide" title="Permalink to this headline">¶</a></h1>
+<p>This guide will walk you through the details of fields of the collections.</p>
+<p>Dmeta stores the records as field-and-value pairs in the MongoDB database. Therefore after creating collection, we need to specify its fields and by doing that we state the type of data we want to store in each field. Also fields allows you to create parent-child relationships between collections.</p>
+<p>Lets go through basics of the fields. At the top, there are three action buttons to manage fields: <strong>insert</strong>, <strong>edit</strong> and <strong>delete</strong>.</p>
+<div class="section" id="insert-fields">
+<h2>Insert Fields<a class="headerlink" href="#insert-fields" title="Permalink to this headline">¶</a></h2>
+<p>In order to insert a new fields, you need to click on the insert button which will open new form as shown below. Here you can enter following fields:</p>
+<ul>
+<li><p class="first"><strong>Name (required):</strong> Name of the field.</p>
+</li>
+<li><p class="first"><strong>Label (required):</strong> Long version of the field name.</p>
+</li>
+<li><p class="first"><strong>Type (required):</strong> Main configuration parameter for MongoDB fields. Available options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>String:</strong> To declare a field as a string.</li>
+<li><strong>Number:</strong> To declare a field as a number.</li>
+<li><strong>Boolean:</strong> To declare a field as a boolean.</li>
+<li><strong>Array:</strong> To declare a field as a array. They implicitly have a default value of empty array (<code class="docutils literal notranslate"><span class="pre">[]</span></code>).</li>
+<li><strong>Date:</strong> To declare field as a date.</li>
+<li><strong>Mixed:</strong> Anything goes into this field.</li>
+<li><strong>ObjectId:</strong> An ObjectId is a special type typically used when child reference is defined.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><strong>Collection:</strong> Choose target collection to insert field.</p>
+</li>
+<li><p class="first"><strong>Description:</strong> Description of the field which will be shown in the form while inserting new data.</p>
+</li>
+<li><p class="first"><strong>Unique:</strong> boolean, whether to define a unique index on this field.</p>
+</li>
+<li><p class="first"><strong>Hidden:</strong> Whether to show this field to users.</p>
+</li>
+<li><p class="first"><strong>Required:</strong> boolean (e.g. <code class="docutils literal notranslate"><span class="pre">true</span></code>) or array (e.g. <code class="docutils literal notranslate"><span class="pre">[true,</span> <span class="pre">&quot;Patient</span> <span class="pre">must</span> <span class="pre">have</span> <span class="pre">a</span> <span class="pre">name.&quot;]</span></code>). When array is used, warning message is defined at the second index of the array to show message when field is not entered.</p>
+</li>
+<li><p class="first"><strong>Ontology:</strong> shows the dropdown options from an ontology API or entered Keyword Array. It is configured with the following parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>url:</strong> URL of ontology API to be used for querying available options.</li>
+<li><strong>authorization:</strong> Optional authorization header of the API request. Typically, token could be entered for authorization.</li>
+<li><strong>filter:</strong> Additional query parameters to filter out retrieved data. (e.g. to only retrieve specific (EFO) ontology data, you can use: <cite>&amp;ontologies=EFO</cite>)</li>
+<li><strong>field:</strong> Describe the location of the keyword in the result of the API. Commonly APIs return array of objects. By using dot notation, location of the keyword (e.g. <code class="docutils literal notranslate"><span class="pre">collection.prefLabel</span></code> could be described for following example:</li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a31&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;collection&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&quot;prefLabel&quot;</span><span class="p">:</span> <span class="s2">&quot;Lupus&quot;</span><span class="p">,</span>
+                                <span class="nt">&quot;obsolete&quot;</span><span class="p">:</span> <span class="kc">false</span>
+                               <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="nt">&quot;_id&quot;</span><span class="p">:</span> <span class="s2">&quot;5fdb8820d6330eb80d503a31&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;collection&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">&quot;prefLabel&quot;</span><span class="p">:</span> <span class="s2">&quot;Vitiligo&quot;</span><span class="p">,</span>
+                                <span class="nt">&quot;obsolete&quot;</span><span class="p">:</span> <span class="kc">false</span>
+                               <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><strong>include:</strong> To declare possible options of the dropdown.</li>
+<li><strong>exclude:</strong> To exclude certain options from the dropdown.</li>
+<li><strong>create:</strong> To declare if user is allowed to insert new options into this field (other than specified <strong>include</strong> keywords or API results. If this option set to true, new options will be saved in to <strong>include</strong> array.</li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p><strong>API example:</strong> Options of <strong>Experiment Type</strong> could be delivered from Ontology server (NCBO – Experimental Factor Ontology) by using following configuration:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="s2">&quot;http://data.bioontology.org/search/?q=&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;authorization&quot;</span><span class="p">:</span><span class="s2">&quot;apikey token=39a74770-b709-4c1c-a69d-45d8e117e87a&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;include&quot;</span><span class="p">:[</span><span class="s2">&quot;ChIP-seq&quot;</span><span class="p">],</span>
+    <span class="nt">&quot;field&quot;</span><span class="p">:</span><span class="s2">&quot;collection.prefLabel&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span>
+    <span class="nt">&quot;filter&quot;</span><span class="p">:</span><span class="s2">&quot;&amp;ontologies=EFO&amp;suggest=true&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Keyword Array example:</strong> Options of <strong>Clinical Phenotype</strong> could be delivered from include array:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;create&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span>
+    <span class="nt">&quot;include&quot;</span><span class="p">:[</span><span class="s2">&quot;GVHD&quot;</span><span class="p">,</span><span class="s2">&quot;Healthy Control&quot;</span><span class="p">,</span><span class="s2">&quot;Lichen Planus&quot;</span><span class="p">,</span><span class="s2">&quot;Lupus&quot;</span><span class="p">,</span><span class="s2">&quot;Vitiligo&quot;</span><span class="p">],</span>
+    <span class="nt">&quot;exclude&quot;</span><span class="p">:[</span><span class="s2">&quot;Control&quot;</span><span class="p">]</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first"><strong>CheckValid:</strong> function or array, adds a validator function for this property. When array is used, warning message is defined at the second index of the array to show message when entered value is not valid. You can use validators of the 3rd party library (<a class="reference external" href="https://www.npmjs.com/package/validator">see examples</a>) inside these functions. Please check the examples below:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">[&quot;(function(v){</span> <span class="pre">return</span> <span class="pre">validator.isEmail(v)</span> <span class="pre">})&quot;,</span> <span class="pre">&quot;It</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">E-mail&quot;]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">[&quot;(function(v){</span> <span class="pre">return</span> <span class="pre">validator.isAlphanumeric(v)</span> <span class="pre">})&quot;,</span> <span class="pre">&quot;Only</span> <span class="pre">letters</span> <span class="pre">and</span> <span class="pre">numbers.&quot;]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">[&quot;(function(v){</span> <span class="pre">return</span> <span class="pre">validator.isURL(v)</span> <span class="pre">})&quot;,</span> <span class="pre">&quot;It</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">valid</span> <span class="pre">URL&quot;]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">[&quot;(function(v){</span> <span class="pre">return</span> <span class="pre">v.length</span> <span class="pre">&gt;</span> <span class="pre">2</span> <span class="pre">})&quot;,</span> <span class="pre">&quot;Field</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">longer</span> <span class="pre">than</span> <span class="pre">2</span> <span class="pre">characters&quot;]</span></code></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first"><strong>Default:</strong> sets a default value for the field.</p>
+</li>
+<li><p class="first"><strong>Ref:</strong> <code class="docutils literal notranslate"><span class="pre">${ProjectName}_${CollectionName}</span></code> to be used for child referencing.</p>
+</li>
+</ul>
+<p>Consider the following hierarchy of collections:</p>
+<a class="reference internal image-reference" href="../_images/fields_reference.png"><img alt="../_images/fields_reference.png" class="align-center" src="../_images/fields_reference.png" style="width: 25%;" /></a>
+<p>In this example, <strong>Patient Visit</strong> is the child collection of the <strong>Patient</strong> collection. Therefore each <strong>Patient Visit</strong> data will have a reference for <strong>Patient</strong> collection. In order to achive this hierarchy, following <code class="docutils literal notranslate"><span class="pre">patient_id</span></code> field could be added in the <strong>Patient Visit</strong> collection:</p>
+<a class="reference internal image-reference" href="../_images/fields_reference_example.png"><img alt="../_images/fields_reference_example.png" class="align-center" src="../_images/fields_reference_example.png" style="width: 90%;" /></a>
+<ul class="simple">
+<li><strong>Enum:</strong> Array, creates a validator that checks if the value is in the given array.</li>
+<li><strong>Min:</strong> Number, creates a validator that checks if the value is greater than or equal to the given minimum.</li>
+<li><strong>Max:</strong> Number, creates a validator that checks if the value is less than or equal to the given maximum.</li>
+<li><strong>Lowercase:</strong> boolean, whether to save value with lowercase characters.</li>
+<li><strong>Uppercase:</strong> boolean, whether to save value with uppercase characters.</li>
+<li><strong>Trim:</strong> boolean, whether to save value after removing white spaces.</li>
+<li><strong>Header:</strong> boolean, whether to show this field at the top of the dropdown options. This feature used when this collection is referenced within other collections.</li>
+<li><strong>Minlength:</strong> Number, creates a validator that checks if the value length is not less than the given number.</li>
+<li><strong>Maxlength:</strong> Number, creates a validator that checks if the value length is not greater than the given number.</li>
+<li><strong>Permissions:</strong> User or groups are selected who are allowed to <strong>view or edit the field</strong>. You may add new user/groups by clicking <strong>share</strong> button. Afterwards, please choose user/group and read/write permission and click <strong>save</strong> button. If you want to edit/remove the permission, please click <strong>options</strong> button.</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/fields_insert.png"><img alt="../_images/fields_insert.png" class="align-center" src="../_images/fields_insert.png" style="width: 99%;" /></a>
+</div>
+<div class="section" id="edit-fields">
+<h2>Edit Fields<a class="headerlink" href="#edit-fields" title="Permalink to this headline">¶</a></h2>
+<p>After clicking one of the checkboxes, you can start editing by clicking the edit button. A similar form window will open for collection editing.</p>
+<a class="reference internal image-reference" href="../_images/fields_edit.png"><img alt="../_images/fields_edit.png" class="align-center" src="../_images/fields_edit.png" style="width: 99%;" /></a>
+</div>
+<div class="section" id="delete-fields">
+<h2>Delete Fields<a class="headerlink" href="#delete-fields" title="Permalink to this headline">¶</a></h2>
+<p>In order to remove field, you can select one or multiple items with checkboxes and click the delete button.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="admin_quick.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="collections.html" class="btn btn-neutral" title="Collection Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alper Kucukural, Artur Manukyan, Onur Yukselen.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v0.0.38',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

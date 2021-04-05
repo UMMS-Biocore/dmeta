@@ -1,3 +1,8 @@
+04.04.2021 Version 0.0.39
+Field type mongoose.Schema.ObjectId replaced with ObjectId.
+d suffix removed from JWT_EXPIRES_IN parameter in config.env.
+Documentation added.
+
 24.03.2021 Version 0.0.38
 Autobackup of db is set for each day.
 Run event added.

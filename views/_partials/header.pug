@@ -12,6 +12,13 @@ header.c-header.c-header-light.c-header-fixed.c-header-with-subheader
         a.c-header-nav-link(href="/import") Import Page
     li.c-header-nav-item.px-3
   ul.c-header-nav.ml-auto.mr-4
+    li.dropdown
+      a.dropdown-toggle.c-header-nav-link(href="#" data-toggle="dropdown" aria-expanded="false")
+        i.cil-book
+          span.caret
+      ul.dropdown-menu.dropdown-menu-right(role="menu")
+        li.dropdown-item 
+          a.float-left(href="http://dmeta.readthedocs.io/" target="_blank") Reference Documentation
     li.c-header-nav-item.dropdown(style="margin-right: 25px;")
       if changeLogVersion
         a#dmetaVersionBut.c-header-nav-link(data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false")= "v" + changeLogVersion 

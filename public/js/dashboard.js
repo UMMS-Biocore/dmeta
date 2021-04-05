@@ -1408,7 +1408,7 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
   }
   if (settings.excel) {
     tableBut = `
-    <button class="btn btn-primary edit-excel-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Edit in Spreadsheet Format" ${data}>
+    <button class="btn btn-primary edit-excel-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Edit in Spreadsheet" ${data}>
       <i class="cil-view-module"> </i>
     </button>
     <button style="display:none;" class="btn btn-primary cancel-excel-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Show Table Format" ${data}>

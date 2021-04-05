@@ -51,7 +51,6 @@ $s.AdminAllCollectionFields = [
   'label',
   'slug',
   'version',
-  'required',
   'parentCollectionID',
   'projectID',
   'id',
@@ -141,12 +140,6 @@ const fieldsOfCollectionsModel = {
     type: 'Number',
     required: true,
     default: '1'
-  },
-  required: {
-    name: 'required',
-    label: 'Required',
-    type: 'boolean',
-    default: false
   },
   restrictTo: {
     name: 'restrictTo',
