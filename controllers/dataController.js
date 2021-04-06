@@ -223,21 +223,24 @@ const parseSummarySchema = async (collectionName, projectName, type) => {
     if (projectName) modelName = `${projectName}_${collectionName}`;
     let col = await collectionsController.getCollectionByName(collectionName, projectName);
     let popObj = '';
-    if (col.parentCollectionID) {
-      const { fieldName, parentModelName } = await collectionsController.getParentRefField(
-        col.parentCollectionID
-      );
-      if (fieldName && mongoose.connection.models[parentModelName]) popObj = fieldName;
-    }
-    const fields = await fieldsController.getFieldsByCollectionId(col._id);
-    let refFields = [];
-    for (let i = 0; i < fields.length; i++) {
-      if (fields[i].ref && mongoose.connection.models[fields[i].ref]) {
-        refFields.push(fields[i].name);
+    if (col) {
+      if (col.parentCollectionID) {
+        const { fieldName, parentModelName } = await collectionsController.getParentRefField(
+          col.parentCollectionID
+        );
+        if (fieldName && mongoose.connection.models[parentModelName]) popObj = fieldName;
       }
+
+      const fields = await fieldsController.getFieldsByCollectionId(col._id);
+      let refFields = [];
+      for (let i = 0; i < fields.length; i++) {
+        if (fields[i].ref && mongoose.connection.models[fields[i].ref]) {
+          refFields.push(fields[i].name);
+        }
+      }
+      refFields.push(popObj);
+      popObj = refFields.join(' ');
     }
-    refFields.push(popObj);
-    popObj = refFields.join(' ');
     return { targetCollection: modelName, popObj: popObj, select: '-__v', rename: null };
   }
   const targetCollection = schema.collection;

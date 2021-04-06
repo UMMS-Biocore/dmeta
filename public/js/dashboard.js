@@ -200,10 +200,16 @@ const getKeyValueExcel = (cleanHeader, rowData) => {
     const refCollName = cleanHeader.match(/(.*)_DID$/)[1];
     key = `${refCollName}_id`;
     value = rowData;
+    console.log('key', key);
+    console.log('value', value);
     // get _id info
     const refColl = $s.collections.filter(col => col.name === refCollName);
     if (refColl && refColl[0] && refColl[0]._id) {
       const collData = $s.data[refColl[0]._id];
+      console.log('$s.data', $s.data);
+      console.log('collData_id', refColl[0]._id);
+      console.log('collData', collData);
+
       const selData = collData.filter(d => d.DID == rowData);
       if (selData && selData[0] && selData[0]._id) {
         key = `${refCollName}_id`;
@@ -655,7 +661,43 @@ const saveDataEventForm = async (type, formID, collID, collName, projectID, oldD
   return success;
 };
 
+const refreshCollectionDiv = async (projectID, collectionID, dry) => {
+  const collectionData = $s.collections.filter(c => c._id === collectionID);
+  if (collectionData && collectionData[0]) {
+    const collectionLabel = collectionData[0]['label'];
+    const collectionName = collectionData[0]['name'];
+    const tableID = collectionID;
+    const colTable = getCollectionTable(collectionID, 'default');
+    const colExcelTable = getExcelTable(`spreadsheet-${collectionID}`);
+    const colDropzone = getDropzoneTable(collectionID);
+    const crudButtons = getCrudButtons(collectionID, collectionLabel, collectionName, projectID, {
+      excel: true
+    });
+    const outerDiv = `#collection-outerdiv-${collectionID}-${projectID}`;
+    const isEmptyDiv = $(outerDiv).html() === '';
+    if (isEmptyDiv) {
+      $(outerDiv).append(`${crudButtons}${colTable}${colExcelTable}${colDropzone}`);
+      await refreshDataTables(tableID, tableID, collectionName, projectID);
+    }
+    if (!dry) {
+      $(`.collection-outerdiv[projectID="${projectID}"]`).css('display', 'none');
+      $(outerDiv).css('display', 'inline');
+    }
+    $($.fn.dataTable.tables(true))
+      .DataTable()
+      .columns.adjust();
+  }
+};
+
 const bindEventHandlers = () => {
+  //================= SELECT COLLECTIONS  =============
+  $(document).on('change', `select.select-collection`, async function(e) {
+    const projectID = $(this).attr('projectID');
+    const collectionID = $(this).val();
+    if (collectionID) {
+      await refreshCollectionDiv(projectID, collectionID, false);
+    }
+  });
   // ================= EVENTS  =================
   $(document).on('click', 'button.multiple-event-form', function(e) {
     const form = $(this).closest('form');
@@ -1062,7 +1104,7 @@ const bindEventHandlers = () => {
     $(`#${importTableID}`).css('display', 'none');
     $(`#${importTableButID}`).css('display', 'none');
     $(this)
-      .closest('.tab-pane')
+      .closest('.collection-outerdiv')
       .find('.dropzone')
       .css('display', 'none');
     $(this)
@@ -1095,7 +1137,7 @@ const bindEventHandlers = () => {
 
     $(this).css('display', 'none');
     $(this)
-      .closest('.tab-pane')
+      .closest('.collection-outerdiv')
       .find('.table-responsive')
       .css('display', 'block');
     $($.fn.dataTable.tables(true))
@@ -1155,11 +1197,11 @@ const bindEventHandlers = () => {
     const collid = $(this).attr('collid');
     $(`#import-spreadsheet-div-${collid}`).css('display', 'block');
     $(this)
-      .closest('.tab-pane')
+      .closest('.collection-outerdiv')
       .find('.table-responsive')
       .css('display', 'none');
     $(this)
-      .closest('.tab-pane')
+      .closest('.collection-outerdiv')
       .find('.dropzone')
       .css('display', 'block');
 
@@ -1253,11 +1295,11 @@ const bindEventHandlers = () => {
     const statusExcelData = addStatusColumns(excelData);
     let header = statusExcelData.shift();
     $(this)
-      .closest('.tab-pane')
+      .closest('.collection-outerdiv')
       .find('.table-responsive')
       .css('display', 'none');
     $(this)
-      .closest('.tab-pane')
+      .closest('.collection-outerdiv')
       .find('.dropzone')
       .css('display', 'none');
 
@@ -1680,6 +1722,8 @@ const showTableTabs = () => {
     const projectID = $(e.target).attr('projectID');
     if (collName == 'all_events') {
       createSelectize(`#select-event-${projectID}`);
+    } else if (collName == 'all_collections') {
+      createSelectize(`#select-collection-${projectID}`);
     } else {
       refreshDataTables(tableID, tableID, collName, projectID);
     }
@@ -1691,14 +1735,29 @@ const showTableTabs = () => {
   });
 };
 
-const getEventDropdown = projectID => {
-  const idText = projectID ? `id="select-event-${projectID}"` : '';
-  let dropdown = `<select class="form-control select-event" projectID="${projectID}" ${idText}>`;
-  dropdown += `<option value="" >--- Select Event ---</option>`;
-  if ($s.events) {
-    const projectEvents = $s.events.filter(e => e.projectID == projectID);
+const getMainDropdown = (projectID, type) => {
+  let classText = '';
+  let defOption = '';
+  let data = '';
+  let dataLabel = '';
+  if (type == 'event') {
+    classText = 'select-event';
+    defOption = 'Select Event';
+    data = $s.events;
+    dataLabel = 'name';
+  } else if (type == 'collection') {
+    classText = 'select-collection';
+    defOption = 'Select Collection';
+    data = $s.collections;
+    dataLabel = 'label';
+  }
+  const idText = projectID ? `id="${classText}-${projectID}"` : '';
+  let dropdown = `<select class="form-control ${classText}" projectID="${projectID}" ${idText}>`;
+  dropdown += `<option value="" >--- ${defOption} ---</option>`;
+  if (data) {
+    const projectEvents = data.filter(e => e.projectID == projectID);
     projectEvents.forEach(i => {
-      dropdown += `<option  value="${i._id}">${i.name}</option>`;
+      dropdown += `<option  value="${i._id}">${i[dataLabel]}</option>`;
     });
   }
   dropdown += `</select>`;
@@ -1706,7 +1765,7 @@ const getEventDropdown = projectID => {
 };
 
 const getEventTab = projectID => {
-  const dropdown = getEventDropdown(projectID);
+  const dropdown = getMainDropdown(projectID, 'event');
   const ret = `
   <div class="row" style="margin-top: 20px;">
     <div class="col-sm-8">${dropdown}</div>
@@ -1724,6 +1783,20 @@ const getEventTab = projectID => {
     </div>
   </div>
   `;
+  return ret;
+};
+
+const getCollectionTab = projectID => {
+  const dropdown = getMainDropdown(projectID, 'collection');
+  let ret = `
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-sm-8">${dropdown}</div>
+    <div class="col-sm-8"></div>
+  </div>`;
+  for (var i = 0; i < $s.collections.length; i++) {
+    const collID = $s.collections[i]['_id'];
+    ret += `<div class="collection-outerdiv" projectID="${projectID}" id="collection-outerdiv-${collID}-${projectID}" style="display:none; margin-top:40px;"></div>`;
+  }
   return ret;
 };
 
@@ -1753,12 +1826,16 @@ const getCollectionNavbar = async projectId => {
   let tabs = [];
   tabs.push({
     name: 'all_events',
-    label: 'All Events',
+    label: 'Events',
     id: `all_events_${projectId}`,
     projectID: projectId
   });
-  tabs = tabs.concat($s.collections);
-
+  tabs.push({
+    name: 'all_collections',
+    label: 'Collections',
+    id: `all_collections_${projectId}`,
+    projectID: projectId
+  });
   let k = 0;
   for (var i = 0; i < tabs.length; i++) {
     const collectionProjectID = tabs[i].projectID;
@@ -1767,7 +1844,7 @@ const getCollectionNavbar = async projectId => {
       const collectionName = tabs[i].name;
       const collectionLabel = tabs[i].label;
       const collectionId = tabs[i].id;
-      const id = getCleanDivId(collectionLabel);
+      const id = getCleanDivId(collectionId);
       const collTabID = 'collTab_' + id;
       const active = k === 1 ? 'active' : '';
       const headerLi = `
@@ -1781,6 +1858,8 @@ const getCollectionNavbar = async projectId => {
       let crudButtons = '';
       if (collectionId == `all_events_${projectId}`) {
         colTable = getEventTab(projectId);
+      } else if (collectionId == `all_collections_${projectId}`) {
+        colTable = getCollectionTab(projectId);
       } else {
         colTable = getCollectionTable(collectionId, 'default');
         colExcelTable = getExcelTable(`spreadsheet-${collectionId}`);
@@ -1808,6 +1887,14 @@ const getCollectionNavbar = async projectId => {
   ret += content;
   ret += '</div>';
   return ret;
+};
+
+export const loadAllTabContent = () => {
+  for (var i = 0; i < $s.collections.length; i++) {
+    const projectID = $s.collections[i].projectID;
+    const collectionID = $s.collections[i]._id;
+    if (projectID && collectionID) refreshCollectionDiv(projectID, collectionID, true);
+  }
 };
 
 export const getProjectNavbar = async () => {

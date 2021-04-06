@@ -2,7 +2,7 @@
 import '@babel/polyfill';
 import axios from 'axios';
 import { loadLoginDiv, login, logout } from './login';
-import { getProjectNavbar } from './dashboard.js';
+import { getProjectNavbar, loadAllTabContent } from './dashboard.js';
 import { refreshAdminProjectNavbar } from './admin-dashboard.js';
 import { getImportPageNavBar } from './importpage.js';
 import { globalEventBinders } from './jsfuncs.js';
@@ -152,6 +152,7 @@ if (loginForm) {
     const projectNavbar = await getProjectNavbar();
     $('#allProjectNav').append(projectNavbar);
     // load all tab content
+    loadAllTabContent();
     $('a.collection[data-toggle="tab"]').trigger('show.coreui.tab');
     $('[data-toggle="tooltip"]').tooltip();
   }
