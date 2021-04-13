@@ -194,6 +194,13 @@ exports.restrictTo = (...roles) => {
   };
 };
 
+// exports.setFindMethod = method => {
+//   return (req, res, next) => {
+//     res.locals.FindMethod = method;
+//     next();
+//   };
+// };
+
 const signToken = id => {
   const numDays = `${process.env.JWT_EXPIRES_IN}d`;
   const token = jwt.sign({ id }, process.env.JWT_SECRET, {

@@ -12,6 +12,10 @@ header.c-header.c-header-light.c-header-fixed.c-header-with-subheader
         a.c-header-nav-link(href="/import") Import Page
     li.c-header-nav-item.px-3
   ul.c-header-nav.ml-auto.mr-4
+    if user
+      li.c-header-nav-item.c-d-legacy-none
+        a.c-header-nav-link(style="padding:8px;" href="profile" data-toggle="tooltip" data-placement="bottom" title="Profile")
+          i.cil-user
     li.dropdown
       a.dropdown-toggle.c-header-nav-link(href="#" data-toggle="dropdown" aria-expanded="false")
         i.cil-book

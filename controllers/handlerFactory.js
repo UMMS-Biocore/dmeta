@@ -184,7 +184,6 @@ exports.getAll = Model =>
     let excludeFields;
     if (res.locals.Filter) filter = res.locals.Filter;
     if (res.locals.ExcludeFields) excludeFields = res.locals.ExcludeFields;
-
     const query = Model.find(filter);
     if (excludeFields) query.select(excludeFields);
     if (res.locals.Perms) {

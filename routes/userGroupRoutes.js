@@ -22,6 +22,6 @@ router
     groupController.setGroupLimiter,
     groupController.updateUserGroup
   )
-  .delete(groupController.setUserFilter, groupController.deleteUserGroup);
+  .delete(groupController.deleteUserGroup);
 
 module.exports = router;

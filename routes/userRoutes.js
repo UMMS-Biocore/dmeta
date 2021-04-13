@@ -15,6 +15,14 @@ router
   .get('/useridwithemail/:email', userController.getUserIDWithEmail)
   .get('/emailwithuserid/:userid', userController.getEmailWithUserID);
 
-router.route('/').get(authController.restrictTo('admin'), userController.getAllUsers);
+router.use(authController.restrictTo('admin'));
+router
+  .route('/')
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
+router
+  .route('/:id')
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
 
 module.exports = router;

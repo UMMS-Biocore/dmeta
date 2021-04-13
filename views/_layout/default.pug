@@ -6,7 +6,7 @@ html(lang='en')
     include ../_partials/head.pug
     block styles
   body.c-app
-    div#session-env-config(style="display: none;" base_url= env.BASE_URL SSO_LOGIN= env.SSO_LOGIN SSO_URL= env.SSO_URL CLIENT_ID= env.CLIENT_ID GOOGLE_SHEET_ID= env.GOOGLE_SHEET_ID)
+    div#session-env-config(style="display: none;" base_url= env.BASE_URL SSO_LOGIN= env.SSO_LOGIN SSO_URL= env.SSO_URL CLIENT_ID= env.CLIENT_ID GOOGLE_SHEET_ID= env.GOOGLE_SHEET_ID role=(user && user.role ? user.role : ""))
     //- include ../_partials/sidebar.pug
     .c-wrapper.c-fixed-components
       include ../_partials/header.pug

@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
-    select: false
+    select: true
   },
   password: {
     type: String,
@@ -68,6 +68,10 @@ userSchema.pre(/^find/, function(next) {
   this.find({ active: { $ne: false } });
   next();
 });
+
+// userSchema.statics.FindWithDeleted = function() {
+//   return this.where({ active: { $ne: true } });
+// };
 
 // Local Login Strategy
 if (process.env.SSO_LOGIN !== 'true') {

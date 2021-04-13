@@ -18,6 +18,12 @@ exports.getImportPage = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getProfile = catchAsync(async (req, res, next) => {
+  res.status(200).render('profile', {
+    title: 'Profile'
+  });
+});
+
 exports.afterSSO = (req, res) => {
   res.status(200).render('after-sso');
 };
