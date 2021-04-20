@@ -16,7 +16,7 @@ router
   .get(collectionsController.getAllCollections)
   .post(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     collectionsController.setAfter,
     collectionsController.createCollection
   );
@@ -26,14 +26,14 @@ router
   .get(collectionsController.getCollection)
   .patch(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     collectionsController.setBefore,
     collectionsController.setAfter,
     collectionsController.updateCollection
   )
   .delete(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     collectionsController.setBefore,
     collectionsController.setAfter,
     collectionsController.deleteCollection

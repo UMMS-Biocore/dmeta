@@ -1,7 +1,7 @@
 /* eslint-disable node/no-unpublished-require */
 const path = require('path');
 // const webpack = require('webpack');
-// const TerserPlugin = require('terser-webpack-plugin'); //minimize js content
+const TerserPlugin = require('terser-webpack-plugin'); //minimize js content
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlPlugin = require('html-webpack-plugin');

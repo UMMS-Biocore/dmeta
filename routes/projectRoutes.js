@@ -18,7 +18,7 @@ router
   .get(projectsController.getAllProjects)
   .post(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     // projectsController.setAfter,
     projectsController.createProject
   );
@@ -28,13 +28,13 @@ router
   .get(projectsController.getProject)
   .patch(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     // projectsController.setAfter,
     projectsController.updateProject
   )
   .delete(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     // projectsController.setAfter,
     projectsController.deleteProject
   );

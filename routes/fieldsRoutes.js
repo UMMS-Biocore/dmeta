@@ -17,7 +17,7 @@ router
   .get(fieldsController.getAllFields)
   .post(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     fieldsController.setCollectionId,
     fieldsController.setAfter,
     fieldsController.createField
@@ -28,13 +28,13 @@ router
   .get(fieldsController.getField)
   .patch(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     fieldsController.setAfter,
     fieldsController.updateField
   )
   .delete(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     fieldsController.setAfter,
     fieldsController.deleteField
   );

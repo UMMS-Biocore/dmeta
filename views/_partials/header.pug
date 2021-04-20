@@ -5,9 +5,10 @@ header.c-header.c-header-light.c-header-fixed.c-header-with-subheader
   ul.c-header-nav.d-md-down
     li.c-header-nav-item.px-3
       a.c-header-nav-link(href="/") Dashboard
-    if user && user.role == 'admin'
+    if user && (user.role == 'admin' || user.role == 'project-admin')
       li.c-header-nav-item.px-3
         a.c-header-nav-link(href="/admin-overview") Admin
+    if user && user.role == 'admin' 
       li.c-header-nav-item.px-3
         a.c-header-nav-link(href="/import") Import Page
     li.c-header-nav-item.px-3
