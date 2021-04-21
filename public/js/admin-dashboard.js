@@ -325,14 +325,17 @@ const getCollectionTable = (collID, projectID) => {
 };
 
 const getFieldsOfCollection = collectionID => {
+  if (!$s.fields.length) return [];
   return $s.fields.filter(field => field.collectionID === collectionID);
 };
 const getCollectionsOfProject = projectID => {
+  if (!$s.collections.length) return [];
   return $s.collections.filter(field => field.projectID === projectID);
 };
 
 const prepareDataForSingleColumn = async (tableID, projectID) => {
   let data;
+  let ret = [];
   if (tableID == `all_collections_${projectID}`) {
     // Use "$s.collections" prepare all_collections table
     data = getCollectionsOfProject(projectID);
@@ -344,36 +347,38 @@ const prepareDataForSingleColumn = async (tableID, projectID) => {
     data = getFieldsOfCollection(tableID);
   }
   const dataCopy = data.slice();
-  const ret = dataCopy.map(el => {
-    let newObj = {};
-    $.each(el, function(k) {
-      // custom view for all_collections tab -> parentCollectionID field (show name of the collection)
-      if (tableID == `all_collections_${projectID}` && k === `parentCollectionID` && el[k]) {
-        const parentColl = $s.collections.filter(col => col._id == el[k]);
-        if (parentColl[0].name) {
-          newObj[k] = parentColl[0].name;
+  if (dataCopy) {
+    ret = dataCopy.map(el => {
+      let newObj = {};
+      $.each(el, function(k) {
+        // custom view for all_collections tab -> parentCollectionID field (show name of the collection)
+        if (tableID == `all_collections_${projectID}` && k === `parentCollectionID` && el[k]) {
+          const parentColl = $s.collections.filter(col => col._id == el[k]);
+          if (parentColl[0].name) {
+            newObj[k] = parentColl[0].name;
+          } else {
+            newObj[k] = el[k];
+          }
+        } else if (tableID == `all_collections_${projectID}` && k === `projectID` && el[k]) {
+          const projectData = $s.projects.filter(p => p._id == el[k]);
+          if (projectData[0] && projectData[0].name) {
+            newObj[k] = projectData[0].name;
+          } else {
+            newObj[k] = el[k];
+          }
+        } else if (
+          (typeof el[k] === 'object' && el[k] !== null) ||
+          Array.isArray(el[k]) ||
+          typeof el[k] === 'boolean'
+        ) {
+          newObj[k] = JSON.stringify(el[k]);
         } else {
           newObj[k] = el[k];
         }
-      } else if (tableID == `all_collections_${projectID}` && k === `projectID` && el[k]) {
-        const projectData = $s.projects.filter(p => p._id == el[k]);
-        if (projectData[0] && projectData[0].name) {
-          newObj[k] = projectData[0].name;
-        } else {
-          newObj[k] = el[k];
-        }
-      } else if (
-        (typeof el[k] === 'object' && el[k] !== null) ||
-        Array.isArray(el[k]) ||
-        typeof el[k] === 'boolean'
-      ) {
-        newObj[k] = JSON.stringify(el[k]);
-      } else {
-        newObj[k] = el[k];
-      }
+      });
+      return newObj;
     });
-    return newObj;
-  });
+  }
   return ret;
 };
 
@@ -1469,7 +1474,7 @@ export const refreshAdminProjectNavbar = async () => {
 
   let tabs = [];
   tabs.push({ name: 'all_projects', label: 'All Projects', id: 'all_projects' });
-  tabs = tabs.concat($s.projects);
+  if ($s.projects.length) tabs = tabs.concat($s.projects);
 
   let header = '<ul class="nav nav-tabs" role="tablist">';
   let content = '<div class="tab-content">';

@@ -118,9 +118,13 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, $scope
       }
     }
     console.log('refData', refData);
-    const fieldsOfCollection = $scope.fields.filter(f => f.collectionID === collectionID);
-    const showFields = getDropdownFields(refData[0], fieldsOfCollection);
-    const dataField = showFields && showFields[0] ? showFields[0] : '';
+    let dataField = '';
+    if ($scope.fields.length) {
+      const fieldsOfCollection = $scope.fields.filter(f => f.collectionID === collectionID);
+      const showFields = getDropdownFields(refData[0], fieldsOfCollection);
+      dataField = showFields && showFields[0] ? showFields[0] : '';
+    }
+
     const collDropdown = getDataDropdown(
       '',
       'ref-control select-text-opt data-reference',
