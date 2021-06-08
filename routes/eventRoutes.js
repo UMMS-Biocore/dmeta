@@ -12,7 +12,7 @@ router
   .get(eventController.getAllEvents)
   .post(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     eventController.createEvent
   );
 
@@ -21,12 +21,12 @@ router
   .get(eventController.getEvent)
   .patch(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     eventController.updateEvent
   )
   .delete(
     authController.requireLogin,
-    authController.restrictTo('admin'),
+    authController.restrictTo('admin', 'project-admin'),
     eventController.deleteEvent
   );
 

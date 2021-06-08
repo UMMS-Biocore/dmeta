@@ -25,8 +25,7 @@ import {
   prepReferenceDropdown,
   getFormElement,
   getFormRow,
-  createSelectizeMultiField,
-  getParentCollection
+  createSelectizeMultiField
 } from './formModules/crudData';
 import { prepDataPerms } from './formModules/dataPerms';
 import Handsontable from 'handsontable';
@@ -52,8 +51,6 @@ const getTableHeaders = collID => {
   let ret = '';
   ret += `<th></th>`; // for checkboxes
   ret += `<th>DID</th>`;
-  const { parentCollLabel } = getParentCollection(collID, $s);
-  if (parentCollLabel) ret += `<th>${parentCollLabel}</th>`;
   for (var i = 0; i < $s.fields.length; i++) {
     if ($s.fields[i].collectionID == collID && $s.fields[i].label && $s.fields[i].hidden !== true)
       ret += `<th>${$s.fields[i].label}</th>`;
@@ -558,30 +555,9 @@ const refreshEventForm = async (projectID, eventID) => {
         let label = '';
         const fieldId = group[i].field;
         if (fieldId) {
-          if (fieldId == 'parentCollectionID') {
-            const collectionID = group[i].collectionID;
-            if (collectionID) {
-              const { parentCollName, parentCollLabel, parentCollectionID } = getParentCollection(
-                collectionID,
-                $s
-              );
-              const ref = projectData[0].name
-                ? `${projectData[0].name}_${parentCollName}`
-                : parentCollName;
-              field = {
-                ref: ref,
-                name: `${parentCollName}_id`,
-                type: 'mongoose.Schema.ObjectId',
-                required: true,
-                collectionID: parentCollectionID
-              };
-              label = parentCollLabel;
-            }
-          } else {
-            const fieldData = $s.fields.filter(f => f._id === fieldId);
-            field = fieldData[0];
-            if (field) label = field.label;
-          }
+          const fieldData = $s.fields.filter(f => f._id === fieldId);
+          field = fieldData[0];
+          if (field) label = field.label;
           if (field && label) {
             const element = await getFormElement(field, projectData[0], $s);
             const refField = $(element).attr('ref');
@@ -599,6 +575,7 @@ const refreshEventForm = async (projectID, eventID) => {
       const fieldsOfCollection = $s.fields.filter(f => f.collectionID === collectionID);
       createSelectizeMultiField(dropdownElement, $s.data[collectionID], fieldsOfCollection);
       prepOntologyDropdown(`#${formID}`, {}, $s);
+      prepReferenceDropdown(`#${formID}`, $s);
       if (collectionName == 'run') prepRunForm(`#${formID}`, {}, $s, projectID);
       prepareClickToActivateModal(`#${formID}`, '', 'input, select', {});
       activateAllForm(`#${formID}`, 'input, select');
@@ -729,12 +706,12 @@ const bindEventHandlers = () => {
       if ($(allDataRefs[i]).hasClass('form-event-collection')) $(allDataRefs[i]).trigger('change');
     }
 
-    // filter data-reference rows based in parent/child relationships.
+    // filter data-reference rows based in child relationships.
     // Later get data from api/v1/tree/${project}
     console.log(collectionID);
     if (collectionID) {
       const projectName = $s.projects.filter(p => p._id === projectID)[0].name;
-      let childCollections = $s.collections.filter(c => c.parentCollectionID == collectionID);
+      let childCollections = [];
       const refFields = $s.fields.filter(f => f.ref == `${projectName}_${collectionName}`);
       for (let i = 0; i < refFields.length; i++) {
         childCollections.push({ _id: refFields[i].collectionID });
@@ -991,7 +968,6 @@ const bindEventHandlers = () => {
     const selColumns = [];
     let reOrderedData = [];
     const data = $s.data[collid];
-    const { parentCollName } = getParentCollection(collid, $s);
     const collFields = getFieldsOfCollection(collid);
     let refFields = [];
     for (var i = 0; i < collFields.length; i++) {
@@ -1007,10 +983,7 @@ const bindEventHandlers = () => {
       let newObj = {};
       for (let k = 0; k < selColumns.length; k++) {
         const col = selColumns[k];
-        if (parentCollName && col == `${parentCollName}_id`) {
-          newObj[`${collName}.${parentCollName}_DID`] =
-            data[i][col] && data[i][col].DID ? data[i][col].DID : '';
-        } else if (refFields.includes(col)) {
+        if (refFields.includes(col)) {
           const trimmedCol = col.replace(new RegExp('_id$'), '');
           if (data[i][col] && data[i][col].DID) {
             newObj[`${collName}.${trimmedCol}_DID`] = data[i][col].DID;
@@ -1442,12 +1415,18 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
   const data = `collLabel="${collLabel}" collID="${collID}" projectID="${projectID}" collName="${collName}"`;
   let tableBut = '';
   let dbEditorBut = '';
+  let childRefBut = '';
   if (settings.dbEditor) {
     dbEditorBut = `
     <button class="btn btn-primary edit-field-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Transfer Fields Data" ${data}>
       <i class="cil-cut"> </i>
     </button>`;
   }
+  if (settings.childRef) {
+    childRefBut = `
+    <button class="btn btn-primary insert-child-ref" type="button" data-toggle="tooltip" data-placement="bottom" title="Insert Reference Field" ${data}><i class="cil-sitemap"> </i></button>`;
+  }
+
   if (settings.excel) {
     tableBut = `
     <button class="btn btn-primary edit-excel-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Edit in Spreadsheet" ${data}>
@@ -1486,6 +1465,7 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
         <i class="cil-trash"> </i>
       </button>
       ${tableBut}
+      ${childRefBut}
       ${dbEditorBut}
     </div>
   </div>`;
@@ -1608,7 +1588,6 @@ const prepareDataForSingleColumn = async (collName, projectID, collectionID, col
   for (var i = 0; i < collFields.length; i++) {
     if (collFields[i].ref) refFields.push(collFields[i].name);
   }
-  const { parentCollName, parentCollectionID } = getParentCollection(collectionID, $s);
   const { projectPart, projectName } = getProjectData(projectID);
   const data = await ajaxCall('GET', `/api/v1/${projectPart}data/${collName}/populated`);
   if (data) {
@@ -1617,15 +1596,11 @@ const prepareDataForSingleColumn = async (collName, projectID, collectionID, col
     ret = dataCopy.map(el => {
       let newObj = {};
       $.each(el, function(k) {
-        if ((refFields.includes(k) || (parentCollName && `${parentCollName}_id` === k)) && el[k]) {
+        if (refFields.includes(k) && el[k]) {
           let refCollID = '';
-          if (parentCollName && `${parentCollName}_id` === k) {
-            refCollID = parentCollectionID;
-          } else {
-            const collNameRef = k.replace(/_id$/, '');
-            const refCollData = getCollectionByName(collNameRef, projectID);
-            if (refCollData && refCollData[0] && refCollData[0]._id) refCollID = refCollData[0]._id;
-          }
+          const collNameRef = k.replace(/_id$/, '');
+          const refCollData = getCollectionByName(collNameRef, projectID);
+          if (refCollData && refCollData[0] && refCollData[0]._id) refCollID = refCollData[0]._id;
           let fieldsOfCollection = [];
           if (refCollID) {
             fieldsOfCollection = $s.fields.filter(f => f.collectionID === refCollID);
@@ -1661,11 +1636,6 @@ export const refreshDataTables = async (TableID, collectionID, collName, project
     let columns = [];
     columns.push({ data: '_id' }); // for checkboxes
     columns.push({ data: 'DID' }); // dolphin id
-    // 1. if parent collection id is defined, insert as a new field
-    const { parentCollName } = getParentCollection(collectionID, $s);
-    if (parentCollName) {
-      columns.push({ data: `${parentCollName}_id` });
-    }
     for (var i = 0; i < collFields.length; i++) {
       columns.push({ data: collFields[i].name });
     }

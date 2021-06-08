@@ -18,22 +18,6 @@ exports.getFieldsOfCollection = async collectionID => {
 
 exports.getFieldsOfCollectionWithParentField = async collectionID => {
   let fieldData = await exports.getFieldsOfCollection(collectionID);
-  const collData = await collectionsController.getCollectionById(collectionID);
-  if (collData.parentCollectionID) {
-    const { fieldName, parentModelName } = await collectionsController.getParentRefField(
-      collData.parentCollectionID
-    );
-    if (fieldName && parentModelName) {
-      fieldData.push({
-        ref: parentModelName,
-        label: fieldName,
-        name: fieldName,
-        type: 'mongoose.Schema.ObjectId',
-        required: true,
-        collectionID: collectionID
-      });
-    }
-  }
   return fieldData;
 };
 

@@ -192,9 +192,9 @@ const getDropdown = (el_name, data, required, dataType) => {
 const getPermDataDiv = async type => {
   const usergroups = await ajaxCall('GET', '/api/v1/usergroups');
   let ret = '';
-  const typeElement = getDropdown('type', ['user', 'group', 'role', 'everyone'], false, 'Array');
+  const typeElement = getDropdown('type', ['user', 'group', 'everyone'], false, 'Array');
   const permElement = getDropdown('perm', ['read', 'write'], true, 'Array');
-  const roleElement = getDropdown('role', ['admin', 'project-admin', 'user'], true, 'Array');
+  // const roleElement = getDropdown('role', ['admin', 'project-admin', 'user'], true, 'Array');
   const groupElement = getDropdown('group', usergroups, true, 'usergroups');
   const userElement = `<input class="form-control data-perm-user" type="text" name="user" required value=""></input>`;
   if (type == 'perm') {
@@ -203,7 +203,7 @@ const getPermDataDiv = async type => {
   }
   ret += getFormRow(typeElement, 'Share with', '');
   ret += getFormRow(userElement, 'E-Mail of the User', { hide: true });
-  ret += getFormRow(roleElement, 'Role', { hide: true });
+  // ret += getFormRow(roleElement, 'Role', { hide: true });
   ret += getFormRow(groupElement, 'Group', { hide: true });
   ret += getFormRow(permElement, 'Permission', { hide: true });
   return ret;

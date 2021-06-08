@@ -125,6 +125,8 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, $scope
       dataField = showFields && showFields[0] ? showFields[0] : '';
     }
 
+    console.log(dataField);
+
     const collDropdown = getDataDropdown(
       '',
       'ref-control select-text-opt data-reference',
@@ -181,21 +183,6 @@ export const getFormElement = async (field, projectData, $scope) => {
   }
 
   return ret;
-};
-
-export const getParentCollection = (collectionID, $scope) => {
-  if (!$scope) $scope = $s;
-  let parentCollectionID = '';
-  let parentCollLabel = '';
-  let parentCollName = '';
-  const col = $scope.collections.filter(col => col.id === collectionID);
-  if (col[0] && col[0].parentCollectionID) {
-    parentCollectionID = col[0].parentCollectionID;
-    const parentColl = $scope.collections.filter(col => col.id === parentCollectionID);
-    if (parentColl[0] && parentColl[0].name) parentCollName = parentColl[0].name;
-    parentCollLabel = parentColl[0] && parentColl[0].label ? parentColl[0].label : parentCollName;
-  }
-  return { parentCollLabel, parentCollName, parentCollectionID };
 };
 
 export const createSelectizeMultiField = (el, data, fieldsOfCollection) => {
@@ -482,7 +469,6 @@ export const prepRunForm = (formId, data, $scope, projectID) => {
 
 export const prepReferenceDropdown = (formId, $scope) => {
   const formValues = $(formId).find('select.ref-control');
-  console.log('formValues', formValues);
   for (var k = 0; k < formValues.length; k++) {
     const collectionID = $(formValues[k]).attr('collectionID');
     if (collectionID && $scope.data && $scope.data[collectionID]) {
@@ -662,24 +648,6 @@ export const prepOntologyDropdown = (formId, data, $scope) => {
 export const getFieldsDiv = async (collectionID, projectData) => {
   await getCollectionFieldData();
   let ret = '';
-  // 1. if parent collection id is defined, insert as a new field
-  const { parentCollLabel, parentCollName, parentCollectionID } = getParentCollection(
-    collectionID,
-    $s
-  );
-  if (parentCollLabel && parentCollName) {
-    const ref =
-      projectData && projectData.name ? `${projectData.name}_${parentCollName}` : parentCollName;
-    const parentField = {
-      ref: ref,
-      name: `${parentCollName}_id`,
-      type: 'mongoose.Schema.ObjectId',
-      required: true,
-      collectionID: parentCollectionID
-    };
-    const element = await getFormElement(parentField, projectData, $s);
-    ret += getFormRow(element, parentCollLabel, parentField);
-  }
   // 2. get all fields of collection
   const fields = getFieldsOfCollection(collectionID);
   for (var k = 0; k < fields.length; k++) {

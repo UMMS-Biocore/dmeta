@@ -24,6 +24,12 @@ exports.getProfile = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getEvent = catchAsync(async (req, res, next) => {
+  res.status(200).render('event', {
+    title: 'Event History'
+  });
+});
+
 exports.afterSSO = (req, res) => {
   res.status(200).render('after-sso');
 };

@@ -7,7 +7,6 @@ const axios = require('axios');
 const uniqueValidator = require('mongoose-unique-validator');
 const Project = require('../models/projectsModel');
 const Collection = require('../models/collectionsModel');
-const collectionsController = require('../controllers/collectionsController');
 const projectsController = require('../controllers/projectsController');
 const Field = require('../models/fieldsModel');
 const { autoIncrementModelDID, CounterModel } = require('../models/counterModel');
@@ -16,9 +15,9 @@ const AppError = require('./appError');
 const modelObj = {};
 exports.modelObj = modelObj;
 
-// create schema for given fields and collection(col)
+// create schema for given fields
 // returns schema obj e.g. { name: { type: String } }
-const createSchema = async (fields, col) => {
+const createSchema = async fields => {
   //
   // function parseSchemaEntry:
   // input sett => should be string, array or boolean.
@@ -131,15 +130,6 @@ const createSchema = async (fields, col) => {
   };
 
   const schema = {};
-  // set default reference fields based on parentCollectionID
-  if (col.parentCollectionID) {
-    // fieldName: reference field name in the collection
-    // parentModelName: parent collection model name
-    const { fieldName, parentModelName } = await collectionsController.getParentRefField(
-      col.parentCollectionID
-    );
-    schema[fieldName] = { type: mongoose.Schema.ObjectId, ref: parentModelName, required: true };
-  }
   for (let n = 0; n < fields.length; n++) {
     const name = fields[n].name;
     const entry = createSchemaEntry(fields[n]);
@@ -149,8 +139,8 @@ const createSchema = async (fields, col) => {
   if (!schema.perms) schema.perms = { type: 'Mixed' };
   schema.owner = { type: mongoose.Schema.ObjectId, ref: 'User' };
   schema.lastUpdatedUser = { type: mongoose.Schema.ObjectId, ref: 'User' };
-  schema.creationDate = { type: Date, default: Date.now() };
-  schema.lastUpdateDate = { type: Date, default: Date.now() };
+  schema.creationDate = { type: Date, default: Date.now };
+  schema.lastUpdateDate = { type: Date, default: Date.now };
   schema.DID = { type: Number, unique: true, min: 1, immutable: true };
   return schema;
 };
@@ -388,7 +378,7 @@ exports.updateModel = async (collectionId, oldColl) => {
     if (col && mongoose.connection.models[modelName]) {
       delete mongoose.connection.models[modelName];
     }
-    const schema = await createSchema(fields, col);
+    const schema = await createSchema(fields);
     const Schema = buildSchema(schema, modelName, fields);
     const Model = mongoose.model(modelName, Schema, modelName);
     modelObj[modelName] = Model;
@@ -417,7 +407,7 @@ exports.buildModels = async () => {
       const modelName = exports.getModelName(allCollections[n], project);
       const fields = allFields.filter(f => f.collectionID == colId);
       // eslint-disable-next-line no-await-in-loop
-      const schema = await createSchema(fields, allCollections[n]);
+      const schema = await createSchema(fields);
       console.log(modelName, schema);
       if (!modelObj[modelName]) {
         const Schema = buildSchema(schema, modelName, fields);

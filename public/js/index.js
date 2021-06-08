@@ -5,6 +5,7 @@ import { loadLoginDiv, login, logout } from './login';
 import { getProjectNavbar, loadAllTabContent } from './dashboard.js';
 import { refreshAdminProjectNavbar } from './admin-dashboard.js';
 import { getProfileNavbar, loadProfileTabContent } from './profile.js';
+import { getEventNavbar, loadEventContent } from './event.js';
 import { getImportPageNavBar } from './importpage.js';
 import { globalEventBinders } from './jsfuncs.js';
 
@@ -43,6 +44,7 @@ const afterSsoClose = document.querySelector('.after-sso-close');
 const loginForm = document.querySelector('#loginOuterDiv');
 const allProjectNav = document.querySelector('#allProjectNav');
 const allProfileNav = document.querySelector('#allProfileNav');
+const allEventNav = document.querySelector('#allEventNav');
 const adminAllProjectNav = document.querySelector('#admin-allProjectNav');
 const dmetaVersionBut = document.querySelector('#dmetaVersionBut');
 
@@ -162,6 +164,12 @@ if (loginForm) {
     const profileNavbar = await getProfileNavbar(userRole);
     $('#allProfileNav').append(profileNavbar);
     loadProfileTabContent(userRole);
+  }
+
+  if (allEventNav) {
+    const eventNavbar = await getEventNavbar();
+    $('#allEventNav').append(eventNavbar);
+    await loadEventContent(userRole);
   }
 
   if (adminAllProjectNav) {

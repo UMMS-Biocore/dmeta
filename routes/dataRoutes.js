@@ -9,6 +9,10 @@ router.use(authController.setDefPerms);
 router.use(authController.isLoggedIn);
 
 router
+  .route('/:collectionName/format/:format')
+  .get(dataController.setExcludeFields, dataController.getFormatData);
+
+router
   .route('/:collectionName/summary')
   .get(dataController.setExcludeFields, dataController.getDataSummary);
 router
@@ -24,7 +28,7 @@ router
   .post(
     authController.requireLogin,
     dataController.setModel,
-    eventLogController.setEventLog,
+    eventLogController.setEventLog('data'),
     dataController.createData
   );
 
@@ -35,13 +39,13 @@ router
     authController.requireLogin,
     dataController.setExcludeFields,
     dataController.setModel,
-    eventLogController.setEventLog,
+    eventLogController.setEventLog('data'),
     dataController.updateData
   )
   .delete(
     authController.requireLogin,
     dataController.setModel,
-    eventLogController.setEventLog,
+    eventLogController.setEventLog('data'),
     dataController.deleteData
   );
 

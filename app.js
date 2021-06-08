@@ -26,6 +26,7 @@ const dataRouter = require('./routes/dataRoutes');
 const projectsRouter = require('./routes/projectRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const miscRouter = require('./routes/miscRoutes');
+const configApisRouter = require('./routes/configApisRoutes');
 const accessTokens = require('./controllers/accessTokenController');
 
 const app = express();
@@ -122,6 +123,7 @@ app.use('/api/v1/fields', fieldsRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/events', eventRouter);
 app.use('/api/v1/eventlogs', eventLogRouter);
+app.use('/api/v1/config/apis', configApisRouter);
 app.use('/api/v1/groups', groupRouter);
 app.use('/api/v1/server', serverRouter);
 app.use('/api/v1/usergroups', userGroupRouter);

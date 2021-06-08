@@ -21,11 +21,11 @@ const projectsSchema = new mongoose.Schema(
     active: { type: 'boolean', default: true },
     creationDate: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     },
     lastUpdateDate: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     },
     perms: {
       type: 'Mixed'

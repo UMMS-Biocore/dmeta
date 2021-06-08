@@ -1073,9 +1073,9 @@ Get a Data
 Create a Data 
 ~~~~~~~~~~~~~
 
-.. http:post:: {{URL}}/api/v1/projects/(string:project_name)/data/(string:collection_name)/(string:data_id)
+.. http:post:: {{URL}}/api/v1/projects/(string:project_name)/data/(string:collection_name)
 
-    This post request is only allowed for the project-admin role.
+    This post request is only allowed for the users that have the write permission.
 
     **Example request**:
 

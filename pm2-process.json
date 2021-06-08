@@ -5,7 +5,7 @@
   "watch_options": {
     "followSymlinks": false
   },
-  "name": "dmeta-skin",
-  "log": "./../dmeta-skin_server.log",
+  "name": "dmeta",
+  "log": "./../dmeta_server.log",
   "cwd": "./"
 }

@@ -6,9 +6,20 @@ const eventLogSchema = new mongoose.Schema({
     required: [true, 'Please provide event type.'],
     enum: ['insert', 'delete', 'update']
   },
-  coll: {
+  target: {
     type: String,
-    required: [true, 'Please provide model name.']
+    required: [true, 'Please provide event type.'],
+    enum: ['collections', 'fields', 'projects', 'data']
+  },
+  coll: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Collection',
+    required: [true, 'Please provide collection id.']
+  },
+  project: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Project',
+    required: [true, 'Please provide project id.']
   },
   doc_id: {
     type: String,
@@ -27,20 +38,12 @@ const eventLogSchema = new mongoose.Schema({
   },
   creationDate: {
     type: Date,
-    default: Date.now()
-  },
-  lastUpdateDate: {
-    type: Date,
-    default: Date.now()
+    default: Date.now
   },
   perms: {
     type: 'Mixed'
   },
   owner: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'User'
-  },
-  lastUpdatedUser: {
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   }

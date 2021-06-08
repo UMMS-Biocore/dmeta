@@ -11,7 +11,7 @@ const refreshTokens = require('./../controllers/refreshTokenController');
 const groupController = require('./../controllers/groupController');
 const collectionsController = require('./../controllers/collectionsController');
 const projectsController = require('./../controllers/projectsController');
-const { modelObj } = require('./../utils/buildModels');
+// const { modelObj } = require('./../utils/buildModels');
 
 const [getAsync, postAsync] = [get, post].map(promisify);
 
@@ -73,35 +73,35 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
           req.params.projectName
         );
         // if parentCollectionID is found, check parentCollectionID for permissions
-        if (col.parentCollectionID) {
-          // fieldName: reference field name in the collection
-          // parentModelName: parent collection model name
-          // refId: reference Id of the newly created document in `parentColName`
-          const { fieldName, parentModelName } = await collectionsController.getParentRefField(
-            col.parentCollectionID
-          );
-          if (parentModelName && fieldName) {
-            if (req.body[fieldName]) {
-              const refId = req.body[fieldName];
-              // get refId from `modelName` collection
-              const Model = modelObj[parentModelName];
-              const query = Model.findById(refId);
-              // check if parentColName's perms allows to write
-              const permFilter = await res.locals.Perms('write');
-              query.find(permFilter);
-              const doc = await query.lean();
-              if (!doc || (Array.isArray(doc) && doc.length === 0)) {
-                return false;
-              }
-              // inherit parents permissions by updating req.body.perms
-              if (!req.body.perms && doc[0].perms) req.body.perms = doc[0].perms;
-              return true;
-            }
-            return next(new AppError(`'${fieldName}' must be specified to create document.`, 403));
-          }
-
-          // if parentCollectionID not found, then check collection.restrictTo for permissions
-        } else if (!col.parentCollectionID && col.restrictTo) {
+        // if (col.parentCollectionID) {
+        //   // fieldName: reference field name in the collection
+        //   // parentModelName: parent collection model name
+        //   // refId: reference Id of the newly created document in `parentColName`
+        //   const { fieldName, parentModelName } = await collectionsController.getParentRefField(
+        //     col.parentCollectionID
+        //   );
+        //   if (parentModelName && fieldName) {
+        //     if (req.body[fieldName]) {
+        //       const refId = req.body[fieldName];
+        //       // get refId from `modelName` collection
+        //       const Model = modelObj[parentModelName];
+        //       const query = Model.findById(refId);
+        //       // check if parentColName's perms allows to write
+        //       const permFilter = await res.locals.Perms('write');
+        //       query.find(permFilter);
+        //       const doc = await query.lean();
+        //       if (!doc || (Array.isArray(doc) && doc.length === 0)) {
+        //         return false;
+        //       }
+        //       // inherit parents permissions by updating req.body.perms
+        //       if (!req.body.perms && doc[0].perms) req.body.perms = doc[0].perms;
+        //       return true;
+        //     }
+        //     return next(new AppError(`'${fieldName}' must be specified to create document.`, 403));
+        //   }
+        // }
+        // if parentCollectionID not found, then check collection.restrictTo for permissions
+        if (col.restrictTo) {
           // user: defines allowed user_ids for creating item in the collection
           // group: defines allowed group_ids for creating item in the collection
           // role: defines allowed roles for creating item in the collection
@@ -121,7 +121,7 @@ exports.setDefPerms = catchAsync(async (req, res, next) => {
             if (group.some(r => userGroups.includes(r))) return true;
           }
           // if parentCollectionID and restrictTo not found, then allow insertion
-        } else if (!col.parentCollectionID && !col.restrictTo) {
+        } else if (!col.restrictTo) {
           // inherit collection permissions by updating req.body.perms
           if (!req.body.perms && col.perms) req.body.perms = col.perms;
           return true;

@@ -142,8 +142,8 @@
 <p class="caption"><span class="caption-text">Developer Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="projects.html">Project Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="collections.html">Pipeline Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fields.html">Process Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collection Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fields.html">Fields Guide</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Administrator Guide</span></p>
 <ul>
@@ -1251,9 +1251,9 @@ to authenticate as a user and have the same permissions that the user itself.</p
 <div class="section" id="create-a-data">
 <h3>Create a Data<a class="headerlink" href="#create-a-data" title="Permalink to this headline">¶</a></h3>
 <dl class="post">
-<dt id="post-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)">
-<code class="descname">POST </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>data_id</em><span class="sig-paren">)</span><a class="headerlink" href="#post-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)-(string-data_id)" title="Permalink to this definition">¶</a></dt>
-<dd><p>This post request is only allowed for the project-admin role.</p>
+<dt id="post-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)">
+<code class="descname">POST </code><code class="descname">{{URL}}/api/v1/projects/</code><span class="sig-paren">(</span><em class="property">string: </em><em>project_name</em><span class="sig-paren">)</span><code class="descname">/data/</code><span class="sig-paren">(</span><em class="property">string: </em><em>collection_name</em><span class="sig-paren">)</span><a class="headerlink" href="#post-URL-api-v1-projects-(string-project_name)-data-(string-collection_name)" title="Permalink to this definition">¶</a></dt>
+<dd><p>This post request is only allowed for the users that have the write permission.</p>
 <p><strong>Example request</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl -X POST <span class="se">\</span>
 <span class="s1">&#39;https://dmeta-skin.dolphinnext.com/api/v1/projects/vitiligo/data/sample&#39;</span> <span class="se">\</span>

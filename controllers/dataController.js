@@ -4,6 +4,7 @@ const factory = require('./handlerFactory');
 const collectionsController = require('./collectionsController');
 const fieldsController = require('./fieldsController');
 const Fields = require('./../models/fieldsModel');
+const ConfigApi = require('./../models/configApiModel');
 const { modelObj } = require('./../utils/buildModels');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
@@ -47,7 +48,6 @@ exports.setExcludeFields = async (req, res, next) => {
   const validFieldNames = validFields.map(f => f.name);
   let exclude = allFieldNames.filter(x => !validFieldNames.includes(x));
   exclude = exclude.map(i => `-${i}`);
-  console.log('exclude', exclude);
   res.locals.ExcludeFields = exclude.join(' ');
   next();
 };
@@ -58,7 +58,25 @@ exports.createData = factory.createOne();
 exports.updateData = factory.updateOne();
 exports.deleteData = factory.deleteOne();
 
-exports.getDataSummarySchema = (collectionName, projectName, type) => {
+const getDataFormatSchema = async (collectionName, projectName, format) => {
+  try {
+    let col = await collectionsController.getCollectionByName(collectionName, projectName, '');
+    if (col && col._id) {
+      const apiConf = await ConfigApi.find({ collectionID: col._id, route: format }).exec();
+      if (apiConf[0] && apiConf[0].config) {
+        let config = apiConf[0].config;
+        console.log(config);
+        config.collection = `${projectName}_${collectionName}`;
+        return config;
+      }
+    }
+  } catch (err) {
+    return null;
+  }
+  return null;
+};
+
+const getDataSummarySchema = (collectionName, projectName, type) => {
   // * expected Schema for data summary
   // - collection: main target collecton
   // - populate: space separated fields to be merged my reference
@@ -205,7 +223,7 @@ exports.getDataSummarySchema = (collectionName, projectName, type) => {
   return null;
 };
 
-const parseSummarySchema = async (collectionName, projectName, type) => {
+const parseSummarySchema = async (collectionName, projectName, format, type) => {
   // e.g. const schema = {
   //    collection: 'sample',
   //    select:'dir experiments_id.exp experiments_id.projects_id.name experiments_id.test_id.name',
@@ -217,20 +235,18 @@ const parseSummarySchema = async (collectionName, projectName, type) => {
   //   populate: { path: 'projects_id test_id' }
   // }
   // returns `rename` Function: renames keys of query docs according to Schema
-  const schema = exports.getDataSummarySchema(collectionName, projectName, type);
+  let schema = '';
+  if (format) {
+    schema = await getDataFormatSchema(collectionName, projectName, format);
+  } else {
+    schema = getDataSummarySchema(collectionName, projectName, type);
+  }
   if (!schema) {
     let modelName = collectionName;
     if (projectName) modelName = `${projectName}_${collectionName}`;
     let col = await collectionsController.getCollectionByName(collectionName, projectName);
     let popObj = '';
     if (col) {
-      if (col.parentCollectionID) {
-        const { fieldName, parentModelName } = await collectionsController.getParentRefField(
-          col.parentCollectionID
-        );
-        if (fieldName && mongoose.connection.models[parentModelName]) popObj = fieldName;
-      }
-
       const fields = await fieldsController.getFieldsByCollectionId(col._id);
       let refFields = [];
       for (let i = 0; i < fields.length; i++) {
@@ -303,10 +319,10 @@ exports.getDataSummaryDoc = async (type, req, res, next) => {
     const { targetCollection, popObj, select, rename } = await parseSummarySchema(
       req.params.collectionName,
       req.params.projectName,
+      req.params.format,
       type
     );
 
-    //const modelName = getModelNameByColId(col.parentCollectionID);
     if (!modelObj[targetCollection]) return null;
     const query = modelObj[targetCollection].find({});
     if (res.locals.Perms) {
@@ -324,6 +340,22 @@ exports.getDataSummaryDoc = async (type, req, res, next) => {
     return null;
   }
 };
+
+exports.getFormatData = catchAsync(async (req, res, next) => {
+  const start = Date.now();
+  const type = 'summary';
+  const doc = await exports.getDataSummaryDoc(type, req, res, next);
+  const duration = Date.now() - start;
+  if (doc === null) return next(new AppError(`No collection found!`, 404));
+  res.status(200).json({
+    status: 'success',
+    duration: duration,
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+});
 
 exports.getDataSummary = catchAsync(async (req, res, next) => {
   const start = Date.now();

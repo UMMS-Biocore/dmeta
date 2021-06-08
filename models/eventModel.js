@@ -5,7 +5,7 @@ const eventSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'A field must have a name'],
+      required: [true, 'An event must have a name'],
       validate: {
         validator: async function(v) {
           let projectID;
@@ -41,11 +41,11 @@ const eventSchema = new mongoose.Schema(
     },
     creationDate: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     },
     lastUpdateDate: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     },
     perms: {
       type: 'Mixed'

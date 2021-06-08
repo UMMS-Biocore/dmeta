@@ -8,9 +8,12 @@ header.c-header.c-header-light.c-header-fixed.c-header-with-subheader
     if user && (user.role == 'admin' || user.role == 'project-admin')
       li.c-header-nav-item.px-3
         a.c-header-nav-link(href="/admin-overview") Admin
-    if user && user.role == 'admin' 
+    //- if user && user.role == 'admin' 
+    //-   li.c-header-nav-item.px-3
+    //-     a.c-header-nav-link(href="/import") Import Page
+    if user
       li.c-header-nav-item.px-3
-        a.c-header-nav-link(href="/import") Import Page
+        a.c-header-nav-link(href="/event") Event History
     li.c-header-nav-item.px-3
   ul.c-header-nav.ml-auto.mr-4
     if user

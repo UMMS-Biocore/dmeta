@@ -1,52 +1,70 @@
 const axios = require('axios');
 const EventLog = require('../models/eventLogModel');
 const serverController = require('../controllers/serverController');
+const collectionsController = require('../controllers/collectionsController');
+const projectsController = require('../controllers/projectsController');
 const factory = require('./handlerFactory');
+const APIFeatures = require('./../utils/apiFeatures');
 
 // create event tracker for data routes -> create/update/delete
-exports.setEventLog = async (req, res, next) => {
-  // event type: "insert", "update", "delete"
-  res.locals.EventLog = async function(type, collection, doc) {
-    let update = {};
-    let docId;
-    let docReq;
-    let docRes;
-    const perms = doc.perms;
-    if (type == 'insert') {
-      docId = doc.id;
-      docReq = req.body;
-      docRes = doc;
-    } else if (type == 'update') {
-      docId = req.params.id;
-      docReq = req.body;
-      docRes = doc;
-    } else if (type == 'delete') {
-      docId = req.params.id;
-    }
-    const eventDetails = {
-      type,
-      coll: collection,
-      doc_id: docId,
-      res: docReq,
-      req: docRes,
-      update,
-      perms
-    };
-    try {
-      await EventLog.create(eventDetails);
-    } catch {
-      return { status: 'error', message: 'Event log could not be created', error: eventDetails };
-    }
+exports.setEventLog = target => {
+  return (req, res, next) => {
+    // target: 'projects', 'collections',"fields", "data"
+    // event type: "insert", "update", "delete"
+    res.locals.EventLog = async function(type, doc) {
+      let projectName;
+      let collectionName;
+      let collection_id;
+      let project_id;
+      if (req.params.projectName) projectName = req.params.projectName;
+      if (req.params.collectionName) collectionName = req.params.collectionName;
+      const col = await collectionsController.getCollectionByName(collectionName, projectName);
+      const proj = await projectsController.getProjectByName(projectName);
+      if (col && col._id) collection_id = col._id;
+      if (proj && proj._id) project_id = proj._id;
 
-    if (
-      type == 'insert' &&
-      (collection == 'run' || collection.match(/_run$/)) &&
-      res.locals.token
-    ) {
-      return await exports.insertRun(doc, req, res, next);
-    }
+      let docId;
+      let docReq;
+      let docRes;
+      const perms = doc.perms;
+      if (type == 'insert') {
+        docId = doc.id;
+        docReq = req.body;
+        docRes = doc;
+      } else if (type == 'update') {
+        docId = req.params.id;
+        docReq = req.body;
+        docRes = doc;
+      } else if (type == 'delete') {
+        docId = req.params.id;
+      }
+      const eventDetails = {
+        target,
+        type,
+        coll: collection_id,
+        project: project_id,
+        doc_id: docId,
+        res: docRes,
+        req: docReq,
+        owner: res.locals.user.id,
+        perms
+      };
+      try {
+        await EventLog.create(eventDetails);
+      } catch {
+        return { status: 'error', message: 'Event log could not be created', error: eventDetails };
+      }
+
+      if (
+        type == 'insert' &&
+        (collectionName == 'run' || collectionName.match(/_run$/)) &&
+        res.locals.token
+      ) {
+        return await exports.insertRun(doc, req, res, next);
+      }
+    };
+    return next();
   };
-  return next();
 };
 
 const prepareDbLib = async (docAr, req, res) => {
@@ -389,5 +407,26 @@ exports.insertRun = async (docSaved, req, res, next) => {
   }
 };
 
-exports.getAllEventLogs = factory.getAll(EventLog);
 exports.getEventLog = factory.getOne(EventLog);
+
+exports.getAllEventLogs = async (req, res, next) => {
+  const query = EventLog.find({});
+  if (res.locals.Perms) {
+    const permFilter = await res.locals.Perms('read');
+    query.find(permFilter);
+  }
+  query.populate({ path: 'coll', select: 'name' });
+  query.populate({ path: 'project', select: 'name' });
+  query.populate({ path: 'owner', select: 'username' });
+  const features = new APIFeatures(query, req.query).filter().sort();
+  const jsonFilter = new APIFeatures(features.query, req.body).filter();
+  let doc = await jsonFilter.query;
+  res.status(200).json({
+    status: 'success',
+    reqeustedAt: req.requestTime,
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+};

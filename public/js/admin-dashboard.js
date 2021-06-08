@@ -9,13 +9,15 @@ import {
   getUpdatedFields,
   prepareMultiUpdateModal,
   prepareClickToActivateModal,
-  getSimpleDropdown
+  getSimpleDropdown,
+  IsJson5String
 } from './jsfuncs';
 import Sortable from 'sortablejs';
 import { getCrudButtons, crudAjaxRequest } from './dashboard';
 import { getFormElement, getFormRow } from './formModules/crudData';
 import { prepDataPerms } from './formModules/dataPerms';
 import { prepDataRestrictTo } from './formModules/dataRestrictTo';
+const JSON5 = require('json5');
 
 // GLOBAL SCOPE
 let $s = { data: {}, collectionCounter: 0 };
@@ -51,7 +53,6 @@ $s.AdminAllCollectionFields = [
   'label',
   'slug',
   'version',
-  'parentCollectionID',
   'projectID',
   'id',
   'restrictTo',
@@ -120,12 +121,6 @@ const fieldsOfCollectionsModel = {
     label: 'Label',
     type: 'String',
     required: true
-  },
-  parentCollectionID: {
-    name: 'parentCollectionID',
-    label: 'Parent Collection',
-    type: 'mongoose.Schema.ObjectId',
-    ref: 'collections'
   },
   projectID: {
     name: 'projectID',
@@ -351,15 +346,8 @@ const prepareDataForSingleColumn = async (tableID, projectID) => {
     ret = dataCopy.map(el => {
       let newObj = {};
       $.each(el, function(k) {
-        // custom view for all_collections tab -> parentCollectionID field (show name of the collection)
-        if (tableID == `all_collections_${projectID}` && k === `parentCollectionID` && el[k]) {
-          const parentColl = $s.collections.filter(col => col._id == el[k]);
-          if (parentColl[0].name) {
-            newObj[k] = parentColl[0].name;
-          } else {
-            newObj[k] = el[k];
-          }
-        } else if (tableID == `all_collections_${projectID}` && k === `projectID` && el[k]) {
+        // custom view for all_collections tab -> projectID field (show name of the project)
+        if (tableID == `all_collections_${projectID}` && k === `projectID` && el[k]) {
           const projectData = $s.projects.filter(p => p._id == el[k]);
           if (projectData[0] && projectData[0].name) {
             newObj[k] = projectData[0].name;
@@ -448,6 +436,7 @@ const showTableTabs = () => {
     const tableID = $(e.target).attr('tableID');
     const projectID = $(e.target).attr('projectID');
     refreshDataTables(tableID, projectID);
+    $('[data-toggle="tooltip"]').tooltip();
   });
   $(document).on('shown.coreui.tab', 'a.collection[data-toggle="tab"]', function(e) {
     $($.fn.dataTable.tables(true))
@@ -467,6 +456,57 @@ const updateNavbarTables = async (collID, projectID) => {
   } else {
     refreshDataTables(collID, projectID);
   }
+};
+
+const refreshAPIWorkflow = async (projectID, apiID, type) => {
+  const workflow = await getAPIWorkflow(projectID, type);
+  $(`#api-workflow-${projectID}`).empty();
+  $(`#api-workflow-${projectID}`).append(workflow);
+  if (apiID && $s.apis) {
+    const api = $s.apis.filter(e => e._id == apiID);
+    if (typeof api[0].config === 'object' && api[0].config !== null) {
+      api[0].config = JSON.stringify(api[0].config);
+    }
+    fillFormByName(`#api-workflow-${projectID}`, 'input, select, textarea', api[0], true);
+  } else {
+    await prepDataPerms(`#api-workflow-${projectID}`, {});
+  }
+};
+
+const getAPIWorkflow = async (projectID, type) => {
+  let disabled = '';
+  if (type == 'disabled') {
+    disabled = 'disabled';
+  }
+  const permsField = { name: 'perms', label: 'Permissions', type: 'Mixed' };
+  const element = await getFormElement(permsField, getProjectData(projectID), $s);
+  const permsDiv = getFormRow(element, permsField.label, permsField);
+  const collDropdown = getCollectionDropdown(projectID, 'collectionID', [], disabled);
+  const ret = `
+  <div class="col-sm-10">
+    <form class="form-horizontal" id="api-workflow-${projectID}" style="margin-top:40px;">
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label text-right">Target Collection</label>
+        <div class="col-md-10">
+          ${collDropdown}
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label text-right">Route Description</label>
+        <div class="col-md-10">
+          <input ${disabled} name="route" class="form-control" type="text" value=""></input>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label text-right">Config</label>
+        <div class="col-md-10">
+          <textarea ${disabled} name="config" class="form-control"  value="" rows="10"></textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+  `;
+  return ret;
 };
 
 const getEventWorkflow = async (projectID, type) => {
@@ -631,7 +671,6 @@ const insertNewField = (projectID, divToAppend, type, counter) => {
     .val();
   const selectField = newFieldRow.find('.select-field');
   fillCollectionFields(selectField, selectedCollID);
-  // $('[data-toggle="tooltip"]').tooltip();
 };
 
 const insertNewEventRow = (projectID, type, newField) => {
@@ -689,9 +728,47 @@ const insertNewEventRow = (projectID, type, newField) => {
     //insertNewField
     newRow.find('.insert-event-field').trigger('click');
   }
+  return newRow;
+};
 
-  // $('[data-toggle="tooltip"]').tooltip();
+const insertNewAPIRow = (projectID, type, newField) => {
+  let hide = '';
+  let disabled = '';
+  if (type == 'disabled') {
+    hide = `style="display:none;"`;
+    disabled = `disabled`;
+  }
+  const counter = $s.collectionCounter;
+  $s.collectionCounter++;
+  const collectionDropdown = getCollDropdown(projectID, type, counter);
 
+  const newRow = $(`
+    <div class="list-group"  style="padding-right:0px;">
+              </label>
+            </div>
+            <div class="col-auto" style="font-size: 0.7rem;">
+              <label class="text-center">M<span class="d-none d-lg-inline">ultiple</span>
+                <input ${disabled} class="multiple-check" type="checkbox" style="width:100%;">
+              </label>
+            </div>
+            <div class="col-auto align-self-center">
+              <a ${hide} href="#" class="insert-event-field"><i class="cil-plus  float-right" data-toggle="tooltip" data-placement="bottom" title="Insert Field" style="margin-left:7px;"></i></a>
+            </div>
+            <div class="col-auto align-self-center">
+              <a ${hide} href="#"><i class="cil-trash js-remove float-right" data-toggle="tooltip" data-placement="bottom" title="Remove Collection Group"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="container field-container" style="margin-right:0px; margin-left:0px; max-width:7000px;"> 
+        </div>  
+      </div>  
+    </div>`);
+  $(`#api-schema-${projectID}`).append(newRow);
+  createSortable(newRow[0], projectID, type, 'collection');
+  if (newField) {
+    //insertNewField
+    newRow.find('.insert-api-field').trigger('click');
+  }
   return newRow;
 };
 
@@ -706,19 +783,6 @@ const fillCollectionFields = (dropdown, collID) => {
       text: '-- Select Field --'
     })
   );
-
-  if (col[0] && col[0].parentCollectionID) {
-    const parentCollID = col[0].parentCollectionID;
-    const parentColl = $s.collections.filter(col => col.id === parentCollID);
-    if (parentColl[0] && parentColl[0].name) {
-      dropdown.append(
-        $('<option>', {
-          value: 'parentCollectionID',
-          text: `${parentColl[0].label} (required ref.)`
-        })
-      );
-    }
-  }
 
   $.each(fields, function(i, item) {
     const required = item.required ? 'required' : '';
@@ -792,13 +856,19 @@ const getEventSchema = projectID => {
   return ret;
 };
 
-const getCollectionDropdown = (projectID, name) => {
-  let dropdown = `<select class="form-control" name="${name}">`;
+const getCollectionDropdown = (projectID, name, exclude, disable) => {
+  let disabled = '';
+  if (disable) {
+    disabled = 'disabled';
+  }
+  let dropdown = `<select ${disabled} class="form-control" name="${name}">`;
   dropdown += `<option value="" >--- Select Collection ---</option>`;
   if ($s.collections) {
     const projectCollections = $s.collections.filter(e => e.projectID == projectID);
     projectCollections.forEach(i => {
-      dropdown += `<option  value="${i._id}">${i.name}</option>`;
+      if (!exclude.includes(i._id)) {
+        dropdown += `<option  value="${i._id}">${i.name}</option>`;
+      }
     });
   }
   dropdown += `</select>`;
@@ -807,7 +877,11 @@ const getCollectionDropdown = (projectID, name) => {
 
 const getEditFieldDiv = projectID => {
   let ret = `<p> Please choose target collection and operation type to transfer your data of fields into target collection. </p>`;
-  ret += getFormRow(getCollectionDropdown(projectID, 'targetCollection'), 'Target Collection', {});
+  ret += getFormRow(
+    getCollectionDropdown(projectID, 'targetCollection', [], false),
+    'Target Collection',
+    {}
+  );
   const operationTypeDropdown = getSimpleDropdown(
     [{ _id: 'move-ref', name: 'Move and Keep Reference' }],
     { name: 'type' }
@@ -817,7 +891,178 @@ const getEditFieldDiv = projectID => {
   return ret;
 };
 
+const getInsertChildRefDiv = async (projectID, collID) => {
+  let ret = `<p>Please choose a collection to be used for referencing. </p>`;
+  const exclude = [collID];
+  ret += getFormRow(
+    getCollectionDropdown(projectID, 'childRefCollection', exclude, false),
+    'Parent Collection',
+    {}
+  );
+  const labelField = { name: 'label', label: 'Reference Label', type: 'String' };
+  const labelDiv = await getFormElement(labelField, getProjectData(projectID), $s);
+  ret += getFormRow(labelDiv, labelField.label, labelField);
+
+  return ret;
+};
+
 const bindEventHandlers = () => {
+  // ================= API CONFIG =============
+  $(document).on('change', `select.select-api`, async function(e) {
+    const projectID = $(this).attr('projectID');
+    const apiID = $(this).val();
+    if (apiID) {
+      await refreshAPIWorkflow(projectID, apiID, 'disabled');
+    } else {
+      $(`#api-workflow-${projectID}`).empty();
+    }
+  });
+  $(document).on('click', `button.insert-api`, async function(e) {
+    const projectID = $(this).attr('projectID');
+    showHideButtons(
+      this,
+      ['insert-api', 'edit-api', 'delete-api', 'update-api'],
+      ['cancel-api', 'save-api']
+    );
+    await refreshAPIWorkflow(projectID, '', 'new');
+  });
+  $(document).on('click', `button.save-api`, async function(e) {
+    const projectID = $(this).attr('projectID');
+    const formValues = $(`#api-workflow-${projectID}`).find('input,textarea,select');
+    const [formObj, stop] = createFormObj(formValues, [], true, 'undefined');
+    formObj.projectID = projectID;
+    if (!IsJson5String(formObj.config)) {
+      showInfoModal('Please enter a valid JSON for config.');
+    } else if (!stop) {
+      formObj.config = JSON5.parse(formObj.config);
+      try {
+        const res = await axios({
+          method: 'POST',
+          url: 'api/v1/config/apis',
+          data: formObj
+        });
+        if (res.data.status == 'success') {
+          showHideButtons(
+            this,
+            ['cancel-api', 'save-api', 'update-api'],
+            ['insert-api', 'edit-api', 'delete-api']
+          );
+          await getAjaxData('apis');
+          console.log(res.data);
+          const newApiId =
+            res.data.data && res.data.data.data && res.data.data.data._id
+              ? res.data.data.data._id
+              : '';
+          refreshCustomDropdown(projectID, newApiId, 'api');
+        }
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.message) {
+          showInfoModal(JSON.stringify(err.response.data.message));
+        } else {
+          showInfoModal(err);
+        }
+      }
+    }
+  });
+  $(document).on('click', `button.cancel-api`, function(e) {
+    const projectID = $(this).attr('projectID');
+    $(`#select-api-${projectID}`).trigger('change');
+    showHideButtons(
+      this,
+      ['cancel-api', 'save-api', 'update-api'],
+      ['insert-api', 'edit-api', 'delete-api']
+    );
+  });
+
+  $(document).on('click', `button.edit-api`, async function(e) {
+    showHideButtons(
+      this,
+      ['insert-api', 'edit-api', 'delete-api', 'save-api'],
+      ['cancel-api', 'update-api']
+    );
+    const projectID = $(this).attr('projectID');
+    const apiID = $(`#select-api-${projectID}`).val();
+    await refreshAPIWorkflow(projectID, apiID, 'new');
+  });
+  $(document).on('click', `button.update-api`, async function(e) {
+    const projectID = $(this).attr('projectID');
+    const apiID = $(`#select-api-${projectID}`).val();
+    const formValues = $(`#api-workflow-${projectID}`).find('input,textarea,select');
+    const [formObj, stop] = createFormObj(formValues, [], true, 'undefined');
+    formObj.projectID = projectID;
+    console.log(formObj);
+    if (!IsJson5String(formObj.config)) {
+      showInfoModal('Please enter a valid JSON for config.');
+    } else if (!stop) {
+      formObj.config = JSON5.parse(formObj.config);
+      try {
+        const res = await axios({
+          method: 'PATCH',
+          url: `api/v1/config/apis/${apiID}`,
+          data: formObj
+        });
+        if (res.data.status == 'success') {
+          showHideButtons(
+            this,
+            ['cancel-api', 'save-api', 'update-api'],
+            ['insert-api', 'edit-api', 'delete-api']
+          );
+          await getAjaxData('apis');
+          refreshCustomDropdown(projectID, apiID, 'api');
+        }
+      } catch (err) {
+        console.log(err);
+        if (err.response && err.response.data && err.response.data.message) {
+          showInfoModal(JSON.stringify(err.response.data.message));
+        } else {
+          showInfoModal(err);
+        }
+      }
+    }
+  });
+  $(document).on('click', `button.delete-api`, function(e) {
+    const projectID = $(this).attr('projectID');
+    const apiID = $(`#select-api-${projectID}`).val();
+    $('#crudModalError').empty();
+    $('#crudModalTitle').text(`Remove API Config`);
+    $('#crudModalYes').text('Remove');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(`<p>Are you sure you want to delete config?</p>`);
+    $('#crudModal').off();
+    $('#crudModal').on('click', '#crudModalYes', async function(e) {
+      e.preventDefault();
+      try {
+        const res = await axios({
+          method: 'DELETE',
+          url: `api/v1/config/apis/${apiID}`
+        });
+        if (res.data.status == 'success') {
+          showHideButtons(
+            '',
+            ['cancel-api', 'save-api', 'update-api'],
+            ['insert-api', 'edit-api', 'delete-api']
+          );
+          await getAjaxData('apis');
+          refreshCustomDropdown(projectID, '', 'api');
+        }
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.message) {
+          showInfoModal(JSON.stringify(err.response.data.message));
+        } else {
+          showInfoModal(err);
+        }
+      }
+      $('#crudModal').modal('hide');
+    });
+    if (!apiID) {
+      showInfoModal('Please select config to delete.');
+    } else {
+      $('#crudModal').modal('show');
+    }
+  });
+
+  // ================= API CONFIG ENDS  =======
   // ================= EVENTS  =================
   $(document).on('change', `select.select-event`, async function(e) {
     const projectID = $(this).attr('projectID');
@@ -1015,7 +1260,66 @@ const bindEventHandlers = () => {
     }
   });
 
-  //
+  // ================= EVENTS ENDS  =================
+
+  // insert child reference button
+  $(document).on('click', `button.insert-child-ref`, async function(e) {
+    const collID = $(this).attr('collID');
+    const collName = $(this).attr('collName');
+    const projectID = $(this).attr('projectID');
+    const childRefDiv = await getInsertChildRefDiv(projectID, collID);
+    const projectData = $s.projects.filter(p => p._id === projectID);
+    const projectName = projectData[0].name;
+    $('#crudModalYes').text('Save');
+    $('#crudModalBody').empty();
+    $('#crudModalBody').append(getErrorDiv());
+    $('#crudModalBody').append(childRefDiv);
+    $('#crudModal').off();
+    $('#crudModalTitle').text(`Insert Reference Field`);
+
+    $('#crudModal').on('click', '#crudModalYes', async function(e) {
+      e.preventDefault();
+      $('#crudModalError').empty();
+      const formValues = $('#crudModal').find('input,select');
+      const requiredFields = ['label', 'childRefCollection'];
+      let [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+      if (stop === false) {
+        let newFormObj = {};
+        const parentCollectionName = $('#crudModal')
+          .find('select[name*=childRefCollection] option:selected')
+          .text();
+        newFormObj.collectionID = collID;
+        newFormObj.ref = `${projectName}_${parentCollectionName}`;
+        newFormObj.name = `${parentCollectionName}_id`;
+        newFormObj.label = formObj.label;
+        newFormObj.required = true;
+        newFormObj.type = 'mongoose.Schema.ObjectId';
+        console.log('newFormObj', newFormObj);
+        try {
+          const res = await axios({
+            method: 'POST',
+            url: 'api/v1/fields',
+            data: newFormObj
+          });
+          if (res.data.status == 'success') {
+            console.log(res.data);
+            refreshDataTables(collID, projectID);
+            $('#crudModal').modal('hide');
+          }
+        } catch (err) {
+          if (err.response && err.response.data && err.response.data.message) {
+            showInfoModal(JSON.stringify(err.response.data.message));
+          } else {
+            showInfoModal(err);
+          }
+        }
+      }
+    });
+
+    $('#crudModal').modal('show');
+  });
+
+  //Transfer Fields Data button
   $(document).on('click', `button.edit-field-data`, async function(e) {
     const collID = $(this).attr('collID');
     const collName = $(this).attr('collName');
@@ -1288,6 +1592,24 @@ const bindEventHandlers = () => {
   });
 };
 
+const refreshCustomDropdown = (projectID, selectId, type) => {
+  let dropdownID = '';
+  if (type == 'api') {
+    dropdownID = `#select-api-${projectID}`;
+  } else if (type == 'event') {
+    dropdownID = `#select-event-${projectID}`;
+  }
+  let dropdown = $(dropdownID);
+
+  const newDropdown = getCustomDropdown(projectID, type);
+  dropdown.replaceWith(newDropdown);
+  dropdown = $(dropdownID);
+  if (selectId) {
+    dropdown.val(selectId);
+  }
+  dropdown.trigger('change');
+};
+
 const refreshEventDropdown = (projectID, selectId) => {
   const dropdown = $(`#select-event-${projectID}`);
   const events = $s.events.filter(f => f.projectID == projectID);
@@ -1312,22 +1634,79 @@ const refreshEventDropdown = (projectID, selectId) => {
   dropdown.trigger('change');
 };
 
-const getEventDropdown = projectID => {
-  const idText = projectID ? `id="select-event-${projectID}"` : '';
-  let dropdown = `<select class="form-control select-event" projectID="${projectID}" ${idText}>`;
-  dropdown += `<option value="" >--- Select Event ---</option>`;
+const getCustomDropdown = (projectID, type) => {
+  const projectData = $s.projects.filter(p => p._id === projectID);
+  const projectName = projectData[0].name;
+  let idPart = '';
+  let label = '';
+  let data = '';
+  if (type === 'event') {
+    idPart = 'select-event';
+    label = 'Select Event';
+    data = $s.events;
+  } else if (type === 'api') {
+    idPart = 'select-api';
+    label = 'Select Route';
+    data = $s.apis;
+  }
+  const idText = projectID ? `id="${idPart}-${projectID}"` : '';
+  let dropdown = `<select class="form-control ${idPart}" projectID="${projectID}" ${idText}>`;
+  dropdown += `<option value="" >--- ${label} ---</option>`;
   if ($s.events) {
-    const projectEvents = $s.events.filter(e => e.projectID == projectID);
-    projectEvents.forEach(i => {
-      dropdown += `<option  value="${i._id}">${i.name}</option>`;
+    const subData = data.filter(e => e.projectID == projectID);
+    subData.forEach(i => {
+      if (type == 'event') {
+        dropdown += `<option  value="${i._id}">${i.name}</option>`;
+      } else if (type == 'api') {
+        ///api/v1/projects/vitiligo/data/sample/summary
+        let collectionName = '';
+        if ($s.collections) {
+          const collData = $s.collections.filter(c => c._id === i.collectionID);
+          if (collData[0]) collectionName = collData[0].name;
+        }
+        dropdown += `<option  value="${i._id}">/api/v1/projects/${projectName}/data/${collectionName}/format/${i.route}</option>`;
+      }
     });
   }
   dropdown += `</select>`;
   return dropdown;
 };
 
+const getAPITab = projectID => {
+  const dropdown = getCustomDropdown(projectID, 'api');
+  const ret = `
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-sm-10">
+      ${dropdown}
+    </div>
+    <div class="col-sm-2">
+      <button class="btn btn-primary insert-api" type="button" data-toggle="tooltip" data-placement="bottom" title="Insert" projectID="${projectID}">
+        <i class="cil-plus"> </i>
+      </button>
+      <button class="btn btn-primary edit-api" type="button" data-toggle="tooltip" data-placement="bottom" title="Edit" projectID="${projectID}">
+        <i class="cil-pencil"> </i>
+      </button>
+      <button class="btn btn-primary delete-api" type="button" data-toggle="tooltip" data-placement="bottom" title="Delete" projectID="${projectID}">
+        <i class="cil-trash"> </i>
+      </button>
+      <button style="display:none;" class="btn btn-primary cancel-api" type="button" data-toggle="tooltip" data-placement="bottom" title="Cancel" projectID="${projectID}">
+        <i class="cil-reload"> </i>
+      </button>
+      <button style="display:none;" class="btn btn-primary save-api" type="button" data-toggle="tooltip" data-placement="bottom" title="Save API config" projectID="${projectID}">
+        <i class="cil-save"> </i>
+      </button>
+      <button style="display:none;" class="btn btn-primary update-api" type="button" data-toggle="tooltip" data-placement="bottom" title="Update API Config" projectID="${projectID}">
+        <i class="cil-save"> </i>
+      </button>
+    </div>
+  </div>
+  <div class="row" style="margin-top: 20px;" id="api-workflow-${projectID}">
+  </div>
+  `;
+  return ret;
+};
 const getEventTab = projectID => {
-  const dropdown = getEventDropdown(projectID);
+  const dropdown = getCustomDropdown(projectID, 'event');
   const ret = `
   <div class="row" style="margin-top: 20px;">
     <div class="col-sm-10">
@@ -1367,6 +1746,7 @@ const refreshCollectionNavbar = async (projectId, type) => {
   if (isNavbarExist) {
     await getAjaxData();
     await getAjaxData('events');
+    await getAjaxData('apis');
   }
 
   let header = '<ul class="nav nav-tabs" role="tablist" style="margin-top: 10px;">';
@@ -1382,6 +1762,11 @@ const refreshCollectionNavbar = async (projectId, type) => {
       name: 'all_events',
       label: 'All Events',
       id: `all_events_${projectId}`
+    },
+    {
+      name: 'all_apis',
+      label: 'API Config',
+      id: `all_apis_${projectId}`
     }
   );
   tabs = tabs.concat($s.collections);
@@ -1392,7 +1777,8 @@ const refreshCollectionNavbar = async (projectId, type) => {
       (projectId && collectionProjectID == projectId) ||
       (!projectId && !collectionProjectID) ||
       tabs[i].id == `all_collections_${projectId}` ||
-      tabs[i].id == `all_events_${projectId}`
+      tabs[i].id == `all_events_${projectId}` ||
+      tabs[i].id == `all_apis_${projectId}`
     ) {
       k++;
       const collectionName = tabs[i].name;
@@ -1410,13 +1796,20 @@ const refreshCollectionNavbar = async (projectId, type) => {
       let crudButtons = '';
       if (tabs[i].id == `all_events_${projectId}`) {
         colNavbar = getEventTab(projectId);
+      } else if (tabs[i].id == `all_apis_${projectId}`) {
+        colNavbar = getAPITab(projectId);
       } else {
         let dbEditor = true;
-        if (tabs[i].id == `all_collections_${projectId}`) dbEditor = false;
+        let childRef = true;
+        if (tabs[i].id == `all_collections_${projectId}`) {
+          dbEditor = false;
+          childRef = false;
+        }
         colNavbar = getCollectionTable(collectionId, projectId);
         crudButtons = getCrudButtons(collectionId, collectionLabel, collectionName, projectId, {
           excel: false,
-          dbEditor: dbEditor
+          dbEditor: dbEditor,
+          childRef: childRef
         });
       }
 
@@ -1450,6 +1843,9 @@ const getAjaxData = async type => {
   if (type == 'events') {
     let [events] = await Promise.all([ajaxCall('GET', '/api/v1/events')]);
     $s.events = events;
+  } else if (type == 'apis') {
+    let [apis] = await Promise.all([ajaxCall('GET', '/api/v1/config/apis')]);
+    $s.apis = apis;
   } else {
     let [collections, fields, projects] = await Promise.all([
       ajaxCall('GET', '/api/v1/collections'),
@@ -1471,6 +1867,7 @@ export const refreshAdminProjectNavbar = async () => {
   }
   await getAjaxData();
   await getAjaxData('events');
+  await getAjaxData('apis');
 
   let tabs = [];
   tabs.push({ name: 'all_projects', label: 'All Projects', id: 'all_projects' });

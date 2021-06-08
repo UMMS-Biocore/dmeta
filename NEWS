@@ -1,3 +1,14 @@
+05.06.2021 Version 0.0.45
+Event History page added.
+Date.now bug fixed.
+ParentCollectionID field and feature removed from collections.
+Insert Reference Field button added to admin page.
+API Config Tab added to admin page.
+
+02.05.2021 Version 0.0.44
+Selectize support added for reference dropdowns.
+Sharing with role option removed.
+
 20.04.2021 Version 0.0.43
 Bug fixed for empty database.
 

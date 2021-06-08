@@ -121,7 +121,7 @@ export const createFormObj = (formValues, requiredFields, warn, visible) => {
       }
     } else if ($(formValues[i]).is('select')) {
       if ($(formValues[i]).val() === '') {
-        val = null;
+        val = '';
       } else {
         val = $(formValues[i]).val();
       }
@@ -451,6 +451,8 @@ export const fillFormByName = (formId, find, data, reset) => {
     const isSelectTextOpt = $(formValues[k]).hasClass('select-text-opt');
     // if selectized
     const isSelectized = $(formValues[k]).hasClass('selectized');
+    // console.log('isSelectized', isSelectized, $(formValues[k]));
+    // console.log('isSelectTextOpt', isSelectTextOpt, $(formValues[k]));
     if (data[nameAttr]) {
       if (radioCheck) {
         if (data[nameAttr] == $(formValues[k]).val()) {
@@ -470,7 +472,14 @@ export const fillFormByName = (formId, find, data, reset) => {
         if (data[nameAttr] === 'on') {
           $(formValues[k]).attr('checked', true);
         } else {
-          if (isSelectTextOpt) {
+          if (isSelectTextOpt && isSelectized) {
+            const options = $(formValues[k])[0].selectize.options;
+            let item = '';
+            Object.keys(options).forEach((k, i) => {
+              if (options[k].text == data[nameAttr]) item = k;
+            });
+            if (item) $(formValues[k])[0].selectize.setValue(item, false);
+          } else if (isSelectTextOpt) {
             const item = $(formValues[k])
               .find('option')
               .filter(function() {
@@ -512,4 +521,21 @@ export const groupArrayOfObj = key => {
       return acc;
     }, {});
   };
+};
+
+export const IsJsonString = str => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+export const IsJson5String = str => {
+  try {
+    JSON5.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 };

@@ -40,7 +40,7 @@ exports.deleteOne = Model =>
       return next(new AppError(`No document found with ${req.params.id}!`, 404));
     }
     if (res.locals.After) res.locals.After();
-    if (res.locals.EventLog) res.locals.EventLog('delete', Model.collection.collectionName, doc);
+    if (res.locals.EventLog) res.locals.EventLog('delete', doc);
 
     res.status(200).json({
       status: 'success',
@@ -105,7 +105,7 @@ exports.updateOne = Model =>
       return next(new AppError(`No document found with ${req.params.id}!`, 404));
     }
     if (res.locals.After) res.locals.After();
-    if (res.locals.EventLog) res.locals.EventLog('update', Model.collection.collectionName, doc);
+    if (res.locals.EventLog) res.locals.EventLog('update', doc);
 
     res.status(200).json({
       status: 'success',
@@ -123,7 +123,7 @@ exports.createOne = Model =>
     if (res.locals.Perms) {
       const permCreate = await res.locals.Perms('create');
       if (!permCreate) {
-        return next(new AppError(`Permission denied: no write permission`, 404));
+        return next(new AppError(`Operation not allowed.`, 404));
       }
     }
     // remove fields that has value undefined
@@ -136,7 +136,7 @@ exports.createOne = Model =>
     const doc = await Model.create(req.body);
     if (res.locals.After) res.locals.After();
     if (res.locals.EventLog) {
-      const eventRet = await res.locals.EventLog('insert', Model.collection.collectionName, doc);
+      const eventRet = await res.locals.EventLog('insert', doc);
       if (eventRet && eventRet.status == 'error') {
         return next(new AppError(`${eventRet.message} ${eventRet.error}`, 404));
       }

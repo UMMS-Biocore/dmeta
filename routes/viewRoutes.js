@@ -13,5 +13,6 @@ router.get('/after-sso', viewsController.afterSSO);
 router.get('/login', viewsController.getLoginForm, viewsController.getOverview);
 router.get('/import', viewsController.getImportPage);
 router.get('/profile', authController.requireLogin, viewsController.getProfile);
+router.get('/event', authController.requireLogin, viewsController.getEvent);
 
 module.exports = router;
