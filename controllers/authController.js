@@ -261,13 +261,13 @@ exports.saveAccessRefreshToken = async (accessToken, refreshToken, expiresIn) =>
     const currentUser = JSON.parse(userInfoObj.body);
     console.log('currentUser', currentUser);
     const userId = currentUser._id;
-    const { scope, email, username, name } = currentUser;
+    const { scope, email, username, name, role } = currentUser;
 
     if (!userId) {
       return null;
     }
     const filter = { email: email };
-    const update = { $set: { sso_id: userId, name, scope, username } };
+    const update = { $set: { sso_id: userId, name, scope, username, role } };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
     const updatedUser = await User.findOneAndUpdate(filter, update, options);
     console.log('updatedUser', updatedUser);
