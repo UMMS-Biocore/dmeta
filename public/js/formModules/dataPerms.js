@@ -115,7 +115,6 @@ export const prepDataPerms = async (formId, data) => {
   }
   for (var k = 0; k < formValues.length; k++) {
     const nameAttr = $(formValues[k]).attr('name');
-    console.log(data.perms);
     let permsObj = {};
     try {
       if (data.perms) permsObj = JSON5.parse(data.perms);

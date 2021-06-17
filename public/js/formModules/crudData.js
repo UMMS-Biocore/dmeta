@@ -39,7 +39,6 @@ const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID, at
   dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
     if (dataField) {
-      console.log('dataField', dataField);
       const selected = def == i[dataField] ? 'selected' : '';
       dropdown += `<option ${selected} value="${i._id}">${i[dataField]}</option>`;
     } else {

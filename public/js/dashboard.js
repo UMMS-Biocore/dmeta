@@ -1,6 +1,6 @@
 /* eslint-disable */
 import axios from 'axios';
-import XLSX from 'XLSX';
+import XLSX from 'xlsx';
 const JSON5 = require('json5');
 import { saveAs } from 'file-saver';
 
@@ -28,6 +28,7 @@ import {
   createSelectizeMultiField
 } from './formModules/crudData';
 import { prepDataPerms } from './formModules/dataPerms';
+import { refreshTreeView } from './treeView';
 import Handsontable from 'handsontable';
 
 // GLOBAL SCOPE
@@ -666,8 +667,237 @@ const refreshCollectionDiv = async (projectID, collectionID, dry) => {
   }
 };
 
+const refreshCollDataDropdown = (projectID, collectionID) => {
+  const collectionData = $s.collections.filter(c => c._id === collectionID);
+  const projectData = $s.projects.filter(p => p._id === projectID);
+  if (collectionData && collectionData[0] && projectData && projectData[0]) {
+    const collectionName = collectionData[0]['name'];
+    const projectName = projectData[0]['name'];
+    const collRef = `${projectName}_${collectionName}`;
+    let dataDropdown = `<select class="form-control tree-view-data" projectID="${projectID}" collectionID="${collectionID}" collectionName="${collectionName}" ref="${collRef}">
+    <option value="" >  --- Select ---  </option></select>`;
+    $(`#tree-view-data-${projectID}`)
+      .empty()
+      .append(dataDropdown);
+  }
+  const dropdownElement = $(`#tree-view-data-${projectID}`).find('select')[0];
+  const fieldsOfCollection = $s.fields.filter(f => f.collectionID === collectionID);
+  createSelectizeMultiField(dropdownElement, $s.data[collectionID], fieldsOfCollection);
+};
+
+export const deleteDataModal = async (button, selectedRows, callback) => {
+  $('#crudModalError').empty();
+  const collID = $(button).attr('collID');
+  const collLabel = $(button).attr('collLabel');
+  const collName = $(button).attr('collName');
+  const projectID = $(button).attr('projectID');
+  const table = $(`#${collID}`).DataTable();
+  const tableData = table.rows().data();
+  let rows_selected = [];
+  if (selectedRows) {
+    rows_selected = selectedRows;
+  } else {
+    rows_selected = table.column(0).checkboxes.selected();
+  }
+  const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+  const items = selectedData.length === 1 ? `the item?` : `${selectedData.length} items?`;
+  $('#crudModalTitle').text(`Remove ${collLabel}`);
+  $('#crudModalYes').text('Remove');
+  $('#crudModalBody').empty();
+  $('#crudModalBody').append(getErrorDiv());
+  $('#crudModalBody').append(`<p>Are you sure you want to delete ${items}</p>`);
+  $('#crudModal').off();
+  $('#crudModal').on('click', '#crudModalYes', async function(e) {
+    e.preventDefault();
+    for (var i = 0; i < selectedData.length; i++) {
+      const success = await crudAjaxRequest(
+        'data',
+        'DELETE',
+        selectedData[i]._id,
+        projectID,
+        collName,
+        {},
+        {},
+        '#crudModalError'
+      );
+      if (!success) {
+        refreshDataTables(collID, collID, collName, projectID);
+        break;
+      }
+      if (success && selectedData.length - 1 === i) {
+        await refreshDataTables(collID, collID, collName, projectID);
+        if (callback) callback($s);
+        $('#crudModal').modal('hide');
+      }
+    }
+  });
+  if (selectedData.length === 0) {
+    showInfoModal('Please click checkboxes to delete items.');
+  } else if (selectedData.length > 0) {
+    $('#crudModal').modal('show');
+  }
+};
+
+export const insertDataModal = async (button, clickToActivateModal, callbackOnSuccess) => {
+  $('#crudModalError').empty();
+  const collID = $(button).attr('collID');
+  const collLabel = $(button).attr('collLabel');
+  const collName = $(button).attr('collName');
+  const projectID = $(button).attr('projectID');
+  const collectionFields = await getFieldsDiv(collID, getProjectDataObj(projectID));
+  $('#crudModalTitle').text(`Insert ${collLabel}`);
+  $('#crudModalYes').text('Save');
+  $('#crudModalBody').empty();
+  $('#crudModalBody').append(getErrorDiv());
+  $('#crudModalBody').append(collectionFields);
+  $('#crudModal').off();
+  if (collName == 'run') prepRunForm('#crudModal', {}, $s, projectID);
+  prepReferenceDropdown('#crudModal', $s);
+  prepOntologyDropdown('#crudModal', {}, $s);
+  await prepDataPerms('#crudModal', {});
+  if (clickToActivateModal) {
+    prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
+  }
+
+  $('#crudModal').on('click', '#crudModalYes', async function(e) {
+    e.preventDefault();
+    $('#crudModalError').empty();
+    const formValues = $('#crudModal').find('input,select');
+    const requiredValues = formValues.filter('[required]');
+    const requiredFields = $.map(requiredValues, function(el) {
+      return $(el).attr('name');
+    });
+    let [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+    formObj = convertFormObj(formObj);
+    if (collName == 'run') formObj = convertRunFormObj(formObj);
+
+    if (stop === false && collName) {
+      const success = await crudAjaxRequest(
+        'data',
+        'POST',
+        '',
+        projectID,
+        collName,
+        formObj,
+        formValues,
+        '#crudModalError'
+      );
+      if (success) {
+        console.log(success);
+        await refreshDataTables(collID, collID, collName, projectID);
+        if (callbackOnSuccess) callbackOnSuccess($s, collID, success);
+        $('#crudModal').modal('hide');
+      }
+    }
+  });
+  $('#crudModal').modal('show');
+};
+
+export const editDataModal = async (button, selectedRows, callback) => {
+  const collID = $(button).attr('collID');
+  const collLabel = $(button).attr('collLabel');
+  const collName = $(button).attr('collName');
+  const projectID = $(button).attr('projectID');
+  const collectionFields = await getFieldsDiv(collID, getProjectDataObj(projectID));
+  $('#crudModalTitle').text(`Edit ${collLabel}`);
+  $('#crudModalYes').text('Save');
+  $('#crudModalBody').empty();
+  $('#crudModalBody').append(getErrorDiv());
+  $('#crudModalBody').append(collectionFields);
+  $('#crudModal').off();
+  const table = $(`#${collID}`).DataTable();
+  const tableData = table.rows().data();
+  let rows_selected = [];
+  if (selectedRows) {
+    rows_selected = selectedRows;
+  } else {
+    rows_selected = table.column(0).checkboxes.selected();
+  }
+  const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
+  console.log('selectedData', selectedData);
+  $('#crudModal').on('show.coreui.modal', async function(e) {
+    fillFormByName('#crudModal', 'input, select', selectedData[0], true);
+    prepReferenceDropdown('#crudModal', $s);
+    // if (collName == 'run') prepRunForm('#crudModal', selectedData[0], $s, projectID);
+    prepOntologyDropdown('#crudModal', selectedData[0], $s);
+    await prepDataPerms('#crudModal', selectedData[0]);
+    if (rows_selected.length > 1) {
+      prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
+    } else {
+      prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', selectedData[0]);
+    }
+  });
+
+  $('#crudModal').on('click', '#crudModalYes', async function(e) {
+    e.preventDefault();
+    $('#crudModalError').empty();
+    const formValues = $('#crudModal').find('input,select');
+    const requiredValues = formValues.filter('[required]');
+    const requiredFields = $.map(requiredValues, function(el) {
+      return $(el).attr('name');
+    });
+    let formObj, stop;
+    if (rows_selected.length > 1) {
+      [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
+    } else {
+      [formObj, stop] = createFormObj(formValues, requiredFields, true, 'undefined');
+    }
+    formObj = convertFormObj(formObj);
+    // get only updated fields:
+    if (rows_selected.length === 1) {
+      formObj = getUpdatedFields(selectedData[0], formObj);
+    }
+    if (stop === false && collName) {
+      for (var i = 0; i < selectedData.length; i++) {
+        const success = await crudAjaxRequest(
+          'data',
+          'PATCH',
+          selectedData[i]._id,
+          projectID,
+          collName,
+          formObj,
+          formValues,
+          '#crudModalError'
+        );
+        if (!success) {
+          refreshDataTables(collID, collID, collName, projectID);
+          break;
+        }
+        if (success && selectedData.length - 1 === i) {
+          await refreshDataTables(collID, collID, collName, projectID);
+          if (callback) callback($s);
+          $('#crudModal').modal('hide');
+        }
+      }
+    }
+  });
+
+  if (rows_selected.length === 0) {
+    showInfoModal('Please click checkboxes to edit items.');
+  } else if (rows_selected.length > 0) {
+    $('#crudModal').modal('show');
+  }
+};
+
 const bindEventHandlers = () => {
-  //================= SELECT COLLECTIONS  =============
+  //================= TREE VIEW TAB =================
+  $(document).on('change', `select.tree-view-collection`, function(e) {
+    const projectID = $(this).attr('projectID');
+    const collectionID = $(this).val();
+    if (collectionID) {
+      refreshCollDataDropdown(projectID, collectionID);
+    }
+  });
+  $(document).on('change', `select.tree-view-data`, function(e) {
+    const projectID = $(this).attr('projectID');
+    const collectionID = $(`#tree-view-collection-${projectID}`).val();
+    const dataID = $(this).val();
+    if (collectionID && dataID) {
+      refreshTreeView(projectID, $s, true, { collectionID, dataID });
+    }
+  });
+
+  //================= COLLECTIONS TAB  =============
   $(document).on('change', `select.select-collection`, async function(e) {
     const projectID = $(this).attr('projectID');
     const collectionID = $(this).val();
@@ -880,88 +1110,7 @@ const bindEventHandlers = () => {
   });
 
   $(document).on('click', `button.edit-data`, async function(e) {
-    const collID = $(this).attr('collID');
-    const collLabel = $(this).attr('collLabel');
-    const collName = $(this).attr('collName');
-    const projectID = $(this).attr('projectID');
-    const collectionFields = await getFieldsDiv(collID, getProjectDataObj(projectID));
-    $('#crudModalTitle').text(`Edit ${collLabel}`);
-    $('#crudModalYes').text('Save');
-    $('#crudModalBody').empty();
-    $('#crudModalBody').append(getErrorDiv());
-    $('#crudModalBody').append(collectionFields);
-    $('#crudModal').off();
-    const table = $(`#${collID}`).DataTable();
-    const tableData = table.rows().data();
-    const rows_selected = table.column(0).checkboxes.selected();
-    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
-    console.log('selectedData', selectedData);
-    $('#crudModal').on('show.coreui.modal', async function(e) {
-      fillFormByName('#crudModal', 'input, select', selectedData[0], true);
-      prepReferenceDropdown('#crudModal', $s);
-      // if (collName == 'run') prepRunForm('#crudModal', selectedData[0], $s, projectID);
-      prepOntologyDropdown('#crudModal', selectedData[0], $s);
-      await prepDataPerms('#crudModal', selectedData[0]);
-      if (rows_selected.length > 1) {
-        prepareMultiUpdateModal('#crudModal', '#crudModalBody', 'input, select');
-      } else {
-        prepareClickToActivateModal(
-          '#crudModal',
-          '#crudModalBody',
-          'input, select',
-          selectedData[0]
-        );
-      }
-    });
-
-    $('#crudModal').on('click', '#crudModalYes', async function(e) {
-      e.preventDefault();
-      $('#crudModalError').empty();
-      const formValues = $('#crudModal').find('input,select');
-      const requiredValues = formValues.filter('[required]');
-      const requiredFields = $.map(requiredValues, function(el) {
-        return $(el).attr('name');
-      });
-      let formObj, stop;
-      if (rows_selected.length > 1) {
-        [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
-      } else {
-        [formObj, stop] = createFormObj(formValues, requiredFields, true, 'undefined');
-      }
-      formObj = convertFormObj(formObj);
-      // get only updated fields:
-      if (rows_selected.length === 1) {
-        formObj = getUpdatedFields(selectedData[0], formObj);
-      }
-      if (stop === false && collName) {
-        for (var i = 0; i < selectedData.length; i++) {
-          const success = await crudAjaxRequest(
-            'data',
-            'PATCH',
-            selectedData[i]._id,
-            projectID,
-            collName,
-            formObj,
-            formValues,
-            '#crudModalError'
-          );
-          if (!success) {
-            refreshDataTables(collID, collID, collName, projectID);
-            break;
-          }
-          if (success && selectedData.length - 1 === i) {
-            refreshDataTables(collID, collID, collName, projectID);
-            $('#crudModal').modal('hide');
-          }
-        }
-      }
-    });
-
-    if (rows_selected.length === 0) {
-      showInfoModal('Please click checkboxes to edit items.');
-    } else if (rows_selected.length > 0) {
-      $('#crudModal').modal('show');
-    }
+    await editDataModal(this);
   });
 
   const prepExcelData = (collid, rowData, columnsObj, collName, format) => {
@@ -1312,102 +1461,13 @@ const bindEventHandlers = () => {
   // ================= INSERT BUTTON =================
 
   $(document).on('click', `button.insert-data`, async function(e) {
-    $('#crudModalError').empty();
-    const collID = $(this).attr('collID');
-    const collLabel = $(this).attr('collLabel');
-    const collName = $(this).attr('collName');
-    const projectID = $(this).attr('projectID');
-    const collectionFields = await getFieldsDiv(collID, getProjectDataObj(projectID));
-    $('#crudModalTitle').text(`Insert ${collLabel}`);
-    $('#crudModalYes').text('Save');
-    $('#crudModalBody').empty();
-    $('#crudModalBody').append(getErrorDiv());
-    $('#crudModalBody').append(collectionFields);
-    $('#crudModal').off();
-    if (collName == 'run') prepRunForm('#crudModal', {}, $s, projectID);
-    prepReferenceDropdown('#crudModal', $s);
-    prepOntologyDropdown('#crudModal', {}, $s);
-    await prepDataPerms('#crudModal', {});
-    prepareClickToActivateModal('#crudModal', '#crudModalBody', 'input, select', {});
-
-    $('#crudModal').on('click', '#crudModalYes', async function(e) {
-      e.preventDefault();
-      $('#crudModalError').empty();
-      const formValues = $('#crudModal').find('input,select');
-      const requiredValues = formValues.filter('[required]');
-      const requiredFields = $.map(requiredValues, function(el) {
-        return $(el).attr('name');
-      });
-      let [formObj, stop] = createFormObj(formValues, requiredFields, true, true);
-      formObj = convertFormObj(formObj);
-      if (collName == 'run') formObj = convertRunFormObj(formObj);
-
-      if (stop === false && collName) {
-        const success = await crudAjaxRequest(
-          'data',
-          'POST',
-          '',
-          projectID,
-          collName,
-          formObj,
-          formValues,
-          '#crudModalError'
-        );
-        if (success) {
-          refreshDataTables(collID, collID, collName, projectID);
-          $('#crudModal').modal('hide');
-        }
-      }
-    });
-    $('#crudModal').modal('show');
+    await insertDataModal(this, true);
   });
 
   // ================= DELETE BUTTON =================
+
   $(document).on('click', `button.delete-data`, async function(e) {
-    $('#crudModalError').empty();
-    const collID = $(this).attr('collID');
-    const collLabel = $(this).attr('collLabel');
-    const collName = $(this).attr('collName');
-    const projectID = $(this).attr('projectID');
-    const table = $(`#${collID}`).DataTable();
-    const tableData = table.rows().data();
-    const rows_selected = table.column(0).checkboxes.selected();
-    const selectedData = tableData.filter(f => rows_selected.indexOf(f._id) >= 0);
-    const items = selectedData.length === 1 ? `the item?` : `${selectedData.length} items?`;
-    $('#crudModalTitle').text(`Remove ${collLabel}`);
-    $('#crudModalYes').text('Remove');
-    $('#crudModalBody').empty();
-    $('#crudModalBody').append(getErrorDiv());
-    $('#crudModalBody').append(`<p>Are you sure you want to delete ${items}</p>`);
-    $('#crudModal').off();
-    $('#crudModal').on('click', '#crudModalYes', async function(e) {
-      e.preventDefault();
-      for (var i = 0; i < selectedData.length; i++) {
-        const success = await crudAjaxRequest(
-          'data',
-          'DELETE',
-          selectedData[i]._id,
-          projectID,
-          collName,
-          {},
-          {},
-          '#crudModalError'
-        );
-        if (!success) {
-          refreshDataTables(collID, collID, collName, projectID);
-          break;
-        }
-        if (success && selectedData.length - 1 === i) {
-          refreshDataTables(collID, collID, collName, projectID);
-          $('#crudModal').modal('hide');
-        }
-      }
-    });
-    if (selectedData.length === 0) {
-      showInfoModal('Please click checkboxes to delete items.');
-    } else if (selectedData.length > 0) {
-      $('#crudModal').modal('show');
-    }
+    await deleteDataModal(this);
   });
 };
 
@@ -1557,6 +1617,9 @@ export const crudAjaxRequest = async (
       data: formObj
     });
     if (res && res.data && res.data.status === 'success') {
+      console.log(res.data.data);
+      if (res.data.data && res.data.data.data && res.data.data.data._id)
+        return res.data.data.data._id;
       return true;
     }
     return false;
@@ -1690,10 +1753,13 @@ const showTableTabs = () => {
     const collName = $(e.target).attr('collName');
     const tableID = $(e.target).attr('tableID');
     const projectID = $(e.target).attr('projectID');
+
     if (collName == 'all_events') {
       createSelectize(`#select-event-${projectID}`);
     } else if (collName == 'all_collections') {
       createSelectize(`#select-collection-${projectID}`);
+    } else if (tableID == `tree_view_${projectID}`) {
+      // refreshTreeView(projectID, $s, false);
     } else {
       refreshDataTables(tableID, tableID, collName, projectID);
     }
@@ -1717,6 +1783,11 @@ const getMainDropdown = (projectID, type) => {
     dataLabel = 'name';
   } else if (type == 'collection') {
     classText = 'select-collection';
+    defOption = 'Select Collection';
+    data = $s.collections;
+    dataLabel = 'label';
+  } else if (type == 'tree-view-collection') {
+    classText = 'tree-view-collection';
     defOption = 'Select Collection';
     data = $s.collections;
     dataLabel = 'label';
@@ -1784,6 +1855,19 @@ const spinnerButton = (button, mode) => {
   }
 };
 
+const getTreeViewTab = projectID => {
+  const dropdown = getMainDropdown(projectID, 'tree-view-collection');
+  let ret = `
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-sm-8">${dropdown}</div>
+    <div id="tree-view-data-${projectID}" projectID="${projectID}" class="col-sm-8" style="margin-top:10px;"></div>
+  </div>
+  <section id="d3-tree-${projectID}" style="height: 500px; max-width:100%;"></section>
+  
+  `;
+  return ret;
+};
+
 const getCollectionNavbar = async projectId => {
   // await getCollectionFieldData();
   let header = '<ul class="nav nav-tabs" role="tablist" style="margin-top: 10px;">';
@@ -1794,18 +1878,26 @@ const getCollectionNavbar = async projectId => {
     header += '<p> No document found.</p>';
   }
   let tabs = [];
-  tabs.push({
-    name: 'all_events',
-    label: 'Events',
-    id: `all_events_${projectId}`,
-    projectID: projectId
-  });
-  tabs.push({
-    name: 'all_collections',
-    label: 'Collections',
-    id: `all_collections_${projectId}`,
-    projectID: projectId
-  });
+  tabs.push(
+    {
+      name: 'all_events',
+      label: 'Events',
+      id: `all_events_${projectId}`,
+      projectID: projectId
+    },
+    {
+      name: 'tree_view',
+      label: 'Tree View',
+      id: `tree_view_${projectId}`,
+      projectID: projectId
+    },
+    {
+      name: 'all_collections',
+      label: 'Collections',
+      id: `all_collections_${projectId}`,
+      projectID: projectId
+    }
+  );
   let k = 0;
   for (var i = 0; i < tabs.length; i++) {
     const collectionProjectID = tabs[i].projectID;
@@ -1830,6 +1922,8 @@ const getCollectionNavbar = async projectId => {
         colTable = getEventTab(projectId);
       } else if (collectionId == `all_collections_${projectId}`) {
         colTable = getCollectionTab(projectId);
+      } else if (collectionId == `tree_view_${projectId}`) {
+        colTable = getTreeViewTab(projectId);
       } else {
         colTable = getCollectionTable(collectionId, 'default');
         colExcelTable = getExcelTable(`spreadsheet-${collectionId}`);

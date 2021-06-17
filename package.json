@@ -30,6 +30,8 @@
     "cors": "^2.8.5",
     "cron": "^1.8.2",
     "crypto-browserify": "^3.12.0",
+    "d3": "^6.7.0",
+    "d3-mitch-tree": "^1.1.2",
     "datatables.net": "^1.10.22",
     "datatables.net-bs4": "^1.10.22",
     "datatables.net-buttons": "^1.6.5",
