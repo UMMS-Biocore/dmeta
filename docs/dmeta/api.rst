@@ -100,7 +100,6 @@ Get All Projects
                         "label": "Vitiligo",
                         "lastUpdatedUser": "5f39add38db6c9a200168a22",
                         "owner": "5f39add38db6c9a200168a22",
-                        "slug": "vitiligo",
                         "perms": {
                             "read": {
                                 "group": [
@@ -160,7 +159,6 @@ Get a Project
                         "label": "Vitiligo",
                         "lastUpdatedUser": "5f39add38db6c9a200168a22",
                         "owner": "5f39add38db6c9a200168a22",
-                        "slug": "vitiligo",
                         "perms": {
                             "read": {
                                 "group": [
@@ -215,8 +213,7 @@ Create a Project
                     "name": "vitiligo",
                     "label": "Vitiligo",
                     "lastUpdatedUser": "5f39add38db6c9a200168a22",
-                    "owner": "5f39add38db6c9a200168a22",
-                    "slug": "vitiligo",
+                    "owner": "5f39add38db6c9a200168a22"
                 }
             }
         }
@@ -240,7 +237,7 @@ Update a Project
           -H "Content-Type: application/json" \
           -d '
               {
-                "slug": "vit"
+                "label": "Vitiligo"
               }'
     
     **Example response**:
@@ -264,7 +261,6 @@ Update a Project
                     "label": "Vitiligo",
                     "lastUpdatedUser": "5f39add38db6c9a200168a22",
                     "owner": "5f39add38db6c9a200168a22",
-                    "slug": "vit",
                     "perms": {
                         "read": {
                             "group": [
@@ -335,7 +331,6 @@ Get All Collections
             "data": {
                 "data": [
                     {
-                        "parentCollectionID": null,
                         "version": 1,
                         "required": false,
                         "active": true,
@@ -349,7 +344,6 @@ Get All Collections
                         },
                         "name": "exp_series",
                         "label": "Experiment Series",
-                        "slug": "exp_series",
                         "lastUpdatedUser": "5f39add38db6c9a200168a22",
                         "owner": "5f39add38db6c9a200168a22",
                         "projectID": "5fb2b395c8c1e577fcb8ce6c",
@@ -368,7 +362,6 @@ Get All Collections
                         "id": "5f57ffba35db5980ba020ff3"
                     },
                     {
-                        "parentCollectionID": "5f57ffba35db5980ba020ff3",
                         "version": 1,
                         "required": false,
                         "active": true,
@@ -382,7 +375,6 @@ Get All Collections
                         },
                         "name": "exp",
                         "label": "Experiments",
-                        "slug": "exp",
                         "lastUpdatedUser": "5f39add38db6c9a200168a22",
                         "owner": "5f39add38db6c9a200168a22",
                         "projectID": "5fb2b395c8c1e577fcb8ce6c",
@@ -431,7 +423,6 @@ Get a Collection
             "data": {
                 "data": [
                     {
-                        "parentCollectionID": "5f57ffba35db5980ba020ff3",
                         "version": 1,
                         "required": false,
                         "active": true,
@@ -445,7 +436,6 @@ Get a Collection
                         },
                         "name": "exp",
                         "label": "Experiments",
-                        "slug": "exp",
                         "lastUpdatedUser": "5f39add38db6c9a200168a22",
                         "owner": "5f39add38db6c9a200168a22",
                         "projectID": "5fb2b395c8c1e577fcb8ce6c",
@@ -486,10 +476,8 @@ Create a Collection
             {
                 "name": "analysis",
                 "label": "Analysis",
-                "slug": "analysis",
                 "projectID":"5fb2b395c8c1e577fcb8ce6c",
                 "restrictTo": {"group":["5fb45793aa5adff6f407f2d2"]},
-                "parentCollectionID":"5f74a0e05443973d2bfd870c"
             }'
 
     **Example response**:
@@ -500,7 +488,6 @@ Create a Collection
                 "status": "success",
                 "data": {
                     "data": {
-                        "parentCollectionID": "5f74a0e05443973d2bfd870c",
                         "version": 1,
                         "required": false,
                         "active": true,
@@ -509,7 +496,6 @@ Create a Collection
                         "_id": "6063e3a33c195afbe6d5e036",
                         "name": "analysis",
                         "label": "Analysis",
-                        "slug": "analysis",
                         "restrictTo": {
                             "group": [
                                 "5fb45793aa5adff6f407f2d2"
@@ -553,7 +539,7 @@ Update a Collection
           -H "Content-Type: application/json" \
           -d '
               {
-                "slug": "anlys"
+                "label": "Analysis"
               }'
     
     **Example response**:
@@ -564,7 +550,6 @@ Update a Collection
                 "status": "success",
                 "data": {
                     "data": {
-                        "parentCollectionID": "5f74a0e05443973d2bfd870c",
                         "version": 1,
                         "required": false,
                         "active": true,
@@ -573,7 +558,6 @@ Update a Collection
                         "_id": "6063e3a33c195afbe6d5e036",
                         "name": "analysis",
                         "label": "Analysis",
-                        "slug": "anlys",
                         "restrictTo": {
                             "group": [
                                 "5fb45793aa5adff6f407f2d2"

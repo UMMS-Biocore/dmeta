@@ -5,14 +5,12 @@ run _id: 5f623137721d09b3670c4b67
 {
     "name": "run",
     "label": "Runs",
-    "slug": "runs"
 }
 
 exp_series _id: 5f57ffba35db5980ba020ff3
 {
     "name": "exp_series",
     "label": "Experiment Series",
-    "slug": "experiment_series",
     "restrictTo": {"role":["admin"]}
 }
 
@@ -20,27 +18,21 @@ exp _id: 5f57ffe635db5980ba020ff4
 {
     "name": "exp",
     "label": "Experiments",
-    "slug": "experiments",
     "restrictTo": {"role":["admin"]},
-    "parentCollectionID":"5f57ffba35db5980ba020ff3"
 }
 
 biosamp _id: 5f57fff635db5980ba020ff5
 {
     "name": "biosamp",
     "label": "Biosamples",
-    "slug": "biosamples",
     "restrictTo": {"role":["admin"]},
-    "parentCollectionID":"5f57ffe635db5980ba020ff4"
 }
 
 sample _id: 5f74a0e05443973d2bfd870c
 {
     "name": "sample",
     "label": "Samples",
-    "slug": "samples",
     "restrictTo": {"role":["admin"]},
-    "parentCollectionID":"5f57fff635db5980ba020ff5"
 }
 
 file _id: 5fbc1f9e148ac02babb22ddd
@@ -48,9 +40,7 @@ file _id: 5fbc1f9e148ac02babb22ddd
     "_id": "5fbc1f9e148ac02babb22ddd",
     "name": "file",
     "label": "Files",
-    "slug": "files",
     "restrictTo": {"group":["5fb45793aa5adff6f407f2d2"]},
-    "parentCollectionID":"5f74a0e05443973d2bfd870c",
     "projectID":"5fb2b395c8c1e577fcb8ce6c"
 }
 
@@ -61,9 +51,7 @@ sample_summary _id: 5f74af86d9e07245ea02b53c
     "_id": "5f74af86d9e07245ea02b53c",
     "name": "sample_summary",
     "label": "Sample Summary",
-    "slug": "sample_summary",
     "restrictTo": {"role":["admin"]},
-    "parentCollectionID":"5f74a0e05443973d2bfd870c"
 }
 
 analysis _id:  5fbd7e6760c2e5b34bf2e4d4
@@ -71,8 +59,6 @@ analysis _id:  5fbd7e6760c2e5b34bf2e4d4
     "_id": "5fbd7e6760c2e5b34bf2e4d4",
     "name": "analysis",
     "label": "Analysis",
-    "slug": "analysis",
     "restrictTo": {"group":["5fb45793aa5adff6f407f2d2"]},
-    "parentCollectionID":"5f74a0e05443973d2bfd870c"
 }
 

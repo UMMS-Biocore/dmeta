@@ -9,7 +9,7 @@ const eventLogSchema = new mongoose.Schema({
   target: {
     type: String,
     required: [true, 'Please provide event type.'],
-    enum: ['collections', 'fields', 'projects', 'data']
+    enum: ['data']
   },
   coll: {
     type: mongoose.Schema.ObjectId,

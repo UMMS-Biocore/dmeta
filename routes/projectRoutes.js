@@ -2,6 +2,7 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const projectsController = require('../controllers/projectsController');
 const collectionsController = require('../controllers/collectionsController');
+const eventLogController = require('../controllers/eventLogController');
 const collectionsRouter = require('./collectionsRoutes');
 const dataRouter = require('./dataRoutes');
 
@@ -20,6 +21,7 @@ router
     authController.requireLogin,
     authController.restrictTo('admin', 'project-admin'),
     // projectsController.setAfter,
+    eventLogController.setAdminEventLog('project'),
     projectsController.createProject
   );
 
@@ -30,12 +32,14 @@ router
     authController.requireLogin,
     authController.restrictTo('admin', 'project-admin'),
     // projectsController.setAfter,
+    eventLogController.setAdminEventLog('project'),
     projectsController.updateProject
   )
   .delete(
     authController.requireLogin,
     authController.restrictTo('admin', 'project-admin'),
     // projectsController.setAfter,
+    eventLogController.setAdminEventLog('project'),
     projectsController.deleteProject
   );
 

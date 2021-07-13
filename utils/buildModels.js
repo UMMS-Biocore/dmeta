@@ -9,7 +9,12 @@ const Project = require('../models/projectsModel');
 const Collection = require('../models/collectionsModel');
 const projectsController = require('../controllers/projectsController');
 const Field = require('../models/fieldsModel');
-const { autoIncrementModelDID, CounterModel } = require('../models/counterModel');
+const {
+  autoIncrementModelDID,
+  dryAutoIncrementModelDID,
+  CounterModel
+} = require('../models/counterModel');
+const { setNamingPattern } = require('../utils/namingPattern');
 const AppError = require('./appError');
 
 const modelObj = {};
@@ -243,13 +248,22 @@ const buildSchema = (schema, modelName, fields) => {
   // { minimize: false } => allows saving empty objects
   const Schema = new mongoose.Schema(schema, { minimize: false, strict: 'throw' });
   Schema.plugin(uniqueValidator);
+  // validate triggers when inserting new record
+  Schema.pre(/^(validate)/, async function(next) {
+    if (this.isNew) {
+      await dryAutoIncrementModelDID(modelName, this, next);
+    }
+    await setNamingPattern(fields, this, next);
+    next();
+  });
   // eslint-disable-next-line no-loop-func
-  Schema.pre('save', function(next) {
+  Schema.pre('save', async function(next) {
     if (!this.isNew) {
       next();
       return;
     }
-    autoIncrementModelDID(modelName, this, next);
+    await autoIncrementModelDID(modelName, this, next);
+    next();
   });
   // check if schema has ontology field -> before save check if item is valid
   const ontologyFields = fields.filter(f => f.ontology);
@@ -262,6 +276,7 @@ const buildSchema = (schema, modelName, fields) => {
       }
       for (let i = 0; i < ontologyFields.length; i++) {
         const name = ontologyFields[i].name;
+        const collectionID = ontologyFields[i].collectionID;
         const value = query[name];
         if (value) {
           const settings = ontologyFields[i].ontology;
@@ -311,10 +326,11 @@ const buildSchema = (schema, modelName, fields) => {
                 if (err) console.log(err);
               }
             );
+            // eslint-disable-next-line no-await-in-loop
+            await exports.updateModel(collectionID, null);
             return next();
           }
           // check value with API
-          console.log('**** stooop');
           if (!url) return next();
           if (!value.length) return next();
           try {
@@ -348,6 +364,7 @@ const buildSchema = (schema, modelName, fields) => {
 
 // Update mongoose models when collection or field changes
 // oldColl -> old collection before query
+// old model will be deleted & new model will be created with new collection and field data
 exports.updateModel = async (collectionId, oldColl) => {
   try {
     console.log('* Update Collection Model ID:', collectionId);

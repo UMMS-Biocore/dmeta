@@ -15,24 +15,7 @@ In order to insert a new collections, you need to click on the insert button whi
 
 * **Name (required):** Collection name is entered in this field. 
 
-* **Slug:** Short version of the collection name is entered for API requests.
-
 * **Label (required):** Long version of the collection name is entered in this field. 
-
-* **Parent Collection:** Collection to be used for parent referencing. 
-
-Consider the following hierarchy of collections:
-
-.. image:: images/collections_reference.png
-    :align: center
-    :width: 25%
-    
-In this example, **Experiment Series** is the parent collection of the **Experiments** collection. Therefore each experiment data will have a reference for **Experiment Series**. Similarly, each data in **Biosamples** will have a reference for **Experiments** collection. In order to achive this hierarchy, following settings could be used:
-
-.. image:: images/collections_reference_example.png
-    :align: center
-    :width: 70%
-
 
 * **Project:** Choose target project to insert collection. 
 

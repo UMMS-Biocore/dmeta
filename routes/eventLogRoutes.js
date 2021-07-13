@@ -8,6 +8,16 @@ router.use(authController.isLoggedIn);
 router.use(authController.requireLogin);
 router.use(authController.setDefPerms);
 
+router
+  .route('/admin')
+  .get(
+    authController.restrictTo('admin', 'project-admin'),
+    eventLogController.getAllAdminEventLogs
+  );
+router
+  .route('/admin/:id')
+  .get(authController.restrictTo('admin', 'project-admin'), eventLogController.getAdminEventLog);
+
 router.route('/').get(eventLogController.getAllEventLogs);
 router.route('/:id').get(eventLogController.getEventLog);
 

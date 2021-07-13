@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const slugify = require('slugify');
 
 // restrictTo supports group, role and user list to limit the access
 // e.g. {role:["admin"]} -> will only allow admin to create an doc in the collection
@@ -31,7 +30,6 @@ const collectionsSchema = new mongoose.Schema(
         message: 'Name exists in the project. It has to be unique in the project!'
       }
     },
-    slug: String,
     label: {
       type: String,
       required: [true, 'A collection must have a label'],
@@ -108,8 +106,6 @@ collectionsSchema.methods.toJSON = function() {
   return obj;
 };
 
-collectionsSchema.index({ slug: 1 });
-
 collectionsSchema.virtual('fields', {
   ref: 'Fields',
   foreignField: 'collectionID',
@@ -123,7 +119,6 @@ collectionsSchema.pre(/^find/, function(next) {
 
 collectionsSchema.pre('save', function(next) {
   this.name = this.name.replace(/\s+/g, '_').toLowerCase();
-  if (!this.slug) this.slug = slugify(this.name, { lower: true });
   next();
 });
 

@@ -125,6 +125,7 @@ a.editable-click-collection {
 .mitch-d3-tree.boxed-tree.default .node.multi-parent .body-group .body-box {
   /* stroke: black !important; */
   fill: antiquewhite !important;
+  /* stroke-width: 3!important; */
 }
 
 /* d3-context-menu */

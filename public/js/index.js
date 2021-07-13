@@ -16,6 +16,8 @@ require('datatables.net-bs4/js/dataTables.bootstrap4.js'); // Datatables Bootstr
 require('datatables.net-bs4/css/dataTables.bootstrap4.css'); // Datatables Bootstrap 4
 require('datatables.net-colreorder');
 require('datatables.net-colreorder-bs4');
+require('datatables.net-rowreorder-bs4');
+require('datatables.net-rowreorder-bs4/css/rowReorder.bootstrap4.min.css');
 require('jquery-datatables-checkboxes');
 require('selectize/dist/js/selectize.js');
 require('selectize/dist/css/selectize.bootstrap3.css');
@@ -45,6 +47,7 @@ const loginForm = document.querySelector('#loginOuterDiv');
 const allProjectNav = document.querySelector('#allProjectNav');
 const allProfileNav = document.querySelector('#allProfileNav');
 const allEventNav = document.querySelector('#allEventNav');
+const allAdminEventNav = document.querySelector('#allAdminEventNav');
 const adminAllProjectNav = document.querySelector('#admin-allProjectNav');
 const dmetaVersionBut = document.querySelector('#dmetaVersionBut');
 
@@ -166,8 +169,13 @@ if (loginForm) {
     loadProfileTabContent(userRole);
   }
 
+  // first get adminEventNavbar then allEventNav
+  if (allAdminEventNav) {
+    const adminEventNavbar = await getEventNavbar('adminevents');
+    $('#allAdminEventNav').append(adminEventNavbar);
+  }
   if (allEventNav) {
-    const eventNavbar = await getEventNavbar();
+    const eventNavbar = await getEventNavbar('events');
     $('#allEventNav').append(eventNavbar);
     await loadEventContent(userRole);
   }

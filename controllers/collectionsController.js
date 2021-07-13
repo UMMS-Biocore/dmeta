@@ -70,6 +70,11 @@ exports.setAfter = async (req, res, next) => {
     res.locals.After = function() {
       const beforeQuery = res.locals.BeforeQuery;
       buildModels.updateModel(req.params.id, beforeQuery);
+      // if collecton name is changed:
+      // 1. fields of other collections that use this collection name should be updated
+      // 2. field update should trigger buildModels.updateModel
+      // e.g. biosample has exp_id field with ref:vitiligo_exp. If exp collection name is changed to series, ref should be set to vitiligo_series.
+      //buildModels.updateModel(collectionID, null);
     };
     return next();
   }

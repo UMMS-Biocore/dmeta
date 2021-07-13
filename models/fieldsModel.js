@@ -71,11 +71,13 @@ const fieldsSchema = new mongoose.Schema(
       }
     },
     description: { type: 'String' },
+    namingPattern: { type: 'String' },
     unique: { type: 'boolean' },
     hidden: { type: 'boolean' },
     required: { type: 'Mixed', default: false },
     checkvalid: { type: 'Mixed' },
     ontology: { type: 'Mixed' },
+    order: { type: 'Number' },
     active: { type: 'boolean', default: true },
     default: { type: 'String' },
     ref: { type: 'String' },
@@ -86,6 +88,7 @@ const fieldsSchema = new mongoose.Schema(
     uppercase: { type: 'boolean' },
     trim: { type: 'boolean' },
     header: { type: 'boolean' },
+    identifier: { type: 'boolean' },
     minlength: { type: 'Number' },
     maxlength: { type: 'Number' },
     various: { type: 'Mixed' },
@@ -125,11 +128,15 @@ fieldsSchema.pre(/^findOneAnd/, async function(next) {
   // When running update validators with the `context` option set to 'query',
   //`this` is query object. `this.r` is query document
   this.r = await this.findOne();
+  if (this.r.identifier && this.getUpdate && this.getUpdate().$set) {
+    this.getUpdate().$set.unique = true;
+  }
   next();
 });
 
 fieldsSchema.pre('save', function(next) {
   this.name = this.name.replace(/\s+/g, '_').toLowerCase();
+  if (this.identifier) this.unique = true;
   next();
 });
 

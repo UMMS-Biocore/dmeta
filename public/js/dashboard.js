@@ -1,6 +1,7 @@
 /* eslint-disable */
 import axios from 'axios';
 import XLSX from 'xlsx';
+import moment from 'moment';
 const JSON5 = require('json5');
 import { saveAs } from 'file-saver';
 
@@ -27,6 +28,7 @@ import {
   getFormRow,
   createSelectizeMultiField
 } from './formModules/crudData';
+import { prepFileForm } from './formModules/fileForm';
 import { prepDataPerms } from './formModules/dataPerms';
 import { refreshTreeView } from './treeView';
 import Handsontable from 'handsontable';
@@ -51,12 +53,12 @@ const ajaxCall = async (method, url) => {
 const getTableHeaders = collID => {
   let ret = '';
   ret += `<th></th>`; // for checkboxes
-  ret += `<th>DID</th>`;
+  // ret += `<th>DID</th>`;
   for (var i = 0; i < $s.fields.length; i++) {
     if ($s.fields[i].collectionID == collID && $s.fields[i].label && $s.fields[i].hidden !== true)
       ret += `<th>${$s.fields[i].label}</th>`;
   }
-  ret += `<th>ID</th>`;
+  // ret += `<th>ID</th>`;
   ret += `<th>Permission</th>`;
   return ret;
 };
@@ -92,16 +94,87 @@ const makeReadOnlyUpdate = hot => {
   }
 };
 
-// highlight imported table data
-const makeUpdatedTableData = tableID => {
+const getExcelColumns = collid => {
+  const datatable = $(`#${collid}`).DataTable();
+  let columnsObj = datatable.init().columns;
+  let selColumns = [];
+  for (let i = 0; i < columnsObj.length; i++) {
+    if (i === 0 && columnsObj[i].mData == '_id') continue; // skip first column for checkboxes
+    if (columnsObj[i].mData == 'perms') continue;
+    selColumns.push(columnsObj[i].mData);
+  }
+  return selColumns;
+};
+
+// highlight imported and updated table data
+const makeUpdatedTableData = (tableID, projectid) => {
+  let identifierName = '';
+  let identifierIndex = '';
+  let collName = '';
+  let collid = '';
   const hot = $s.handsontables[tableID];
   const data = hot.getData();
-  for (let r = 0; r < data.length; r++) {
-    for (let c = 0; c < data[r].length; c++) {
-      if (c === 0 || c === 1) continue;
-      hot.setCellMeta(r, c, 'className', 'bg-yellow');
+
+  // 1. get header and detect indentifier column
+  const header = hot.getColHeader();
+  for (let k = 0; k < header.length; k++) {
+    if (k == 0 || k == 1) continue; // Skip Update status and update log columns
+    const headerSplit = header[k].split('.');
+    if (headerSplit[0] && headerSplit[1]) {
+      collName = headerSplit[0];
+      const collData = $s.collections.filter(c => c.name == collName && c.projectID == projectid);
+      if (collData && collData[0] && collData[0]._id) {
+        collid = collData[0]._id;
+        const identifierData = $s.fields.filter(f => f.collectionID == collid && f.identifier);
+        if (identifierData && identifierData[0] && identifierData[0].name) {
+          identifierName = identifierData[0].name;
+          identifierIndex = k;
+          break;
+        }
+      }
     }
   }
+  if (!identifierName) {
+    showInfoModal('Identifier Column Not Found.');
+    return;
+  }
+
+  const fields = $s.fields.filter(f => f.collectionID === collid);
+  const fieldsArr = fields.map(f => f.name);
+  const excelData = prepExcelData(projectid, collid, fieldsArr, collName, 'object', 'short');
+  for (let r = 0; r < data.length; r++) {
+    let existingDataFound = false;
+    const rowData = data[r];
+    const identifierValue = rowData[identifierIndex];
+    // 2. based on identifier column check existing data
+    if (identifierValue && excelData) {
+      const existingData = excelData.filter(d => d[identifierName] == identifierValue);
+      if (existingData && existingData[0]) {
+        existingDataFound = true;
+        for (let c = 0; c < header.length; c++) {
+          if (c == 0 || c == 1 || c == identifierIndex) continue;
+          const key = header[c].replace(`${collName}.`, '');
+          let value = rowData[c];
+          if (rowData[c] === null) {
+            value = '';
+          }
+
+          if (value === '' && existingData[0][key] === undefined) continue;
+          if (value === '' && existingData[0][key] === null) continue;
+          if (existingData[0][key] == value) continue;
+          hot.setCellMeta(r, c, 'className', 'bg-yellow');
+        }
+      }
+      // if existingDataFound not found, then heightlight all of them
+      if (!existingDataFound) {
+        for (let c = 0; c < rowData.length; c++) {
+          if (c === 0 || c === 1) continue;
+          hot.setCellMeta(r, c, 'className', 'bg-yellow');
+        }
+      }
+    }
+  }
+
   hot.render();
 };
 
@@ -113,7 +186,8 @@ const createHandsonTable = (tableID, header, statusExcelData) => {
     const hot = new Handsontable(container, {
       data: statusExcelData,
       colHeaders: header,
-      // height: 700,
+      width: '100%',
+      height: 500,
       rowHeaders: true,
       stretchH: 'all',
       contextMenu: true,
@@ -190,27 +264,71 @@ const getExcelNavbar = (collId, tabs) => {
   return ret;
 };
 
-const getKeyValueExcel = (cleanHeader, rowData) => {
+const getRefCollIdentifiers = (projectID, collid) => {
+  let projectName = '';
+  const projectData = $s.projects.filter(p => p._id == projectID);
+  if (projectData && projectData[0] && projectData[0].name) projectName = projectData[0].name;
+  const collFields = getFieldsOfCollection(collid);
+  let refFields = []; // ref field names
+  let refCollectionIDs = []; // extract from ref data
+  let refCollIdentifiers = []; // use  from ref data
+
+  for (let i = 0; i < collFields.length; i++) {
+    if (collFields[i].ref) {
+      let refCollectionID = '';
+      let refFieldIdent = '';
+      refFields.push(collFields[i].name);
+      if (collFields[i].ref.startsWith(projectName + '_')) {
+        const refColName = collFields[i].ref.replace(new RegExp('^' + projectName + '_'), '');
+        if (refColName) {
+          const refCoData = $s.collections.filter(c => c.name == refColName);
+          if (refCoData && refCoData[0] && refCoData[0]._id) {
+            refCollectionID = refCoData[0]._id;
+            const refFieldIdenData = $s.fields.filter(
+              f => f.collectionID == refCollectionID && f.identifier
+            );
+            if (refFieldIdenData && refFieldIdenData[0] && refFieldIdenData[0].name) {
+              refFieldIdent = refFieldIdenData[0].name;
+            }
+          }
+        }
+        refCollectionIDs.push(refCollectionID);
+        refCollIdentifiers.push(refFieldIdent);
+      }
+    }
+  }
+  return { refFields, refCollectionIDs, refCollIdentifiers };
+};
+
+const getKeyValueExcel = (
+  cleanHeader,
+  rowData,
+  refFields,
+  refCollectionIDs,
+  refCollIdentifiers
+) => {
   let key = '';
   let value = '';
-  // if header ends with _DID, get _id from data collections
-  if (cleanHeader.match(/(.*)_DID$/)) {
-    const refCollName = cleanHeader.match(/(.*)_DID$/)[1];
-    key = `${refCollName}_id`;
+  // find reference columns and get their ids
+  console.log('refFields', refFields);
+  console.log('refCollectionIDs', refCollectionIDs);
+  console.log('refCollIdentifiers', refCollIdentifiers);
+  if (refFields.indexOf(cleanHeader) > -1) {
+    const refIndex = refFields.indexOf(cleanHeader);
+    const refCollectionID = refCollectionIDs[refIndex];
+    const refCollIdentifier = refCollIdentifiers[refIndex];
+    key = cleanHeader;
     value = rowData;
     console.log('key', key);
     console.log('value', value);
     // get _id info
-    const refColl = $s.collections.filter(col => col.name === refCollName);
-    if (refColl && refColl[0] && refColl[0]._id) {
-      const collData = $s.data[refColl[0]._id];
-      console.log('$s.data', $s.data);
-      console.log('collData_id', refColl[0]._id);
+    if (refCollectionID) {
+      const collData = $s.data[refCollectionID];
       console.log('collData', collData);
 
-      const selData = collData.filter(d => d.DID == rowData);
+      const selData = collData.filter(d => d[refCollIdentifier] == rowData);
       if (selData && selData[0] && selData[0]._id) {
-        key = `${refCollName}_id`;
+        key = cleanHeader;
         value = selData[0]._id;
       }
     }
@@ -229,31 +347,52 @@ const syncTableData = async (tableID, collid, collName, projectid) => {
   const data = hot.getData();
   const header = hot.getColHeader();
   const { projectPart } = getProjectData(projectid);
+  // identifierAndNamingPatterns
+  const updateOnInsert = $s.fields.filter(
+    f => (f.identifier || f.namingPattern) && f.collectionID == collid
+  );
+  const { refFields, refCollectionIDs, refCollIdentifiers } = getRefCollIdentifiers(
+    projectid,
+    collid
+  );
   for (let i = 0; i < data.length; i++) {
     let updatedObj = {};
     let insertObj = {};
     const rowData = data[i];
-
     let updtCheck = false;
     for (let k = 0; k < header.length; k++) {
       if (k == 0 || k == 1) continue; // Skip Update status and update log columns
-      const cleanHeader = header[k].replace(`${collName}.`, '');
-      const { key, value } = getKeyValueExcel(cleanHeader, rowData[k]);
-      if (key != '_id' && key != 'DID' && value) insertObj[key] = value;
       const rowProperties = hot.getCellMeta(i, k);
-
-      if (
-        key != '_id' &&
-        key != 'DID' &&
-        rowProperties.className &&
-        rowProperties.className == 'bg-yellow'
-      ) {
+      if (rowProperties.className && rowProperties.className == 'bg-yellow') {
         updtCheck = true;
-        updatedObj[key] = value;
       }
     }
-    console.log('updtCheck', i, updtCheck, updatedObj, insertObj);
+
     if (updtCheck) {
+      for (let k = 0; k < header.length; k++) {
+        if (k == 0 || k == 1) continue; // Skip Update status and update log columns
+        const rowProperties = hot.getCellMeta(i, k);
+        const cleanHeader = header[k].replace(`${collName}.`, '');
+        const { key, value } = getKeyValueExcel(
+          cleanHeader,
+          rowData[k],
+          refFields,
+          refCollectionIDs,
+          refCollIdentifiers
+        );
+        if (key != '_id' && key != 'DID' && value) insertObj[key] = value;
+
+        if (
+          key != '_id' &&
+          key != 'DID' &&
+          rowProperties.className &&
+          rowProperties.className == 'bg-yellow'
+        ) {
+          updatedObj[key] = value;
+        }
+      }
+      console.log('updtCheck', i, updtCheck, updatedObj, insertObj);
+
       try {
         if (!$.isEmptyObject(updatedObj)) {
           const rowID = getExcelRowID(collid, collName, header, rowData);
@@ -267,7 +406,6 @@ const syncTableData = async (tableID, collid, collName, projectid) => {
               collid,
               i
             );
-            console.log(res);
             // insert new document
           } else {
             res = await excelCrudCall(
@@ -293,6 +431,17 @@ const syncTableData = async (tableID, collid, collName, projectid) => {
               hot.setDataAtCell(i, indexPerms, JSON.stringify(newPerms));
             } else {
               hot.setDataAtCell(i, indexPerms, newPerms);
+            }
+          }
+          // update identifier and namingpattern columns
+          for (let m = 0; m < updateOnInsert.length; m++) {
+            let fieldName = updateOnInsert[m].name;
+            if (fieldName && res[fieldName]) {
+              const newData = res[fieldName];
+              const indexData = header.indexOf(`${collName}.${fieldName}`);
+              if (indexData != -1 && newData) {
+                hot.setDataAtCell(i, indexData, newData);
+              }
             }
           }
         }
@@ -331,8 +480,21 @@ const addStatusColumns = data => {
   }
   return ret;
 };
+
+const addEmptyRows = (data, numRows) => {
+  const numOfColumns = data[0].length;
+  if (numOfColumns) {
+    let emptyRow = [];
+    for (let i = 0; i < numOfColumns; i++) {
+      emptyRow.push('');
+    }
+    for (let i = 0; i < numRows; i++) {
+      data.push(emptyRow);
+    }
+  }
+  return data;
+};
 const createDropzone = (id, buttonID, destroy) => {
-  console.log('createDropzone');
   if (destroy) {
     $(`#${id}`)[0].dropzone.destroy();
     $(`#${id}`).off();
@@ -362,15 +524,20 @@ const createDropzone = (id, buttonID, destroy) => {
 
 const getExcelRowID = (collid, collName, header, rowData) => {
   let id = '';
+  let idField = '';
   // search for ${collName}_id, or ${collName}.DID
-  const indexID = header.indexOf(`${collName}._id`);
-  const indexDID = header.indexOf(`${collName}.DID`);
-  if (indexID != -1 && rowData[indexID]) return rowData[indexID];
-  if (indexDID != -1 && rowData[indexDID]) {
-    const data = $s.data[collid];
-    const selData = data.filter(d => d.DID == rowData[indexDID]);
-    if (selData && selData[0] && selData[0]._id) return selData[0]._id;
+  // get identifier field of collection
+  const identifierField = $s.fields.filter(f => f.collectionID == collid && f.identifier);
+  if (identifierField && identifierField[0] && identifierField[0].name) {
+    idField = identifierField[0].name;
+    const idFieldIndex = header.indexOf(`${collName}.${idField}`);
+    if (idFieldIndex != -1 && rowData[idFieldIndex]) {
+      const data = $s.data[collid];
+      const selData = data.filter(d => d[idField] == rowData[idFieldIndex]);
+      if (selData && selData[0] && selData[0]._id) return selData[0]._id;
+    }
   }
+
   return id;
 };
 
@@ -578,6 +745,7 @@ const refreshEventForm = async (projectID, eventID) => {
       prepOntologyDropdown(`#${formID}`, {}, $s);
       prepReferenceDropdown(`#${formID}`, $s);
       if (collectionName == 'run') prepRunForm(`#${formID}`, {}, $s, projectID);
+      // if (collectionName == 'file') prepFileForm(`#${formID}`, {}, $s, projectID);
       prepareClickToActivateModal(`#${formID}`, '', 'input, select', {});
       activateAllForm(`#${formID}`, 'input, select');
     }
@@ -647,9 +815,10 @@ const refreshCollectionDiv = async (projectID, collectionID, dry) => {
     const tableID = collectionID;
     const colTable = getCollectionTable(collectionID, 'default');
     const colExcelTable = getExcelTable(`spreadsheet-${collectionID}`);
-    const colDropzone = getDropzoneTable(collectionID);
+    const colDropzone = getDropzoneTable(collectionID, projectID);
     const crudButtons = getCrudButtons(collectionID, collectionLabel, collectionName, projectID, {
-      excel: true
+      excel: true,
+      delBtn: true
     });
     const outerDiv = `#collection-outerdiv-${collectionID}-${projectID}`;
     const isEmptyDiv = $(outerDiv).html() === '';
@@ -752,6 +921,7 @@ export const insertDataModal = async (button, clickToActivateModal, callbackOnSu
   $('#crudModalBody').append(collectionFields);
   $('#crudModal').off();
   if (collName == 'run') prepRunForm('#crudModal', {}, $s, projectID);
+  // if (collName == 'file') prepFileForm('#crudModal', {}, $s, projectID);
   prepReferenceDropdown('#crudModal', $s);
   prepOntologyDropdown('#crudModal', {}, $s);
   await prepDataPerms('#crudModal', {});
@@ -877,6 +1047,77 @@ export const editDataModal = async (button, selectedRows, callback) => {
   } else if (rows_selected.length > 0) {
     $('#crudModal').modal('show');
   }
+};
+
+const prepExcelData = (projectID, collid, selColumns, collName, format, fieldType) => {
+  let reOrderedData = [];
+  const { refFields, refCollectionIDs, refCollIdentifiers } = getRefCollIdentifiers(
+    projectID,
+    collid
+  );
+  const data = $s.data[collid];
+  const collFields = getFieldsOfCollection(collid);
+  let dateFields = []; // date field names
+  for (var i = 0; i < collFields.length; i++) {
+    if (collFields[i].type == 'Date') dateFields.push(collFields[i].name);
+  }
+
+  for (let i = 0; i < data.length; i++) {
+    let newObj = {};
+    for (let k = 0; k < selColumns.length; k++) {
+      const col = selColumns[k];
+      let fields = '';
+      if (fieldType == 'short') {
+        fields = col;
+      } else if (fieldType == 'long') {
+        fields = `${collName}.${col}`;
+      }
+      if (refFields.includes(col)) {
+        newObj[fields] = '';
+        const refIndex = refFields.indexOf(col);
+        const refCollectionID = refCollectionIDs[refIndex];
+        const refCollIdentifier = refCollIdentifiers[refIndex];
+        if (data[i][col] && data[i][col]._id && $s.data[refCollectionID]) {
+          const refData = $s.data[refCollectionID].filter(d => d._id == data[i][col]._id);
+          if (refData && refData[0] && refData[0][refCollIdentifier]) {
+            newObj[fields] = refData[0][refCollIdentifier];
+          }
+        }
+      } else if (dateFields.includes(col) && data[i][col]) {
+        const timestamp = Date.parse(data[i][col]);
+        if (isNaN(timestamp) == false) {
+          newObj[fields] = moment(data[i][col])
+            .utc()
+            .format('YYYY-MM-DD');
+        } else {
+          console.log('not valid timestamp', data[i][col]);
+          newObj[fields] = data[i][col];
+        }
+      } else if (
+        (typeof data[i][col] === 'object' && data[i][col] !== null) ||
+        Array.isArray(data[i][col])
+      ) {
+        newObj[fields] = JSON.stringify(data[i][col]);
+      } else {
+        newObj[fields] = data[i][col];
+      }
+    }
+    reOrderedData.push(newObj);
+  }
+  if (format === 'array') {
+    let arrayData = [];
+    const header = Object.keys(reOrderedData[0]);
+    arrayData.push(header);
+    for (let i = 0; i < reOrderedData.length; i++) {
+      let newArr = [];
+      for (let h = 0; h < header.length; h++) {
+        newArr.push(reOrderedData[i][header[h]]);
+      }
+      arrayData.push(newArr);
+    }
+    reOrderedData = arrayData;
+  }
+  return reOrderedData;
 };
 
 const bindEventHandlers = () => {
@@ -1113,72 +1354,17 @@ const bindEventHandlers = () => {
     await editDataModal(this);
   });
 
-  const prepExcelData = (collid, rowData, columnsObj, collName, format) => {
-    const selColumns = [];
-    let reOrderedData = [];
-    const data = $s.data[collid];
-    const collFields = getFieldsOfCollection(collid);
-    let refFields = [];
-    for (var i = 0; i < collFields.length; i++) {
-      if (collFields[i].ref) refFields.push(collFields[i].name);
-    }
-    for (let i = 0; i < columnsObj.length; i++) {
-      // skip first column for checkboxes
-      if (i === 0 && columnsObj[i].mData == '_id') continue;
-      selColumns.push(columnsObj[i].mData);
-    }
-
-    for (let i = 0; i < data.length; i++) {
-      let newObj = {};
-      for (let k = 0; k < selColumns.length; k++) {
-        const col = selColumns[k];
-        if (refFields.includes(col)) {
-          const trimmedCol = col.replace(new RegExp('_id$'), '');
-          if (data[i][col] && data[i][col].DID) {
-            newObj[`${collName}.${trimmedCol}_DID`] = data[i][col].DID;
-          } else if (data[i][col] && data[i][col]._id) {
-            newObj[`${collName}.${trimmedCol}_id`] = data[i][col]._id;
-          } else {
-            newObj[`${collName}.${trimmedCol}_DID`] = '';
-          }
-        } else if (
-          (typeof data[i][col] === 'object' && data[i][col] !== null) ||
-          Array.isArray(data[i][col])
-        ) {
-          newObj[`${collName}.${col}`] = JSON.stringify(data[i][col]);
-        } else {
-          newObj[`${collName}.${col}`] = data[i][col];
-        }
-      }
-      reOrderedData.push(newObj);
-    }
-    if (format === 'array') {
-      let arrayData = [];
-      const header = Object.keys(reOrderedData[0]);
-      arrayData.push(header);
-      for (let i = 0; i < reOrderedData.length; i++) {
-        let newArr = [];
-        for (let h = 0; h < header.length; h++) {
-          newArr.push(reOrderedData[i][header[h]]);
-        }
-        arrayData.push(newArr);
-      }
-      reOrderedData = arrayData;
-    }
-    return reOrderedData;
-  };
-
   $(document).on('click', `button.export-excel-data`, async function(e) {
     const collid = $(this).attr('collid');
     const colllabel = $(this).attr('colllabel');
     const collName = $(this).attr('collname');
-    const datatable = $(`#${collid}`).DataTable();
+    const projectID = $(this).attr('projectID');
     const rowData = datatable
       .rows({ order: 'applied' })
       .data()
       .toArray();
-    let columnsObj = datatable.init().columns;
-    const excelData = prepExcelData(collid, rowData, columnsObj, collName, 'object');
+    const selColumns = getExcelColumns(collid);
+    const excelData = prepExcelData(projectID, collid, selColumns, collName, 'object', 'long');
     if (excelData && excelData[0]) {
       const wb = XLSX.utils.book_new();
       wb.SheetNames.push(colllabel);
@@ -1287,7 +1473,7 @@ const bindEventHandlers = () => {
         const splitted = columnName.split('.');
         if (splitted.length !== 2) {
           showInfoModal(
-            'Header format is not recognized. Collection name and field name should separated with dot symbol. e.g. exp.name, exp._id, exp_series.DID'
+            'Header format is not recognized. Collection name and field name should separated with dot symbol. e.g. exp.name, series.name'
           );
         } else {
           const collName = splitted[0];
@@ -1310,7 +1496,6 @@ const bindEventHandlers = () => {
     const projectid = $(this).attr('projectid');
     const tableID = `spreadsheet-${collid}`;
     // format checker -> only one collection should be defined.
-    // _id or DID field should be found
     await syncTableData(tableID, collid, collName, projectid);
     refreshDataTables(collid, collid, collName, projectid);
   });
@@ -1370,6 +1555,7 @@ const bindEventHandlers = () => {
 
   $(document).on('click', `button.load-excel-table`, async function(e) {
     const collid = $(this).attr('collid');
+    const projectid = $(this).attr('projectid');
     const dropzoneId = `excelUpload-${collid}`;
     const buttonID = `load-excel-table-${collid}`;
 
@@ -1394,11 +1580,10 @@ const bindEventHandlers = () => {
         // 4. load excel tables
         for (let i = 0; i < tabs.length; i++) {
           const statusExcelData = addStatusColumns(tabData[tabs[i]]);
-          console.log(statusExcelData);
           let header = statusExcelData.shift();
           const tableID = `import-spreadsheet-${collid}-${i}`;
           createHandsonTable(tableID, header, statusExcelData);
-          makeUpdatedTableData(tableID);
+          makeUpdatedTableData(tableID, projectid);
         }
       }
     }
@@ -1407,14 +1592,14 @@ const bindEventHandlers = () => {
   $(document).on('click', `button.edit-excel-data`, async function(e) {
     const collid = $(this).attr('collid');
     const collName = $(this).attr('collname');
-    const datatable = $(`#${collid}`).DataTable();
-    const rowData = datatable
-      .rows()
-      .data()
-      .toArray();
-    let columnsObj = datatable.init().columns;
-    const excelData = prepExcelData(collid, rowData, columnsObj, collName, 'array');
-    const statusExcelData = addStatusColumns(excelData);
+    const projectID = $(this).attr('projectID');
+    const selColumns = getExcelColumns(collid);
+    const excelData = prepExcelData(projectID, collid, selColumns, collName, 'array', 'long');
+    const statExcelData = addStatusColumns(excelData);
+    const statusExcelData = addEmptyRows(statExcelData, 100);
+    console.log(statExcelData);
+    console.log(statusExcelData);
+
     let header = statusExcelData.shift();
     $(this)
       .closest('.collection-outerdiv')
@@ -1476,6 +1661,14 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
   let tableBut = '';
   let dbEditorBut = '';
   let childRefBut = '';
+  let delBtn = '';
+  let refreshIdentifierBut = '';
+  if (settings.refreshIdentifier) {
+    refreshIdentifierBut = `
+    <button class="btn btn-primary refresh-namingPattern-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Refresh Naming Patterns" ${data}>
+      <i class="cil-badge"> </i>
+    </button>`;
+  }
   if (settings.dbEditor) {
     dbEditorBut = `
     <button class="btn btn-primary edit-field-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Transfer Fields Data" ${data}>
@@ -1512,6 +1705,12 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
     </button>
     `;
   }
+  if (settings.delBtn) {
+    delBtn = `<button class="btn btn-primary delete-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Delete" ${data}>
+  <i class="cil-trash"> </i>
+</button>`;
+  }
+
   const ret = `
   <div class="row" style="margin-top: 20px;">
     <div class="col-sm-12">
@@ -1521,25 +1720,24 @@ export const getCrudButtons = (collID, collLabel, collName, projectID, settings)
       <button class="btn btn-primary edit-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Edit" ${data}>
         <i class="cil-pencil"> </i>
       </button>
-      <button class="btn btn-primary delete-data" type="button" data-toggle="tooltip" data-placement="bottom" title="Delete" ${data}>
-        <i class="cil-trash"> </i>
-      </button>
+      ${delBtn}
       ${tableBut}
       ${childRefBut}
       ${dbEditorBut}
+      ${refreshIdentifierBut}
     </div>
   </div>`;
   return ret;
 };
 
-const getDropzoneTable = collID => {
+const getDropzoneTable = (collID, projectID) => {
   const ret = `
   <form id="excelUpload-${collID}" action="/api/v1/misc/fileUpload" method="post" enctype="multipart/form-data" class="dropzone" style="display:none;">
     <div class="fallback ">
       <input name="file" type="file" />
     </div>
   </form>
-  <button style="margin-top:5px; float:right; display:none;" id="load-excel-table-${collID}" class="btn btn-primary load-excel-table" collID="${collID}" type="button"> Load Table </button>
+  <button style="margin-top:5px; float:right; display:none;" id="load-excel-table-${collID}" class="btn btn-primary load-excel-table" projectid="${projectID}" collID="${collID}" type="button"> Load Table </button>
   <div id="import-spreadsheet-div-${collID}"></div>`;
   return ret;
 };
@@ -1648,8 +1846,10 @@ const prepareDataForSingleColumn = async (collName, projectID, collectionID, col
   let ret = [];
   if (!collName) return ret;
   let refFields = [];
+  let dateFields = [];
   for (var i = 0; i < collFields.length; i++) {
     if (collFields[i].ref) refFields.push(collFields[i].name);
+    if (collFields[i].type == 'Date') dateFields.push(collFields[i].name);
   }
   const { projectPart, projectName } = getProjectData(projectID);
   const data = await ajaxCall('GET', `/api/v1/${projectPart}data/${collName}/populated`);
@@ -1673,6 +1873,16 @@ const prepareDataForSingleColumn = async (collName, projectID, collectionID, col
             newObj[k] = el[k][showFields[0]];
           } else {
             newObj[k] = el[k]._id;
+          }
+        } else if (dateFields.includes(k) && el[k]) {
+          const timestamp = Date.parse(el[k]);
+          if (isNaN(timestamp) == false) {
+            newObj[k] = moment(el[k])
+              .utc()
+              .format('YYYY-MM-DD');
+          } else {
+            console.log('not valid timestamp', el[k]);
+            newObj[k] = el[k];
           }
         } else if (
           (typeof el[k] === 'object' && el[k] !== null) ||
@@ -1698,11 +1908,11 @@ export const refreshDataTables = async (TableID, collectionID, collName, project
   if (!$.fn.DataTable.isDataTable(`#${TableID}`)) {
     let columns = [];
     columns.push({ data: '_id' }); // for checkboxes
-    columns.push({ data: 'DID' }); // dolphin id
+    // columns.push({ data: 'DID' }); // dolphin id
     for (var i = 0; i < collFields.length; i++) {
       columns.push({ data: collFields[i].name });
     }
-    columns.push({ data: '_id' });
+    // columns.push({ data: '_id' });
     columns.push({ data: 'perms' });
     var dataTableObj = {
       columns: columns,
@@ -1927,9 +2137,10 @@ const getCollectionNavbar = async projectId => {
       } else {
         colTable = getCollectionTable(collectionId, 'default');
         colExcelTable = getExcelTable(`spreadsheet-${collectionId}`);
-        colDropzone = getDropzoneTable(collectionId);
+        colDropzone = getDropzoneTable(collectionId, projectId);
         crudButtons = getCrudButtons(collectionId, collectionLabel, collectionName, projectId, {
-          excel: true
+          excel: true,
+          delBtn: true
         });
       }
       const contentDiv = `

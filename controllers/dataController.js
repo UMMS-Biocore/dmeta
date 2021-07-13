@@ -10,6 +10,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
 const { replaceAllDataIds } = require('./eventLogController');
+const { getPopulateObj } = require('../utils/misc');
 
 //if collectionName is set, then save that Model as a res.locals.Model
 exports.setModel = (req, res, next) => {
@@ -49,6 +50,7 @@ exports.setExcludeFields = async (req, res, next) => {
   let exclude = allFieldNames.filter(x => !validFieldNames.includes(x));
   exclude = exclude.map(i => `-${i}`);
   res.locals.ExcludeFields = exclude.join(' ');
+  res.locals.AllFields = allFields;
   next();
 };
 
@@ -266,31 +268,9 @@ const parseSummarySchema = async (collectionName, projectName, format, type) => 
     return names.indexOf(item) == pos;
   });
   select = uniqueNames.join(' ');
-  const popObj = {};
-
-  // * prepare popObj
   const popArr = schema.populate.replace(/\s+/g, ' ').split(' ');
-  for (let i = 0; i < popArr.length; i++) {
-    if (!popArr[i].match(/\./)) {
-      // parent fields without dots
-      if (popObj.path) popObj.path += ` ${popArr[i]}`;
-      if (!popObj.path) popObj.path = popArr[i];
-    } else {
-      const fields = popArr[i].split('.');
-      const level = fields.length;
-      const lastfield = fields[level - 1];
-      const populates = `populate${'.populate'.repeat(level - 2)}`; // nested populates
-      // lodash used for setting multiple levels of object with dot notation
-      if (!_.get(popObj, `${populates}.path`)) {
-        // set `path` value with `lastfield`
-        _.set(popObj, `${populates}.path`, lastfield);
-      } else {
-        // get last `path` value and concat with `lastfield`
-        const path = _.get(popObj, `${populates}`).path;
-        _.set(popObj, `${populates}.path`, `${path} ${lastfield}`);
-      }
-    }
-  }
+  // * prepare popObj
+  const popObj = getPopulateObj(popArr);
 
   // * prepare `rename` function
   // e.g. project obj: {
@@ -322,7 +302,6 @@ exports.getDataSummaryDoc = async (type, req, res, next) => {
       req.params.format,
       type
     );
-
     if (!modelObj[targetCollection]) return null;
     const query = modelObj[targetCollection].find({});
     if (res.locals.Perms) {

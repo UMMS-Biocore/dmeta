@@ -5,11 +5,16 @@ const factory = require('./handlerFactory');
 const AppError = require('./../utils/appError');
 const buildModels = require('./../utils/buildModels');
 const dbbackup = require('./../utils/dbbackup');
+const { setNamingPattern } = require('./../utils/namingPattern');
 
 // for post/patch requests
 exports.setCollectionId = (req, res, next) => {
   if (!req.body.collections) req.body.collections = req.params.collectionID;
   next();
+};
+
+exports.getFieldById = async id => {
+  return await Fields.findById(id).lean();
 };
 
 exports.getFieldsOfCollection = async collectionID => {
@@ -28,25 +33,110 @@ exports.setFilter = (req, res, next) => {
   next();
 };
 
+//if field name has changed -> fields of data should be updated
+exports.updateDataFields = async (oldField, newField) => {
+  if (oldField.collectionID && oldField.name && newField.name && oldField.name != newField.name) {
+    const collectionID = oldField.collectionID;
+    const oldFieldName = oldField.name;
+    const newFieldName = newField.name;
+    const collData = await collectionsController.getCollectionById(collectionID);
+    const collectionName = collData.name;
+    const projectID = collData.projectID;
+    const projectData = await projectsController.getProjectById(projectID);
+    const projectName = projectData ? projectData.name : '';
+    const modelName = `${projectName}_${collectionName}`;
+    const Model = buildModels.modelObj[modelName];
+
+    let renameObj = {};
+    renameObj[oldFieldName] = newFieldName;
+    try {
+      await Model.updateMany({}, { $rename: renameObj }, { multi: true });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
 // asign commands to `res.locals.After` which will be executed after query is completed
 exports.setAfter = async (req, res, next) => {
   let collectionID;
   try {
     // for createField
-    if (req.body.collectionID) collectionID = req.body.collectionID;
+    if (req.body.collectionID) {
+      collectionID = req.body.collectionID;
+    }
     // for updateField and deleteField
     else if (req.params.id) {
       const field = await Fields.findById(req.params.id);
       if (field.collectionID) collectionID = field.collectionID;
     }
     if (collectionID) {
-      res.locals.After = () => buildModels.updateModel(collectionID, null);
+      res.locals.After = async () => {
+        // for updateField and deleteField
+        if (req.params.id && res.locals.BeforeQuery) {
+          // if field name is changed -> data field names should be updated
+          const oldField = res.locals.BeforeQuery;
+          const newField = await Fields.findById(req.params.id);
+          await exports.updateDataFields(oldField, newField);
+        }
+        buildModels.updateModel(collectionID, null);
+      };
       return next();
     }
     return next(new AppError(`CollectionID or FieldID is not defined!`, 404));
   } catch {
     return next(new AppError(`Field is not found.`, 404));
   }
+};
+
+// set commands before update/delete query is completed
+exports.setBefore = (req, res, next) => {
+  // for update and delete field
+  if (req.params.id) {
+    res.locals.Before = async function() {
+      const field = await exports.getFieldById(req.params.id);
+      res.locals.BeforeQuery = field;
+    };
+    return next();
+  }
+  return next(new AppError(`Field id not found!`, 404));
+};
+
+//
+exports.refreshIdentifier = async (req, res, next) => {
+  const { fieldID } = req.body;
+  if (!fieldID) return next(new AppError('FieldID is not defined', 404));
+  const field = await exports.getFieldById(fieldID);
+  const collectionID = field.collectionID;
+  const collData = await collectionsController.getCollectionById(collectionID);
+  const collectionName = collData.name;
+  const projectID = collData.projectID;
+  const projectData = await projectsController.getProjectById(projectID);
+  const projectName = projectData ? projectData.name : '';
+  const modelName = `${projectName}_${collectionName}`;
+  const Model = buildModels.modelObj[modelName];
+  const allData = await Model.find({});
+
+  for (let i = 0; i < allData.length; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    const fields = await exports.getFieldsOfCollection(collectionID);
+    const namingPatterns = fields.filter(f => f.namingPattern).map(f => f.name);
+
+    let doc = allData[i];
+    // eslint-disable-next-line no-await-in-loop
+    doc = await setNamingPattern(fields, doc, next);
+    let updateObj = {};
+    for (let k = 0; k < namingPatterns.length; k++) {
+      updateObj[namingPatterns[k]] = doc[namingPatterns[k]];
+    }
+    console.log('updateObj', updateObj);
+    // eslint-disable-next-line no-await-in-loop
+    await Model.findOneAndUpdate({ _id: doc._id }, { $set: updateObj }, { runValidators: true });
+  }
+
+  res.status(200).json({
+    status: 'success'
+  });
 };
 
 // transfer data of fields to targetCollection

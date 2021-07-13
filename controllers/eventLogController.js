@@ -1,5 +1,8 @@
 const axios = require('axios');
 const EventLog = require('../models/eventLogModel');
+const AdminEventLog = require('../models/adminEventLogModel');
+const Collection = require('../models/collectionsModel');
+const Project = require('../models/projectsModel');
 const serverController = require('../controllers/serverController');
 const collectionsController = require('../controllers/collectionsController');
 const projectsController = require('../controllers/projectsController');
@@ -9,7 +12,7 @@ const APIFeatures = require('./../utils/apiFeatures');
 // create event tracker for data routes -> create/update/delete
 exports.setEventLog = target => {
   return (req, res, next) => {
-    // target: 'projects', 'collections',"fields", "data"
+    // target: "data"
     // event type: "insert", "update", "delete"
     res.locals.EventLog = async function(type, doc) {
       let projectName;
@@ -276,9 +279,6 @@ exports.replaceRunOuts = async (doc, req, res, next) => {
       const file_id = fileIDs[i];
       const file_name = fileNames[i];
       const sample_id = sampleIDs[i];
-      console.log('file_id', file_id);
-      console.log('file_name', file_name);
-      console.log('sample_id', sample_id);
       const queryParams = `?file_id=${file_id}&run_id=${run_id}`;
       // eslint-disable-next-line no-await-in-loop
       let outCollectionDoc = await exports.getDataByQueryParams(
@@ -408,7 +408,6 @@ exports.insertRun = async (docSaved, req, res, next) => {
 };
 
 exports.getEventLog = factory.getOne(EventLog);
-
 exports.getAllEventLogs = async (req, res, next) => {
   const query = EventLog.find({});
   if (res.locals.Perms) {
@@ -429,4 +428,123 @@ exports.getAllEventLogs = async (req, res, next) => {
       data: doc
     }
   });
+};
+
+exports.getAdminEventLog = factory.getOne(AdminEventLog);
+exports.getAllAdminEventLogs = async (req, res, next) => {
+  const query = AdminEventLog.find({});
+  if (res.locals.Perms) {
+    const permFilter = await res.locals.Perms('read');
+    query.find(permFilter);
+  }
+  query.populate({ path: 'field', select: 'name' });
+  // query.populate({ path: 'coll', select: 'name' });
+  // query.populate({ path: 'project', select: 'name' });
+  query.populate({ path: 'owner', select: 'username' });
+  const features = new APIFeatures(query, req.query).filter().sort();
+  const jsonFilter = new APIFeatures(features.query, req.body).filter();
+  let doc = await jsonFilter.query;
+  console.log(doc);
+  res.status(200).json({
+    status: 'success',
+    reqeustedAt: req.requestTime,
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+};
+
+// event tracker for project collection and field routes -> create/update/delete
+exports.setAdminEventLog = target => {
+  return (req, res, next) => {
+    // target: "project", "collection", "field"
+    // event type: "insert", "update", "delete"
+    // doc: operation performed on this document
+    res.locals.EventLog = async function(type, doc) {
+      let field_id;
+      let col;
+      let proj;
+      let collection_id;
+      let project_id;
+
+      if (target == 'field') {
+        if (doc && doc._id) field_id = doc._id;
+        if (doc.collectionID) collection_id = doc.collectionID;
+        try {
+          col = await Collection.findOne({ _id: collection_id })
+            .select('name projectID')
+            .lean();
+          console.log('col', col);
+          if (col && col.projectID) project_id = col.projectID;
+          proj = await Project.findOne({ _id: project_id })
+            .select('name')
+            .lean();
+        } catch (err) {
+          console.log(err);
+        }
+      } else if (target == 'collection') {
+        if (doc && doc._id) {
+          collection_id = doc._id;
+          col = doc;
+        } else if (doc && doc[0]._id && doc[0]._id) {
+          collection_id = doc[0]._id;
+          col = doc[0];
+        }
+        try {
+          if (col && col.projectID) project_id = col.projectID;
+          proj = await Project.findOne({ _id: project_id })
+            .select('name')
+            .lean();
+        } catch (err) {
+          console.log(err);
+        }
+      } else if (target == 'project') {
+        if (doc && doc._id) {
+          project_id = doc._id;
+          proj = doc;
+        } else if (doc && doc[0]._id && doc[0]._id) {
+          project_id = doc[0]._id;
+          proj = doc[0];
+        }
+      }
+      let docId;
+      let docReq;
+      let docRes;
+      const perms = doc.perms;
+      if (type == 'insert') {
+        docId = doc.id;
+        docReq = req.body;
+        docRes = doc;
+      } else if (type == 'update') {
+        docId = req.params.id;
+        docReq = req.body;
+        docRes = doc;
+      } else if (type == 'delete') {
+        docId = req.params.id;
+      }
+      const eventDetails = {
+        target,
+        type,
+        field: field_id,
+        coll: col,
+        project: proj,
+        doc_id: docId,
+        res: docRes,
+        req: docReq,
+        owner: res.locals.user.id,
+        perms
+      };
+      try {
+        await AdminEventLog.create(eventDetails);
+      } catch (err) {
+        return {
+          status: 'error',
+          message: 'Admin Event log could not be created',
+          error: err
+        };
+      }
+    };
+    return next();
+  };
 };

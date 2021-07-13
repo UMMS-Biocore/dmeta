@@ -11,8 +11,6 @@ In order to insert a new project, you need to click on the insert button which w
 
 * **Name:** Project name is entered in this field. 
 
-* **Slug:** Short version of the project name is entered for API requests.
-
 * **Label:** Long version of the project name is entered in this field. 
 
 * **RestrictTo:** User or groups are selected who are allowed to **insert a new collection into project**. You may add new user/groups by clicking **insert** button. Afterwards, you may choose user/group/role to insert permission. If you want to remove the permission, please click **options -> delete** button.

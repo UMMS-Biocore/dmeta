@@ -1,3 +1,25 @@
+12.07.2021 Version 0.0.47
+Date support added for the data type.
+Slug removed from the collection.
+Slug and parentCollectionID removed from documentation.
+Delete button removed from fields section.
+Admin event log added to the event history page.
+The field of data will be updated if the field name has changed.
+The header field is renamed as an identifier for fields.
+Unique identifier field required for each collection.
+Excel import could be done with the unique identifier. 
+Reference data defined with unique identifier while excel import/export.
+Spreadsheet scroll issue fixed. 
+Empty 100 rows were added to the end of the spreadsheet.
+Only updated rows are highlighted in excel import.
+A new field option, namingPattern, was added for automatic name generation.
+Refresh namingPattern button for project-admins which allows pattern change.
+A field that is defined as namingPattern removed from form entries.
+Identifier ve naming pattern columns updated after insert for spreadsheet view.
+Create identifier when new collection is created.
+Show warning if identifier is not exist or defined more than once in the collection.
+
+
 16.06.2021 Version 0.0.46
 Tree view tab added into dashboard and admin page.
 

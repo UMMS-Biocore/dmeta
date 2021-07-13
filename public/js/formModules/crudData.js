@@ -39,7 +39,7 @@ const getDataDropdown = (id, el_class, el_name, data, def, required, fieldID, at
   dropdown += `<option value="" >--- Select ---</option>`;
   data.forEach(i => {
     if (dataField) {
-      const selected = def == i[dataField] ? 'selected' : '';
+      const selected = def == i[dataField] && def != '' ? 'selected' : '';
       dropdown += `<option ${selected} value="${i._id}">${i[dataField]}</option>`;
     } else {
       const selected = def == i.id || def == i.name ? 'selected' : '';
@@ -84,7 +84,6 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, $scope
     if (re && ref.match(re)) {
       collName = ref.match(re)[1];
       refData = await ajaxCall('GET', `/api/v1/projects/${projectData.name}/data/${collName}`);
-      console.log($scope.collections);
       if ($scope.collections && $scope.collections[0]) {
         const collection = $scope.collections.filter(
           c => c.name == collName && c.projectID == projectID
@@ -93,7 +92,6 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, $scope
       }
     } else {
       rawRefData = await ajaxCall('GET', `/api/v1/${ref}`);
-      console.log(rawRefData);
       for (var k = 0; k < rawRefData.length; k++) {
         // take only one project for ref== 'projects'
         if (
@@ -116,7 +114,6 @@ const getRefFieldDropdown = async (ref, name, required, def, projectData, $scope
         refData.push(rawRefData[k]);
       }
     }
-    console.log('refData', refData);
     let dataField = '';
     if ($scope.fields.length) {
       const fieldsOfCollection = $scope.fields.filter(f => f.collectionID === collectionID);
@@ -176,7 +173,7 @@ export const getFormElement = async (field, projectData, $scope) => {
     if (field.ref) {
       ret = await getRefFieldDropdown(field.ref, field.name, required, def, projectData, $scope);
     }
-  } else if (type == 'boolean') {
+  } else if (type == 'Boolean') {
     const checked = def == true ? 'checked' : '';
     ret = `<input ${dbType} style="margin-left:0rem; margin-top:0.70rem;" type="checkbox" name="${field.name}" ${required} ${checked}></input>`;
   }
@@ -188,7 +185,7 @@ export const createSelectizeMultiField = (el, data, fieldsOfCollection) => {
   if (data && data[0]) {
     const showFields = getDropdownFields(data[0], fieldsOfCollection);
     const showFieldsSum = showFields.slice(0, 3);
-
+    const isRequired = $(el).attr('required');
     $(el).selectize({
       create: true,
       valueField: '_id',
@@ -222,6 +219,9 @@ export const createSelectizeMultiField = (el, data, fieldsOfCollection) => {
         }
       }
     });
+    if (isRequired) {
+      $(el).prop('required', true);
+    }
   }
 };
 
@@ -650,6 +650,7 @@ export const getFieldsDiv = async (collectionID, projectData) => {
   // 2. get all fields of collection
   const fields = getFieldsOfCollection(collectionID);
   for (var k = 0; k < fields.length; k++) {
+    if (fields[k].namingPattern) continue;
     const label = fields[k].label;
     const element = await getFormElement(fields[k], projectData, $s);
     ret += getFormRow(element, label, fields[k]);
